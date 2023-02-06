@@ -24,6 +24,7 @@ import mc.rellox.spawnermeta.api.spawner.VirtualSpawner;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.SpawnerType;
+import mc.rellox.spawnermeta.text.Text;
 
 public final class DataManager {
 	
@@ -68,6 +69,11 @@ public final class DataManager {
 		return new int[] {1, 1, 1};
 	}
 
+	public static ItemStack getSpawner(VirtualSpawner spawner, int a) {
+		return getSpawners(spawner.getType(), spawner.getUpgradeLevels(), spawner.getCharges(), spawner.getSpawnable(),
+				a, spawner.isEmpty(), true).get(0);
+	}
+	
 	public static List<ItemStack> getSpawners(Block block, boolean ignore) {
 		return getSpawners(getType(block), getUpgradeLevels(block), getCharges(block),
 				getSpawnable(block), getStack(block), isEmpty(block), ignore);
@@ -112,21 +118,21 @@ public final class DataManager {
 		} else meta.setDisplayName(Language.get("Spawners.item.regular.name", "type", type).text());
 		List<String> lore = new ArrayList<>();
 		lore.add("");
-		if(Settings.settings.item_show_header == true) lore.add(Language.get("Spawners.item.header").text());
+		if(Settings.settings.item_show_header == true) lore.addAll(Text.toText(Language.list("Spawners.item.header")));
 		if(Settings.settings.item_show_range == true)
-			lore.add(Language.get("Spawners.item.upgrade.range", "level", Utils.roman(levels[0])).text());
+			lore.addAll(Text.toText(Language.list("Spawners.item.upgrade.range", "level", Utils.roman(levels[0]))));
 		if(Settings.settings.item_show_delay == true)
-			lore.add(Language.get("Spawners.item.upgrade.delay", "level", Utils.roman(levels[1])).text());
+			lore.addAll(Text.toText(Language.list("Spawners.item.upgrade.delay", "level", Utils.roman(levels[1]))));
 		if(Settings.settings.item_show_amount == true)
-			lore.add(Language.get("Spawners.item.upgrade.amount", "level", Utils.roman(levels[2])).text());
+			lore.addAll(Text.toText(Language.list("Spawners.item.upgrade.amount", "level", Utils.roman(levels[2]))));
 		boolean k = false;
 		if(Settings.settings.charges_enabled == true) {
 			k = lore.add("");
-			lore.add(Language.get("Spawners.item.charges", "charges", charges).text());
+			lore.addAll(Text.toText(Language.list("Spawners.item.charges", "charges", charges)));
 		}
 		if(Settings.settings.spawnable_enabled == true) {
 			if(k == false) k = lore.add("");
-			lore.add(Language.get("Spawners.item.spawnable", "spawnable", spawnable).text());
+			lore.addAll(Text.toText(Language.list("Spawners.item.spawnable", "spawnable", spawnable)));
 		}
 		meta.setLore(lore);
 		Utils.hideCustomFlags(meta);
@@ -182,6 +188,7 @@ public final class DataManager {
 		setSpawnable(block, entity_limit);
 		setDefault(block);
 		setOneCount(block);
+		setNearbyLimit(block);
 		setType(block, type);
 		setEnabled(block, true);
 		if(empty == true) setEmpty(block);
@@ -196,6 +203,7 @@ public final class DataManager {
 		setDelay(block, r[1]);
 		setDefault(block);
 		setOneCount(block);
+		setNearbyLimit(block);
 	}
 
 	public static void recalculate(Block block) {
@@ -316,6 +324,13 @@ public final class DataManager {
 		cs.setSpawnCount(1);
 		cs.update();
 	}
+	
+	private static void setNearbyLimit(Block block) {
+		CreatureSpawner cs = cast(block);
+		if(cs == null) return;
+		cs.setMaxNearbyEntities(Settings.settings.nearby_entity_limit);
+		cs.update();
+	}
 
 	public static boolean isItemSpawner(Block block) {
 		CreatureSpawner cs = cast(block);
@@ -416,6 +431,12 @@ public final class DataManager {
 				Settings.settings.spawner_values.get(type));
 	}
 	
+	public static boolean isRotating(Block block) {
+		CreatureSpawner cs = cast(block);
+		if(cs == null) return false;
+		return cs.getRequiredPlayerRange() > 0;
+	}
+	
 	public static void setRotating(Block block, boolean b) {
 		CreatureSpawner cs = cast(block);
 		if(cs == null) return;
@@ -511,30 +532,11 @@ public final class DataManager {
 	}
 	
 	public static void setCharges(Block block, int c) {
+		if(c < 0) c = 0;
 		CreatureSpawner cs = cast(block);
 		if(cs == null) return;
 		PersistentDataContainer p = cs.getPersistentDataContainer();
 		p.set(key_charges, PersistentDataType.INTEGER, c);
-		cs.update();
-	}
-	
-	public static void addCharges(Block block, int c) {
-		if(c <= 0) return;
-		CreatureSpawner cs = cast(block);
-		if(cs == null) return;
-		PersistentDataContainer p = cs.getPersistentDataContainer();
-		int h = p.getOrDefault(key_charges, PersistentDataType.INTEGER, 0);
-		p.set(key_charges, PersistentDataType.INTEGER, h + c);
-		cs.update();
-	}
-	
-	public static void removeCharges(Block block, int c) {
-		if(c <= 0) return;
-		CreatureSpawner cs = cast(block);
-		if(cs == null) return;
-		PersistentDataContainer p = cs.getPersistentDataContainer();
-		int h = p.getOrDefault(key_charges, PersistentDataType.INTEGER, 0);
-		p.set(key_charges, PersistentDataType.INTEGER, h - c);
 		cs.update();
 	}
 

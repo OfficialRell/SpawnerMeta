@@ -128,7 +128,7 @@ public interface APIInstance {
 	/**
 	 * Returns a spawner builder with the specified spawner type;
 	 * 
-	 * @param block - spawner block
+	 * @param type - spawner type
 	 * @return Mutable spawner
 	 * 
 	 * @throws NullPointerException if type is {@code null}

@@ -37,7 +37,10 @@ public final class APIRegistry implements APIInstance {
 		WrappedExecutor<?> wrapper = new WrappedExecutor<>(c, executor);
 		int j = 0;
 		for(int i = 0; i < executors.size(); i++)
-			if(executors.get(i).subclass(c) == true) j = i + 1;
+			if(executors.get(i).subclass(c) == true) {
+				j = i + 1;
+				break;
+			}
 		executors.add(j, wrapper);
 		registered = true;
 	}
