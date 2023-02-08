@@ -61,11 +61,11 @@ public class SpawnerEditor implements Listener {
 		if(c.equals(v) == false) return;
 		event.setCancelled(true);
 		int s = event.getSlot();
+		ClickType t = event.getClick();
 		if(s >= 0 && s < 27) {
 			Slot l = SpawnerViewLayout.LAYOUT[s];
 			if(l.c == false) return;
 			else {
-				ClickType t = event.getClick();
 				if(t == ClickType.RIGHT) {
 					if(s == 26) return;
 					SpawnerViewLayout.LAYOUT[s] = SpawnerViewLayout.LAYOUT[s + 1];
@@ -90,8 +90,13 @@ public class SpawnerEditor implements Listener {
 			}
 		} else if(s == 31) {
 			ItemStack cu = event.getCursor();
-			if(Utils.nulled(cu) == true || cu.getType() == SpawnerViewLayout.background) return;
-			SpawnerViewLayout.background = cu.getType();
+			if(t.isShiftClick() == true) {
+				if(SpawnerViewLayout.background == null) return;
+				SpawnerViewLayout.background = null;
+			} else {
+				if(Utils.nulled(cu) == true || cu.getType() == SpawnerViewLayout.background) return;
+				SpawnerViewLayout.background = cu.getType();
+			}
 			SpawnerViewLayout.setBackground();
 			player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 2f, 1.25f);
 		}

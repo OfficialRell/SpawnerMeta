@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -62,6 +63,7 @@ public final class SpawnerViewLayout {
 	public static final Slot[] LAYOUT = new Slot[27];
 	public static int charges;
 	public static Material background;
+	public static int background_model;
 	
 	public static void initialize() {
 		lf = new File(SpawnerMeta.instance().getDataFolder(), "layout.yml");
@@ -81,6 +83,7 @@ public final class SpawnerViewLayout {
 				for(Slot s : LAYOUT) {
 					if(s.t == SlotType.BACKGROUND) {
 						background = s.m;
+						background_model = s.o;
 						break;
 					}
 				}
@@ -114,18 +117,23 @@ public final class SpawnerViewLayout {
 	public static void setBackground() {
 		Stream.of(LAYOUT)
 			.filter(s -> s.t == SlotType.BACKGROUND)
-			.forEach(s -> s.m = background);
+			.forEach(s -> {
+				s.m = background;
+				s.o = background_model;
+			});
 	}
 	
 	private static ItemStack background() {
-		ItemStack item = new ItemStack(background == null ? Material.BARRIER : background);
+		boolean b = background == null;
+		ItemStack item = new ItemStack(b ? Material.BARRIER : background);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(ChatColor.AQUA + "Background: " + ChatColor.GRAY
-				+ (background == null ? "Air" : Utils.displayName(item)));
-		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
+				+ (b ? "Air" : Utils.displayName(item)));
+		meta.addItemFlags(ItemFlag.values());
 		List<String> lore = new ArrayList<>();
 		lore.add("");
 		lore.add(ChatColor.GREEN + "Click " + ChatColor.AQUA + "to swap material");
+		lore.add(ChatColor.GOLD + "Shift-click " + ChatColor.AQUA + "to set as air");
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
@@ -138,9 +146,12 @@ public final class SpawnerViewLayout {
 				LAYOUT[i] = new Slot(RF.enumerate(SlotType.class, layout.getString(path + ".Type")), 
 						layout.getBoolean(path + ".Changable"), 
 						i, RF.enumerate(Material.class, layout.getString(path + ".Material")),
-						layout.getBoolean(path + ".Glint"));
+						layout.getBoolean(path + ".Glint"),
+						layout.getInt(path + ".Model"));
 			} catch(Exception e) {
 				LAYOUT[i] = DEFAULT[i];
+				Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SM"
+				+ ChatColor.DARK_PURPLE + "]" + ChatColor.DARK_RED + " Unable to read layout slot: " + i + ", using default");
 			}
 		}
 	}
@@ -157,21 +168,13 @@ public final class SpawnerViewLayout {
 		if(s == null) return;
 		layout.addDefault("Upgrade-Layout." + s.i + ".Type", s.t.name());
 		layout.addDefault("Upgrade-Layout." + s.i + ".Changable", s.c);
-		layout.addDefault("Upgrade-Layout." + s.i + ".Material", s.m.name());
+		layout.addDefault("Upgrade-Layout." + s.i + ".Material", s.m == null ? "AIR" : s.m.name());
 		layout.addDefault("Upgrade-Layout." + s.i + ".Glint", s.g);
+		layout.addDefault("Upgrade-Layout." + s.i + ".Model", s.o);
 	}
 	
 	public static void resetLayout() {
-		for(int i = 0; i < 27; i++) resetSlot(LAYOUT[i] = DEFAULT[i]);
-	}
-	
-	private static void resetSlot(Slot s) {
-		if(s == null) return;
-		layout.set("Upgrade-Layout." + s.i + ".Type", s.t.name());
-		layout.set("Upgrade-Layout." + s.i + ".Changable", s.c);
-		layout.set("Upgrade-Layout." + s.i + ".Material", s.m.name());
-		layout.set("Upgrade-Layout." + s.i + ".Glint", s.g);
-		saveLayout();
+		for(int i = 0; i < 27; i++) saveSlot(LAYOUT[i] = DEFAULT[i]);
 	}
 	
 	public static void saveSlots() {
@@ -182,15 +185,17 @@ public final class SpawnerViewLayout {
 		if(s == null) return;
 		layout.set("Upgrade-Layout." + s.i + ".Type", s.t.name());
 		layout.set("Upgrade-Layout." + s.i + ".Changable", s.c);
-		layout.set("Upgrade-Layout." + s.i + ".Material", s.m.name());
+		layout.set("Upgrade-Layout." + s.i + ".Material", s.m == null ? "AIR" : s.m.name());
 		layout.set("Upgrade-Layout." + s.i + ".Glint", s.g);
+		layout.set("Upgrade-Layout." + s.i + ".Model", s.o);
 		saveLayout();
 	}
 	
 	private static ItemStack slot(Slot s) {
-		ItemStack item = new ItemStack(s.m);
+		boolean b = s.m == null;
+		ItemStack item = new ItemStack(b ? Material.BARRIER : s.m);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(s.t.getName() + ChatColor.GRAY + " (" + Utils.displayName(item) + ")");
+		meta.setDisplayName(s.t.getName() + ChatColor.GRAY + " (" + (b ? "AIR" : Utils.displayName(item)) + ")");
 		if(s.g) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
 		if(s.c) {
@@ -202,6 +207,7 @@ public final class SpawnerViewLayout {
 			lore.add(ChatColor.RED + "Shift-click " + ChatColor.AQUA + "to toggle glint");
 			meta.setLore(lore);
 		}
+		if(s.o > 0) meta.setCustomModelData(s.o);
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -216,19 +222,31 @@ public final class SpawnerViewLayout {
 	
 	public static class Slot {
 
+		// slot type
 		protected final SlotType t;
+		// changable
 		protected final boolean c;
 		
+		// slot
 		protected int i;
+		// material
 		protected Material m;
+		// glint
 		protected boolean g;
+		// model
+		protected int o;
 		
-		public Slot(SlotType t, boolean c, int i, Material m, boolean g) {
+		public Slot(SlotType t, boolean c, int i, Material m, boolean g, int o) {
 			this.t = t;
 			this.c = c;
 			this.i = i;
 			this.m = m;
 			this.g = g;
+			this.o = o;
+		}
+		
+		public Slot(SlotType t, boolean c, int i, Material m, boolean g) {
+			this(t, c, i, m, g, 0);
 		}
 		
 	}
