@@ -6,8 +6,12 @@ import org.bukkit.block.Block;
 
 public abstract class EntityBox {
 	
+	public static EntityBox single() {
+		return new EntityBoundsSingle();
+	}
+	
 	public static EntityBox box(int x, int y, int z) {
-		if(x == 1 && y == 1 && z == 1) return new EntityBoundsSingle();
+		if(x == 1 && y == 1 && z == 1) return single();
 		if(x == 1 && y > 1 && z == 1) return new EntityBoundsHigh(y);
 		return new EntityBoundsLarge(x, y, z);
 	}
