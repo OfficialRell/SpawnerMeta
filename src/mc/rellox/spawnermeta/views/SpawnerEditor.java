@@ -78,9 +78,10 @@ public class SpawnerEditor implements Listener {
 					SpawnerViewLayout.updateLayout();
 					player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_FRAME_ROTATE_ITEM, 2f, 1.5f);
 				} else if(t == ClickType.MIDDLE) {
-					ItemStack cu = event.getCursor();
-					if(Utils.nulled(cu) == true || cu.getType() == l.m) return;
-					l.m = cu.getType();
+					ItemStack item = event.getCursor();
+					if(Utils.nulled(item) == true || item.getType() == l.m) return;
+					l.m = item.getType();
+					if(item.hasItemMeta() == true) l.o = item.getItemMeta().getCustomModelData();
 					player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 2f, 1.25f);
 				} else if(t == ClickType.SHIFT_LEFT || t == ClickType.SHIFT_RIGHT) {
 					l.g = !l.g;
