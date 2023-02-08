@@ -250,26 +250,28 @@ public final class SpawnerUpgrade implements Listener {
 		SpawnerType type = spawner.getType();
 		Slot s;
 		for(int i = 0; i < 27; i++) {
-			if((s = SpawnerViewLayout.LAYOUT[i]).t == SlotType.BACKGROUND) v.setItem(i, x(s.m));
+			if((s = SpawnerViewLayout.LAYOUT[i]).t == SlotType.BACKGROUND) v.setItem(i, x(s));
 			else if(s.t == SlotType.STATS) v.setItem(i, stats(s));
 			else if(s.t == SlotType.UPGRADE_RANGE) v.setItem(i, allowed(0) ? upgrade(s, 0) : denied(0));
 			else if(s.t == SlotType.UPGRADE_DELAY) v.setItem(i, allowed(1) ? upgrade(s, 1) : denied(1));
 			else if(s.t == SlotType.UPGRADE_AMOUNT) v.setItem(i, allowed(2) ? upgrade(s, 2) : denied(2));
 			else if(s.t == SlotType.CHARGES) v.setItem(i, Settings.settings.charges_enabled
-					? charges(type, s) : x(SpawnerViewLayout.background));
+					? charges(type, s) : x(SpawnerViewLayout.background_slot));
 		}
 	}
 	
-	private ItemStack upgrade(Slot s, int i) {
-		ItemStack item = new ItemStack(s.m);
+	private ItemStack upgrade(Slot slot, int i) {
+		ItemStack item = new ItemStack(slot.m);
 		ItemMeta meta = item.getItemMeta();
+		if(meta == null) return item;
 		int[] levels = spawner.getUpgradeLevels();
 		int level = levels[i];
 		UpgradeType u = UpgradeType.of(i);
 		meta.setDisplayName(Language.get("Inventory.upgrades.items.upgrade.name." + u.lower(),
 				"level", Utils.roman(level)).text());
 		meta.addItemFlags(ItemFlag.values());
-		if(s.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
+		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
+		if(slot.o > 0) meta.setCustomModelData(slot.o);
 		List<String> lore = new ArrayList<>();
 		SpawnerType type = spawner.getType();
 		int[] max_levels = Settings.settings.upgrades_levels.get(type);
@@ -309,6 +311,7 @@ public final class SpawnerUpgrade implements Listener {
 		meta.setDisplayName(Language.get("Inventory.upgrades.items.stats.name",
 				"type", spawner.getType()).text());
 		meta.addItemFlags(ItemFlag.values());
+		if(slot.o > 0) meta.setCustomModelData(slot.o);
 		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		List<String> lore = new ArrayList<>();
 		int[] l = Utils.location(block);
@@ -383,14 +386,15 @@ public final class SpawnerUpgrade implements Listener {
 		return b;
 	}
 	
-	private ItemStack charges(SpawnerType type, Slot s) {
-		ItemStack item = new ItemStack(s.m);
+	private ItemStack charges(SpawnerType type, Slot slot) {
+		ItemStack item = new ItemStack(slot.m);
 		ItemMeta meta = item.getItemMeta();
 		int charges = spawner.getCharges();
 		meta.setDisplayName(Language.get("Inventory.upgrades.items.charges.name",
 				"charges", charges).text());
 		meta.addItemFlags(ItemFlag.values());
-		if(s.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
+		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
+		if(slot.o > 0) meta.setCustomModelData(slot.o);
 		List<String> lore = new ArrayList<>();
 		lore.add("");
 		int f0 = Settings.settings.charges_buy_first;
@@ -411,10 +415,13 @@ public final class SpawnerUpgrade implements Listener {
 		return item;
 	}
 	
-	private ItemStack x(Material m) {
-		if(m == null || m == Material.AIR) return null;
-		ItemStack item = new ItemStack(m);
+	private ItemStack x(Slot slot) {
+		if(slot.m == null || slot.m == Material.AIR) return null;
+		ItemStack item = new ItemStack(slot.m);
 		ItemMeta meta = item.getItemMeta();
+		if(slot.o > 0) meta.setCustomModelData(slot.o);
+		meta.addItemFlags(ItemFlag.values());
+		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		meta.setDisplayName(" ");
 		item.setItemMeta(meta);
 		return item;

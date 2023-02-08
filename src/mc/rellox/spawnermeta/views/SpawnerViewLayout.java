@@ -62,6 +62,7 @@ public final class SpawnerViewLayout {
 	}
 	public static final Slot[] LAYOUT = new Slot[27];
 	public static int charges;
+	public static Slot background_slot;
 	public static Material background;
 	public static int background_model;
 	
@@ -84,6 +85,7 @@ public final class SpawnerViewLayout {
 					if(s.t == SlotType.BACKGROUND) {
 						background = s.m;
 						background_model = s.o;
+						background_slot = s;
 						break;
 					}
 				}
@@ -127,6 +129,7 @@ public final class SpawnerViewLayout {
 		boolean b = background == null;
 		ItemStack item = new ItemStack(b ? Material.BARRIER : background);
 		ItemMeta meta = item.getItemMeta();
+		if(meta == null) return item;
 		meta.setDisplayName(ChatColor.AQUA + "Background: " + ChatColor.GRAY
 				+ (b ? "Air" : Utils.displayName(item)));
 		meta.addItemFlags(ItemFlag.values());
@@ -195,7 +198,8 @@ public final class SpawnerViewLayout {
 		boolean b = s.m == null;
 		ItemStack item = new ItemStack(b ? Material.BARRIER : s.m);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(s.t.getName() + ChatColor.GRAY + " (" + (b ? "AIR" : Utils.displayName(item)) + ")");
+		if(meta == null) return item;
+		meta.setDisplayName(s.t.getName() + ChatColor.GRAY + " (" + (b ? "Air" : Utils.displayName(item)) + ")");
 		if(s.g) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
 		if(s.c) {
@@ -215,6 +219,7 @@ public final class SpawnerViewLayout {
 	private static ItemStack x() {
 		ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
 		ItemMeta meta = item.getItemMeta();
+		if(meta == null) return item;
 		meta.setDisplayName(" ");
 		item.setItemMeta(meta);
 		return item;
@@ -240,7 +245,7 @@ public final class SpawnerViewLayout {
 			this.t = t;
 			this.c = c;
 			this.i = i;
-			this.m = m;
+			this.m = m == Material.AIR ? null : m;
 			this.g = g;
 			this.o = o;
 		}

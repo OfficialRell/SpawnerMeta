@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.utils.Utils;
@@ -81,7 +82,10 @@ public class SpawnerEditor implements Listener {
 					ItemStack item = event.getCursor();
 					if(Utils.nulled(item) == true || item.getType() == l.m) return;
 					l.m = item.getType();
-					if(item.hasItemMeta() == true) l.o = item.getItemMeta().getCustomModelData();
+					if(item.hasItemMeta() == true) {
+						ItemMeta meta = item.getItemMeta();
+						if(meta.hasCustomModelData() == true) l.o = meta.getCustomModelData();
+					}
 					player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 2f, 1.25f);
 				} else if(t == ClickType.SHIFT_LEFT || t == ClickType.SHIFT_RIGHT) {
 					l.g = !l.g;
@@ -97,8 +101,11 @@ public class SpawnerEditor implements Listener {
 			} else {
 				if(Utils.nulled(item) == true || item.getType() == SpawnerViewLayout.background) return;
 				SpawnerViewLayout.background = item.getType();
-				if(item.hasItemMeta() == true)
-					SpawnerViewLayout.background_model = item.getItemMeta().getCustomModelData();
+				if(item.hasItemMeta() == true) {
+					ItemMeta meta = item.getItemMeta();
+					if(meta.hasCustomModelData() == true)
+						SpawnerViewLayout.background_model = meta.getCustomModelData();
+				}
 			}
 			SpawnerViewLayout.setBackground();
 			player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 2f, 1.25f);
