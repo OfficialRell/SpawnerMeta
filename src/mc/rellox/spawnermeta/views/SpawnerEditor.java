@@ -57,8 +57,7 @@ public class SpawnerEditor implements Listener {
 		if(check() == false) return;
 		if(player.equals(event.getWhoClicked()) == false) return;
 		Inventory c = event.getClickedInventory();
-		if(c == null) return;
-		if(c.equals(v) == false) return;
+		if(c == null || c.equals(v) == false) return;
 		event.setCancelled(true);
 		int s = event.getSlot();
 		ClickType t = event.getClick();
@@ -89,13 +88,16 @@ public class SpawnerEditor implements Listener {
 				}
 			}
 		} else if(s == 31) {
-			ItemStack cu = event.getCursor();
+			ItemStack item = event.getCursor();
 			if(t.isShiftClick() == true) {
 				if(SpawnerViewLayout.background == null) return;
 				SpawnerViewLayout.background = null;
+				SpawnerViewLayout.background_model = 0;
 			} else {
-				if(Utils.nulled(cu) == true || cu.getType() == SpawnerViewLayout.background) return;
-				SpawnerViewLayout.background = cu.getType();
+				if(Utils.nulled(item) == true || item.getType() == SpawnerViewLayout.background) return;
+				SpawnerViewLayout.background = item.getType();
+				if(item.hasItemMeta() == true)
+					SpawnerViewLayout.background_model = item.getItemMeta().getCustomModelData();
 			}
 			SpawnerViewLayout.setBackground();
 			player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 2f, 1.25f);
