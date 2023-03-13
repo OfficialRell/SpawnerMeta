@@ -55,6 +55,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
@@ -105,7 +106,8 @@ import mc.rellox.spawnermeta.views.SpawnerUpgrade;
 
 public final class EventRegistry implements Listener {
 	
-	private static final RegistryAbstract[] REGISTRIES = {new RegistryAI(), new RegistryWorldLoad()};
+	private static final List<RegistryAbstract> REGISTRIES =
+			List.of(new RegistryAI(), new RegistryWorldLoad(), new RegistryLinking());
 	
 	private static long time, chunk;
 	
@@ -117,7 +119,7 @@ public final class EventRegistry implements Listener {
 	}
 	
 	public static void update() {
-		for(RegistryAbstract registry : REGISTRIES) registry.update();
+		REGISTRIES.forEach(RegistryAbstract::update);
 	}
 	
 	public static APIInstance getAPI() {
@@ -380,6 +382,7 @@ public final class EventRegistry implements Listener {
 						spawner.setType(change);
 						spawner.update();
 						HologramRegistry.update(block);
+						unlink(block);
 						
 						return;
 					} else {
@@ -441,6 +444,7 @@ public final class EventRegistry implements Listener {
 						spawner.setType(change);
 						spawner.update();
 						HologramRegistry.update(block);
+						unlink(block);
 					}
 					return;
 				} else if(item.getType().name().endsWith("_EGG") == true) event.setCancelled(true);
@@ -501,6 +505,7 @@ public final class EventRegistry implements Listener {
 		spawner.setType(SpawnerType.EMPTY);
 		spawner.setRotating(false);
 		HologramRegistry.update(block);
+		unlink(block);
 		
 		if(block.equals(verify) == true) verify = null;
 	}
@@ -512,6 +517,7 @@ public final class EventRegistry implements Listener {
 			if(block.getType() != Material.SPAWNER) return;
 			Spawner spawner = getAPI().getSpawner(block);
 			SpawnerType type = spawner.getType();
+			boolean ce = Settings.settings.cancel_break_event;
 			event.setCancelled(true);
 			if(type.disabled() == true) return;
 			Player player = event.getPlayer();
@@ -588,13 +594,13 @@ public final class EventRegistry implements Listener {
 				} else {
 					player.spawnParticle(Particle.SQUID_INK, bl, 25, 0.25, 0.25, 0.25, 0.1);
 					mm = Language.list("Spawners.breaking.failure");
-					spawnXP(block);
+					spawnXP(block, event, give);
 				}
 			} else {
 				player.spawnParticle(Particle.SQUID_INK, bl, 25, 0.25, 0.25, 0.25, 0.1);
 				player.playSound(player.getEyeLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 0.35f, 0f);
 				mm = Language.list("Spawners.breaking.failure");
-				spawnXP(block);
+				spawnXP(block, event, ce);
 			}
 			m.send(mm);
 			if(Settings.settings.breaking_durability_enabled == true) {
@@ -615,19 +621,24 @@ public final class EventRegistry implements Listener {
 			SpawnerManager.dropEggs(player, block);
 			LF.remove(block);
 			block.setType(Material.AIR);
+			unlink(block);
 			HologramRegistry.remove(block);
 			ItemCollector.execute(player);
+			event.setCancelled(ce);
 		} catch (Exception e) {
 			RF.debug(e);
 		}
 	}
 
-	private static void spawnXP(Block block) {
+	private static void spawnXP(Block block, BlockBreakEvent event, boolean ce) {
+		event.setExpToDrop(0);
 		int xp = Settings.settings.breaking_xp_on_failure;
 		if(xp > 0) {
-			ExperienceOrb orb = (ExperienceOrb) block.getWorld()
-					.spawnEntity(block.getLocation().add(0.5, 0.5, 0.5), EntityType.EXPERIENCE_ORB);
-			orb.setExperience(xp);
+			if(ce == true) {
+				ExperienceOrb orb = (ExperienceOrb) block.getWorld()
+						.spawnEntity(block.getLocation().add(0.5, 0.5, 0.5), EntityType.EXPERIENCE_ORB);
+				orb.setExperience(xp);
+			} else event.setExpToDrop(xp);
 		}
 	}
 
@@ -866,6 +877,7 @@ public final class EventRegistry implements Listener {
 			boolean clear = false;
 			x: if(call.bypass_checks == false && Settings.settings.spawnable_enabled == true) {
 				int spawnable = spawner.getSpawnable();
+				if(spawnable >= 1_000_000_000) break x;
 				if(spawnable <= 0) {
 					clear = true;
 					count = 0;
@@ -911,11 +923,13 @@ public final class EventRegistry implements Listener {
 					}
 				});
 			}
-			if(call.bypass_checks == false && Settings.settings.charges_enabled == true) spawner.setCharges(--charges);
+			if(call.bypass_checks == false && Settings.settings.charges_enabled == true
+					&& charges < 1_000_000_000) spawner.setCharges(--charges);
 			
 			if(clear == true) {
 				SpawnerUpgrade.close(block);
 				block.setType(Material.AIR);
+				unlink(block);
 				l.getWorld().spawnParticle(Particle.LAVA, block.getLocation().add(0.5, 0.5, 0.5), 25, 0.1, 0.1, 0.1, 0);
 				HologramRegistry.remove(block);
 			}
@@ -1018,8 +1032,8 @@ public final class EventRegistry implements Listener {
 					e.clear();
 				}
 				Object o = RF.order(entity, "getHandle").invoke();
-				RF.access(o, "spawnedViaMobSpawner", boolean.class).set(true);
-				RF.access(o, "spawnReason", SpawnReason.class).set(SpawnReason.SPAWNER);
+				RF.accessI(o, "spawnedViaMobSpawner", boolean.class).set(true);
+				RF.accessI(o, "spawnReason", SpawnReason.class).set(SpawnReason.SPAWNER);
 				if(Settings.settings.send_spawning_event == true) {
 					SpawnerSpawnEvent event = new SpawnerSpawnEvent(entity, cs);
 					entity.getServer().getPluginManager().callEvent(event);
@@ -1047,8 +1061,8 @@ public final class EventRegistry implements Listener {
 				}
 			}
 			Object o = RF.order(entity, "getHandle").invoke();
-			RF.access(o, "spawnedViaMobSpawner", boolean.class).set(true);
-			RF.access(o, "spawnReason", SpawnReason.class).set(SpawnReason.SPAWNER);
+			RF.accessI(o, "spawnedViaMobSpawner", boolean.class).set(true);
+			RF.accessI(o, "spawnReason", SpawnReason.class).set(SpawnReason.SPAWNER);
 		} catch (Exception e) {
 			RF.debug(e);
 		}
@@ -1100,6 +1114,29 @@ public final class EventRegistry implements Listener {
 		@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 		private void onWorldLoad(WorldLoadEvent event) {
 			HologramRegistry.load(event.getWorld());
+		}
+		
+	}
+	
+	public static void unlink(Block block) {
+		if(SpawnerMeta.WILD_STACKER.exists() == false) return;
+		SpawnerMeta.WILD_STACKER.unlink(block);
+	}
+	
+	private static final class RegistryLinking extends RegistryAbstract {
+
+		@Override
+		public void update() {
+			if(SpawnerMeta.WILD_STACKER.exists() == false) unregister();
+			else register();
+		}
+
+		@EventHandler(priority = EventPriority.HIGH)
+		private void onUnloadLink(ChunkUnloadEvent event) {
+			Stream.of(event.getChunk().getTileEntities())
+				.filter(CreatureSpawner.class::isInstance)
+				.map(BlockState::getBlock)
+				.forEach(SpawnerMeta.WILD_STACKER::unlink);
 		}
 		
 	}
