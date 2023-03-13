@@ -152,7 +152,7 @@ public final class SpawnerViewLayout {
 						layout.getBoolean(path + ".Glint"),
 						layout.getInt(path + ".Model"));
 			} catch(Exception e) {
-				LAYOUT[i] = DEFAULT[i];
+				LAYOUT[i] = DEFAULT[i].copy();
 				Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SM"
 				+ ChatColor.DARK_PURPLE + "]" + ChatColor.DARK_RED + " Unable to read layout slot: " + i + ", using default");
 			}
@@ -177,7 +177,10 @@ public final class SpawnerViewLayout {
 	}
 	
 	public static void resetLayout() {
-		for(int i = 0; i < 27; i++) saveSlot(LAYOUT[i] = DEFAULT[i]);
+		for(int i = 0; i < 27; i++) saveSlot(LAYOUT[i] = DEFAULT[i].copy());
+		background = Material.CYAN_STAINED_GLASS_PANE;
+		background_model = 0;
+		
 	}
 	
 	public static void saveSlots() {
@@ -252,6 +255,10 @@ public final class SpawnerViewLayout {
 		
 		public Slot(SlotType t, boolean c, int i, Material m, boolean g) {
 			this(t, c, i, m, g, 0);
+		}
+		
+		public Slot copy() {
+			return new Slot(t, c, i, m, g, o);
 		}
 		
 	}
