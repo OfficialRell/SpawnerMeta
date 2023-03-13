@@ -344,9 +344,12 @@ public final class SpawnerUpgrade implements Listener {
 			}
 		}
 		if(Settings.settings.spawnable_enabled == true) {
-			t = Language.get("Inventory.upgrades.items.stats.spawnable",
-					"spawnable", spawner.getSpawnable()).text();
-			if(t.isEmpty() == false) lore.add(t);
+			int spawnable = spawner.getSpawnable();
+			if(spawnable < 1_000_000_000) {
+				t = Language.get("Inventory.upgrades.items.stats.spawnable",
+						"spawnable", spawnable).text();
+				if(t.isEmpty() == false) lore.add(t);
+			}
 		}
 		if(Settings.settings.charges_enabled == true) {
 			int c = spawner.getCharges();
@@ -389,32 +392,36 @@ public final class SpawnerUpgrade implements Listener {
 	private ItemStack charges(SpawnerType type, Slot slot) {
 		ItemStack item = new ItemStack(slot.m);
 		ItemMeta meta = item.getItemMeta();
-		int charges = spawner.getCharges();
+		int c = spawner.getCharges();
+		boolean b = c >= 1_000_000_000;
+		String charges = b ? "" + '\u221E' : "" + spawner.getCharges();
 		meta.setDisplayName(Language.get("Inventory.upgrades.items.charges.name",
 				"charges", charges).text());
 		meta.addItemFlags(ItemFlag.values());
 		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		if(slot.o > 0) meta.setCustomModelData(slot.o);
-		List<String> lore = new ArrayList<>();
-		lore.add("");
-		int f0 = Settings.settings.charges_buy_first;
-		int f1 = Settings.settings.charges_buy_second;
-		int r = Settings.settings.charges_price(type, block);
-		int c0 = r * f0;
-		int c1 = r * f1;
-		int a = lowestCharges() / r;
-		int c2 = r * a;
-		lore.addAll(Text.toText(Language.list("Inventory.upgrades.items.charges.purchase.first",
-				"charges", f0, "price", Price.of(Group.charges, c0))));
-		lore.addAll(Text.toText(Language.list("Inventory.upgrades.items.charges.purchase.second",
-				"charges", f1, "price", Price.of(Group.charges, c1))));
-		if(a > 0) lore.addAll(Text.toText(Language.list("Inventory.upgrades.items.charges.purchase.all",
-				"price", Price.of(Group.charges, c2), "charges", a)));
-		meta.setLore(lore);
+		if(b == false) {
+			List<String> lore = new ArrayList<>();
+			lore.add("");
+			int f0 = Settings.settings.charges_buy_first;
+			int f1 = Settings.settings.charges_buy_second;
+			int r = Settings.settings.charges_price(type, block);
+			int c0 = r * f0;
+			int c1 = r * f1;
+			int a = lowestCharges() / r;
+			int c2 = r * a;
+			lore.addAll(Text.toText(Language.list("Inventory.upgrades.items.charges.purchase.first",
+					"charges", f0, "price", Price.of(Group.charges, c0))));
+			lore.addAll(Text.toText(Language.list("Inventory.upgrades.items.charges.purchase.second",
+					"charges", f1, "price", Price.of(Group.charges, c1))));
+			if(a > 0) lore.addAll(Text.toText(Language.list("Inventory.upgrades.items.charges.purchase.all",
+					"price", Price.of(Group.charges, c2), "charges", a)));
+			meta.setLore(lore);
+		}
 		item.setItemMeta(meta);
 		return item;
 	}
-	
+
 	private ItemStack x(Slot slot) {
 		if(slot.m == null || slot.m == Material.AIR) return null;
 		ItemStack item = new ItemStack(slot.m);

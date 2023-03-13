@@ -14,10 +14,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import mc.rellox.spawnermeta.api.spawner.Spawner;
 import mc.rellox.spawnermeta.api.spawner.VirtualSpawner;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.LocationFile.LF;
 import mc.rellox.spawnermeta.configuration.Settings;
+import mc.rellox.spawnermeta.events.EventRegistry;
 import mc.rellox.spawnermeta.holograms.HologramRegistry;
 import mc.rellox.spawnermeta.items.ItemCollector;
 import mc.rellox.spawnermeta.utils.DataManager;
@@ -66,6 +68,7 @@ public final class SpawnerManager {
 		}
 		LF.remove(block);
 		block.setType(Material.AIR);
+		EventRegistry.unlink(block);
 		if(particles == true) loc.getWorld().spawnParticle(Particle.CLOUD, loc, 25, 0.25, 0.25, 0.25, 0);
 		HologramRegistry.remove(block);
 		return true;
@@ -77,17 +80,18 @@ public final class SpawnerManager {
 			block.getWorld().spawnParticle(Particle.CRIT, Utils.center(block), 10, 0, 0, 0, 0.1);
 			return;
 		}
-		SpawnerType type = DataManager.getType(block);
-		if(DataManager.isEmpty(block) == true && type != SpawnerType.EMPTY) {
+		Spawner spawner = Spawner.of(block);
+		SpawnerType type = spawner.getType();
+		if(spawner.isEmpty() == true && type != SpawnerType.EMPTY) {
 			if(type.unique() == false) {
 				Material mat = type.changer();
 				if(mat != null) {
+					int s = spawner.getStack();
 					if(Settings.settings.breaking_drop_on_ground == true) {
-						ItemStack item = new ItemStack(mat, DataManager.getStack(block));
+						ItemStack item = new ItemStack(mat, s);
 						block.getWorld().dropItem(block.getLocation().add(0.5, 0.5, 0.5), item)
 							.setVelocity(new Vector());
 					} else if(player != null) {
-						int s = DataManager.getStack(block);
 						while(s > 0) {
 							ItemStack item = new ItemStack(mat, s >= 64 ? 64 : s);
 							ItemCollector.add(player, item);

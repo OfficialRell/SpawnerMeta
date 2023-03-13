@@ -128,11 +128,14 @@ public final class DataManager {
 		boolean k = false;
 		if(Settings.settings.charges_enabled == true) {
 			k = lore.add("");
-			lore.addAll(Text.toText(Language.list("Spawners.item.charges", "charges", charges)));
+			boolean inf = charges >= 1_000_000_000;
+			lore.addAll(Text.toText(Language.list("Spawners.item.charges",
+					"charges", inf ? Text.infinity : charges)));
 		}
 		if(Settings.settings.spawnable_enabled == true) {
 			if(k == false) k = lore.add("");
-			lore.addAll(Text.toText(Language.list("Spawners.item.spawnable", "spawnable", spawnable)));
+			if(spawnable < 1_000_000_000)
+				lore.addAll(Text.toText(Language.list("Spawners.item.spawnable", "spawnable", spawnable)));
 		}
 		meta.setLore(lore);
 		Utils.hideCustomFlags(meta);
@@ -155,7 +158,9 @@ public final class DataManager {
 		int[] is = new int[5];
 		int i = 0;
 		for(; i < 5; i++) {
-			if(vs[i].equals("-") == true) is[i] = 0;
+			if(i > 2 && vs[i].equals("inf") == true
+					|| vs[i].equals("infinite") == true) is[i] = 1_500_000_000;
+			else if(vs[i].equals("-") == true) is[i] = 0;
 			else if(Utils.isInteger(vs[i]) == true) is[i] = Integer.parseInt(vs[i]);
 			else return null;
 		}

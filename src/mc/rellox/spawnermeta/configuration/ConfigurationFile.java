@@ -161,6 +161,7 @@ public class ConfigurationFile {
 			
 			file.addDefault("Events.cancel-spawning-event", true);
 			file.addDefault("Events.send-spawner-event", false);
+			file.addDefault("Events.cancel-break-event", true);
 			
 			file.addDefault("Items.taking-ticks", 60 * 20);
 			file.addDefault("Items.taking-remind-ticks", 30 * 20);
@@ -383,6 +384,9 @@ public class ConfigurationFile {
 				c.comment("Events.send-spawner-event",
 						"Is entity spawning event sent for each new entity.",
 						"This option might be useful for some plugins.");
+				c.comment("Events.cancel-break-event",
+						"Is spawner break event cancelled.",
+						"Useful for other plugins that register spawner locations.");
 				c.comment("Items.taking-ticks",
 						"Amount of ticks to get back dropped items using",
 						"  /spawnerdrops.",

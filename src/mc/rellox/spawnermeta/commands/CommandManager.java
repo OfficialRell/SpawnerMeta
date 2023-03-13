@@ -164,8 +164,8 @@ public final class CommandManager {
 						if(type == null) warn(sender, "Invalid type!");
 						else {
 							Block block = player.getTargetBlock(null, 10);
-							if(block == null) warn(sender, "Target block not found!");
-							else if(block.getType() != Material.SPAWNER) warn(sender, "Target block is not a spawner!");
+							if(block == null) warn(sender, "Target spawner not found!");
+							else if(block.getType() != Material.SPAWNER) warn(sender, "Target spawner is not a spawner!");
 							else {
 								DataManager.setType(block, type);
 								SpawnerUpgrade.update(block);
@@ -182,8 +182,8 @@ public final class CommandManager {
 						else {
 							int s = Integer.parseInt(a);
 							Block block = player.getTargetBlock(null, 10);
-							if(block == null) warn(sender, "Target block not found!");
-							else if(block.getType() != Material.SPAWNER) warn(sender, "Target block is not a spawner!");
+							if(block == null) warn(sender, "Target spawner not found!");
+							else if(block.getType() != Material.SPAWNER) warn(sender, "Target spawner is not a spawner!");
 							else {
 								if(a.charAt(0) == '+' || a.charAt(0) == '-') s += DataManager.getStack(block);
 								DataManager.setStack(block, s < 1 ? 1 : s);
@@ -197,17 +197,18 @@ public final class CommandManager {
 					if(args.length < 3) sender.sendMessage(help1);
 					else {
 						String a = args[2];
-						if(Utils.isInteger(a) == false) warn(sender, "Invalid value!");
+						boolean inf = a.equalsIgnoreCase("infinite");
+						if(Utils.isInteger(a) == false && inf == false) warn(sender, "Invalid value!");
 						else {
-							int s = Integer.parseInt(a);
+							int s = inf ? 1_500_000_000 : Integer.parseInt(a);
 							Block block = player.getTargetBlock(null, 10);
-							if(block == null) warn(sender, "Target block not found!");
-							else if(block.getType() != Material.SPAWNER) warn(sender, "Target block is not a spawner!");
+							if(block == null) warn(sender, "Target spawner not found!");
+							else if(block.getType() != Material.SPAWNER) warn(sender, "Target spawner is not a spawner!");
 							else {
 								if(a.charAt(0) == '+' || a.charAt(0) == '-') s += DataManager.getSpawnable(block);
 								DataManager.setSpawnable(block, s < 1 ? 1 : s);
 								SpawnerUpgrade.update(block);
-								success(sender, "Spawner spawnable entity set to #0!", s);
+								success(sender, "Spawner spawnable entity set to #0!", inf ? "infinite" : s);
 							}
 						}
 					}
@@ -216,17 +217,18 @@ public final class CommandManager {
 					if(args.length < 3) sender.sendMessage(help1);
 					else {
 						String a = args[2];
-						if(Utils.isInteger(a) == false) warn(sender, "Invalid value!");
+						boolean inf = a.equalsIgnoreCase("infinite");
+						if(Utils.isInteger(a) == false && inf == false) warn(sender, "Invalid value!");
 						else {
-							int s = Integer.parseInt(a);
+							int s = inf ? 1_500_000_000 : Integer.parseInt(a);
 							Block block = player.getTargetBlock(null, 10);
-							if(block == null) warn(sender, "Target block not found!");
-							else if(block.getType() != Material.SPAWNER) warn(sender, "Target block is not a spawner!");
+							if(block == null) warn(sender, "Target spawner not found!");
+							else if(block.getType() != Material.SPAWNER) warn(sender, "Target spawner is not a spawner!");
 							else {
 								if(a.charAt(0) == '+' || a.charAt(0) == '-') s += DataManager.getCharges(block);
 								DataManager.setCharges(block, s);
 								SpawnerUpgrade.update(block);
-								success(sender, "Spawner charges set to #0!", s);
+								success(sender, "Spawner charges set to #0!", inf ? "infinite" : s);
 							}
 						}
 					}
@@ -301,6 +303,10 @@ public final class CommandManager {
 				else if(args[1].equalsIgnoreCase("type") == true) {
 					if(args.length < 4) return entities(args[2]);
 					else return l;
+				} else if(args[1].equalsIgnoreCase("charges") == true
+						|| args[1].equalsIgnoreCase("entities") == true) {
+					if(args.length < 4) return inf(args[2]);
+					else return l;
 				} else return l;
 			} else if(args[0].equalsIgnoreCase("disable") == true) {
 				if(args.length < 3) return tf(args[1]);
@@ -321,7 +327,9 @@ public final class CommandManager {
 	}
 
 	private static List<String> pl(String s) {
-		return reduce(Bukkit.getOnlinePlayers().stream().map(p -> p.getName()).collect(Collectors.toList()), s);
+		return reduce(Bukkit.getOnlinePlayers().stream()
+				.map(Player::getName)
+				.collect(Collectors.toList()), s);
 	}
 
 	private static List<String> or(String s) {
@@ -357,6 +365,12 @@ public final class CommandManager {
 		return reduce(l, s);
 	}
 
+	private static List<String> inf(String s) {
+		List<String> l = new ArrayList<>();
+		l.add("infinite");
+		return reduce(l, s);
+	}
+
 	private static List<String> entities(String s) {
 		return reduce(Stream.of(SpawnerType.values())
 				.filter(SpawnerType::exists)
@@ -366,7 +380,9 @@ public final class CommandManager {
 
 	private static List<String> reduce(List<String> l, String s) {
 		if(s.isEmpty() == true) return l;
-		return l.stream().filter(a -> a.toLowerCase().contains(s.toLowerCase())).collect(Collectors.toList());
+		return l.stream()
+				.filter(a -> a.toLowerCase().contains(s.toLowerCase()))
+				.collect(Collectors.toList());
 	}
 	
 

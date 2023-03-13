@@ -62,6 +62,7 @@ public final class Settings {
 	
 	public boolean cancel_spawning_event;
 	public boolean send_spawning_event;
+	public boolean cancel_break_event;
 	
 	public boolean kill_entities_on_spawn;
 	
@@ -206,6 +207,7 @@ public final class Settings {
 		
 		cancel_spawning_event = CF.s.getBoolean("Events.cancel-spawning-event");
 		send_spawning_event = CF.s.getBoolean("Events.send-spawner-event");
+		cancel_break_event = CF.s.getBoolean("Events.cancel-break-event");
 		
 		kill_entities_on_spawn = CF.s.getBoolean("Spawners.kill-entities-on-spawn");
 		

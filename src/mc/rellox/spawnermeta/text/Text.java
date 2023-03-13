@@ -7,6 +7,8 @@ import mc.rellox.spawnermeta.text.content.Content;
 
 public final class Text {
 	
+	public static final String infinity = "" + '\u221E';
+	
 	public static List<String> toText(List<Content> list) {
 		return list.stream()
 				.map(Content::text)

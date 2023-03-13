@@ -265,15 +265,15 @@ public final class Language {
 	}
 
 	public static Content get(String key, String k, Object o) {
-		List<Content> s = language.text.get(key);
-		if(s == null) return Content.empty();
-		return s.get(0).modified(Variables.with(k, o));
+		List<Content> list = language.text.get(key);
+		if(list == null) return Content.empty();
+		return list.get(0).modified(Variables.with(k, o));
 	}
 
 	public static Content get(String key, Object... vs) {
-		List<Content> s = language.text.get(key);
-		if(s == null) return Content.empty();
-		return s.get(0).modified(Variables.with(vs));
+		List<Content> list = language.text.get(key);
+		if(list == null) return Content.empty();
+		return list.get(0).modified(Variables.with(vs));
 	}
 
 	public static List<Content> list(String key) {
@@ -282,19 +282,19 @@ public final class Language {
 	}
 
 	public static List<Content> list(String key, String k, Object o) {
-		List<Content> s = language.text.get(key);
-		if(s == null) return List.of(); 
+		List<Content> list = language.text.get(key);
+		if(list == null) return List.of(); 
 		Variables v = Variables.with(k, o);
-		return s.stream()
+		return list.stream()
 				.map(c -> c.modified(v))
 				.collect(Collectors.toList());
 	}
 
 	public static List<Content> list(String key, Object... vs) {
-		List<Content> s = language.text.get(key);
-		if(s == null) return List.of(); 
+		List<Content> list = language.text.get(key);
+		if(list == null) return List.of(); 
 		Variables v = Variables.with(vs);
-		return s.stream()
+		return list.stream()
 				.map(c -> c.modified(v))
 				.collect(Collectors.toList());
 	}
