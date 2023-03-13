@@ -149,6 +149,16 @@ public final class Reflections {
 			return (Accessor<R>) null_accessor;
 		}
 
+		@SuppressWarnings("unchecked")
+		public static <R> Accessor<R> accessI(Object o, String f, Class<R> r) {
+			try {
+				Field field = field(o.getClass(), f);
+				field.setAccessible(true);
+				return ofI(field, o);
+			} catch (Exception e) {}
+			return (Accessor<R>) null_accessor;
+		}
+
 		private static Field field(Class<?> c, String n) throws Exception {
 			try {
 				return c.getField(n);
@@ -220,6 +230,27 @@ public final class Reflections {
 					} catch (Exception e) {
 						debug(e);
 					}
+				}
+			};
+		}
+
+		private static <R> Accessor<R> ofI(Field field, Object o) {
+			return new Accessor<R>() {
+				@SuppressWarnings("unchecked")
+				@Override
+				public R field() {
+					try {
+						field.setAccessible(true);
+						return (R) field.get(o);
+					} catch (Exception e) {}
+					return null;
+				}
+				@Override
+				public void set(R r) {
+					try {
+						field.setAccessible(true);
+						field.set(o, r);
+					} catch (Exception e) {}
 				}
 			};
 		}
