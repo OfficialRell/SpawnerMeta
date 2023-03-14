@@ -64,6 +64,10 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 		}
 		x: if(link != null) {
 			LivingEntity le = link.getLivingEntity();
+			if(le.isDead() == true) {
+				linked.values().removeIf(se -> se.getLivingEntity().isDead());
+				break x;
+			}
 			int a = wild.getSettings().linkedEntitiesMaxDistance;
 			if(le.getWorld().equals(at.getWorld()) == false
 					|| le.getLocation().distanceSquared(at) > a * a) break x;
