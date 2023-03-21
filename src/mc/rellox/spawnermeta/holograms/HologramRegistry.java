@@ -20,23 +20,25 @@ import org.bukkit.scheduler.BukkitRunnable;
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.utils.Version;
-import mc.rellox.spawnermeta.utils.Version.VersionType;
 
 public final class HologramRegistry {
 
 	public static final HologramInstance HI;
 	static {
-		if(Version.version == VersionType.v_14_1) HI = new HologramInstance1_14();
-		else if(Version.version == VersionType.v_15_1) HI = new HologramInstance1_15();
-		else if(Version.version == VersionType.v_16_1) HI = new HologramInstance1_16_1();
-		else if(Version.version == VersionType.v_16_2) HI = new HologramInstance1_16_2();
-		else if(Version.version == VersionType.v_16_3) HI = new HologramInstance1_16_3();
-		else if(Version.version == VersionType.v_17_1) HI = new HologramInstance1_17();
-		else if(Version.version == VersionType.v_18_1) HI = new HologramInstance1_18_1();
-		else if(Version.version == VersionType.v_18_2) HI = new HologramInstance1_18_2();
-		else if(Version.version == VersionType.v_19_1) HI = new HologramInstance1_19_1();
-		else if(Version.version == VersionType.v_19_2) HI = new HologramInstance1_19_2();
-		else HI = null;
+		HI = switch(Version.version) {
+		case v_14_1 -> new HologramInstance1_14();
+		case v_15_1 -> new HologramInstance1_15();
+		case v_16_1 -> new HologramInstance1_16_1();
+		case v_16_2 -> new HologramInstance1_16_2();
+		case v_16_3 -> new HologramInstance1_16_3();
+		case v_17_1 -> new HologramInstance1_17();
+		case v_18_1 -> new HologramInstance1_18_1();
+		case v_18_2 -> new HologramInstance1_18_2();
+		case v_19_1 -> new HologramInstance1_19_1();
+		case v_19_2 -> new HologramInstance1_19_2();
+		case v_19_3 -> new HologramInstance1_19_3();
+		default -> null;
+		};
 	}
 	
 	private static final HologramLoader LOADER = new HologramLoader();

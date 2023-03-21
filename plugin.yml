@@ -2,7 +2,7 @@ name: SpawnerMeta
 main: mc.rellox.spawnermeta.SpawnerMeta
 softdepend: [Vault]
 api-version: 1.14
-version: 19.2
+version: 19.0
 author: Rellox
 commands:
   spawnermeta:
