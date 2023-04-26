@@ -37,6 +37,10 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 		return wild != null;
 	}
 	
+	public boolean enabled() {
+		return wild.getSettings().entitiesStackingEnabled == true;
+	}
+	
 	public void unlink(Block block) {
 		linked.remove(block);
 	}
