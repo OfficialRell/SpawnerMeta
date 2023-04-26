@@ -167,6 +167,10 @@ public interface Spawner {
 		return id == null ? null : Bukkit.getPlayer(id);
 	}
 	
+	default UUID getOwnerID() {
+		return DataManager.getOwner(block());
+	}
+	
 	default boolean isOwner(Player player) {
 		return isOwner(player, false);
 	}
