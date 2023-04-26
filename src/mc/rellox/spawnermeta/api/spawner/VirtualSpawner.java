@@ -1,6 +1,8 @@
 package mc.rellox.spawnermeta.api.spawner;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.spawner.SpawnerType;
@@ -66,6 +68,16 @@ public interface VirtualSpawner {
 	
 	default ItemStack getItem() {
 		return getItem(1);
+	}
+	
+	default void place(Block block) {
+		place(null, block);
+	}
+	
+	default void place(Player owner, Block block) {
+		block.setType(Material.SPAWNER);
+		DataManager.setNewSpawner(owner, block, getType(), getUpgradeLevels(),
+				getCharges(), getSpawnable(), isEmpty());
 	}
 
 }
