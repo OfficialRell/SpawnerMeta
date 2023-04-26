@@ -58,6 +58,8 @@ public final class Settings {
 	public boolean disable_item_spawners;
 	public final Set<SpawnerType> spawner_disabled;
 	
+	public boolean allow_renaming;
+	
 	public int slime_size;
 	
 	public boolean cancel_spawning_event;
@@ -65,6 +67,7 @@ public final class Settings {
 	public boolean cancel_break_event;
 	
 	public boolean kill_entities_on_spawn;
+	public boolean entities_drop_xp;
 	
 	public int nearby_entity_limit;
 	
@@ -111,10 +114,12 @@ public final class Settings {
 	public int breaking_silk_level;
 	public boolean breaking_silk_break_owned;
 	public boolean breaking_silk_break_natural;
+	public boolean breaking_silk_destroy;
 	public boolean breaking_durability_enabled;
 	public int breaking_durability_to_remove;
 	public int breaking_xp_on_failure;
 	public final Map<String, Double> chance_permissions;
+	public boolean breaking_show_owner;
 	
 	public boolean entity_target;
 	public boolean entity_movement;
@@ -210,6 +215,9 @@ public final class Settings {
 		cancel_break_event = CF.s.getBoolean("Events.cancel-break-event");
 		
 		kill_entities_on_spawn = CF.s.getBoolean("Spawners.kill-entities-on-spawn");
+		entities_drop_xp = CF.s.getBoolean("Spawners.drop-xp-when-instant-kill");
+		
+		allow_renaming = CF.s.getBoolean("Spawners.allow-renaming");
 		
 		nearby_entity_limit = CF.s.getInteger("Spawners.nearby-entity-limit");
 
@@ -257,6 +265,7 @@ public final class Settings {
 		breaking_silk_level = CF.s.getInteger("Modifiers.breaking.silk-requirement.level");
 		breaking_silk_break_owned = CF.s.getBoolean("Modifiers.breaking.silk-requirement.break-owned");
 		breaking_silk_break_natural = CF.s.getBoolean("Modifiers.breaking.silk-requirement.break-natural");
+		breaking_silk_destroy = CF.s.getBoolean("Modifiers.breaking.silk-requirement.destroy-on-fail");
 		breaking_durability_enabled = CF.s.getBoolean("Modifiers.breaking.enable-durability");
 		breaking_durability_to_remove = CF.s.getInteger("Modifiers.breaking.durability-to-remove");
 		breaking_xp_on_failure = CF.s.getInteger("Modifiers.breaking.xp-on-failure");
@@ -269,6 +278,7 @@ public final class Settings {
 				chance_permissions.put(p, c);
 			}
 		}
+		breaking_show_owner = CF.s.getBoolean("Modifiers.breaking.show-owner");
 		
 		entity_target = CF.s.getBoolean("Modifiers.entity-target");
 		entity_movement = CF.s.getBoolean("Modifiers.entity-movement");

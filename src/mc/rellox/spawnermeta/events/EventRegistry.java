@@ -14,6 +14,7 @@ import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.Sound;
@@ -54,6 +55,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
@@ -107,7 +109,8 @@ import mc.rellox.spawnermeta.views.SpawnerUpgrade;
 public final class EventRegistry implements Listener {
 	
 	private static final List<RegistryAbstract> REGISTRIES =
-			List.of(new RegistryAI(), new RegistryWorldLoad(), new RegistryLinking());
+			List.of(new RegistryAI(), new RegistryWorldLoad(), new RegistryLinking(),
+					new RegistrySpawnerRename());
 	
 	private static long time, chunk;
 	
@@ -539,12 +542,29 @@ public final class EventRegistry implements Listener {
 			if(Settings.settings.owned_can_break == false && spawner.isOwner(player, true) == false) {
 				if(player.hasPermission("spawnermeta.ownership.bypass.breaking") == false) {
 					m.send(Language.list("Spawners.ownership.breaking.warning"));
+					if(Settings.settings.breaking_show_owner == true) {
+						var id = spawner.getOwnerID();
+						if(id != null) {
+							OfflinePlayer off = Bukkit.getOfflinePlayer(id);
+							var name = off.getName();
+							if(name != null) m.send(Language.list("Spawners.ownership.show-owner",
+									"player", name));
+						}
+					}
 					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 					return;
 				}
 			}
 			if(Settings.settings.breaking_drop_on_ground == false && ItemCollector.exists(player) == true) {
 				m.send(Language.list("Items.spawner-drop.try-breaking"));
+				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+				return;
+			}
+			boolean silk = Settings.settings.has_silk(player) == true;
+			if(Settings.settings.breaking_silk_enabled == true
+					&& Settings.settings.breaking_silk_destroy == false
+					&& silk == false) {
+				m.send(Language.list("Spawners.breaking.failure"));
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 				return;
 			}
@@ -912,16 +932,22 @@ public final class EventRegistry implements Listener {
 			call(new SpawnerPostSpawnEvent(block, entities));
 
 			if(Settings.settings.kill_entities_on_spawn == true) {
-				Optional<Player> opt = block.getWorld().getNearbyEntities(block.getLocation(), 32, 32, 32).stream()
-						.filter(n -> n instanceof Player)
-						.findAny()
-						.map(n -> (Player) n);
-				entities.forEach(e -> {
-					if(e instanceof LivingEntity living) {
-						opt.ifPresent(near -> living.damage(10_000_000, near));
-						living.setHealth(0);
-					}
-				});
+				if(Settings.settings.entities_drop_xp == true) {
+					Optional<Player> opt = block.getWorld().getNearbyEntities(block.getLocation(), 32, 32, 32).stream()
+							.filter(n -> n instanceof Player)
+							.findAny()
+							.map(n -> (Player) n);
+					entities.forEach(e -> {
+						if(e instanceof LivingEntity living) {
+							opt.ifPresent(near -> living.damage(10_000_000, near));
+							living.setHealth(0);
+						}
+					});
+				} else {
+					entities.forEach(e -> {
+						if(e instanceof LivingEntity living) living.setHealth(0);
+					});
+				}
 			}
 			if(call.bypass_checks == false && Settings.settings.charges_enabled == true
 					&& charges < 1_000_000_000) spawner.setCharges(--charges);
@@ -957,8 +983,7 @@ public final class EventRegistry implements Listener {
 			
 			EntityBox box = st.box();
 			
-			final Consumer<Entity> f;
-			final Consumer<Entity> n = function(cs);
+			final Consumer<Entity> f, n = function(cs);
 			
 			if(s > 0) {
 				box = box.multiply(s);
@@ -970,9 +995,12 @@ public final class EventRegistry implements Listener {
 			
 			spread.set(block, at, box);
 
-			if(isLiving(type) == true && SpawnerMeta.WILD_STACKER.exists() == true) {
+			if(isLiving(type) == true && SpawnerMeta.WILD_STACKER.exists() == true
+					&& SpawnerMeta.WILD_STACKER.enabled() == true) {
+//				Bukkit.getLogger().info("Spawning through WS");
 				entities = SpawnerMeta.WILD_STACKER.combine(block, type, spread, a, cs);
 			} else {
+//				Bukkit.getLogger().info("Spawning as regular");
 				entities = Stream.generate(spread::get)
 					.limit(a)
 					.peek(EventRegistry::particle)
@@ -1137,6 +1165,23 @@ public final class EventRegistry implements Listener {
 				.filter(CreatureSpawner.class::isInstance)
 				.map(BlockState::getBlock)
 				.forEach(SpawnerMeta.WILD_STACKER::unlink);
+		}
+		
+	}
+	
+	private static final class RegistrySpawnerRename extends RegistryAbstract {
+
+		@Override
+		public void update() {
+			if(Settings.settings.allow_renaming == true) unregister();
+			else register();
+		}
+
+		@EventHandler(priority = EventPriority.HIGH)
+		private void onAnvilPrep(PrepareAnvilEvent event) {
+			var res = event.getResult();
+			if(res == null || res.getType() != Material.SPAWNER) return;
+			event.setResult(null);
 		}
 		
 	}

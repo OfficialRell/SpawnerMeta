@@ -174,6 +174,7 @@ public final class Language {
 		put("Spawners.ownership.upgrading.warning", "<#800000>(!) <#ff8000>You cannot upgrade a spawner that you do not own!");
 		put("Spawners.ownership.opening.warning", "<#800000>(!) <#ff8000>You cannot open a spawner that you do not own!");
 		put("Spawners.ownership.changing.warning", "<#800000>(!) <#ff8000>You cannot change a spawner that you do not own!");
+		put("Spawners.ownership.show-owner", "<#008000>(!) <#ffff00>This spawner is owner by <#00ffff>%player%");
 		put("Spawners.natural.changing.warning", "<#800000>(!) <#ff8000>You cannot change a natural spawner!");
 		put("Spawners.natural.breaking.warning", "<#800000>(!) <#ff8000>You cannot break a natural spawner!");
 		put("Spawners.natural.stacking.warning", "<#800000>(!) <#ff8000>You cannot stack a natural spawner!");

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.bukkit.Material;
@@ -153,9 +152,12 @@ public class ConfigurationFile {
 			file.addDefault("Spawners.spawning-particles", true);
 			file.addDefault("Spawners.disable-item-spawners", false);
 			
+			file.addDefault("Spawners.allow-renaming", true);
+			
 			file.addDefault("Spawners.nearby-entity-limit", 6);
 			
 			file.addDefault("Spawners.kill-entities-on-spawn", false);
+			file.addDefault("Spawners.drop-xp-when-instant-kill", true);
 			
 			file.addDefault("Spawners.default-slime-size", 0);
 			
@@ -212,11 +214,13 @@ public class ConfigurationFile {
 			file.addDefault("Modifiers.breaking.silk-requirement.level", 1);
 			file.addDefault("Modifiers.breaking.silk-requirement.break-owned", true);
 			file.addDefault("Modifiers.breaking.silk-requirement.break-natural", true);
+			file.addDefault("Modifiers.breaking.silk-requirement.destroy-on-fail", true);
 			file.addDefault("Modifiers.breaking.enable-durability", false);
 			file.addDefault("Modifiers.breaking.durability-to-remove", 1);
 			int xp = first ? 20 : 0;
 			file.addDefault("Modifiers.breaking.xp-on-failure", xp);
 			file.addDefault("Modifiers.breaking.permissions", List.of());
+			file.addDefault("Modifiers.breaking.show-owner", false);
 			
 			Object o = file.get("Modifiers.entity-AI");
 			if(o != null) {
@@ -267,10 +271,13 @@ public class ConfigurationFile {
 			});
 
 			file.addDefault("Spawner-view.enabled", true);
-			file.addDefault("Spawner-view.ignore-entities", Stream.of(SpawnerType.ARMOR_STAND, SpawnerType.BOAT, SpawnerType.EXPERIENCE_BOTTLE,
-			SpawnerType.EXPERIENCE_ORB, SpawnerType.MINECART, SpawnerType.MINECART_CHEST, SpawnerType.MINECART_COMMAND,
-			SpawnerType.MINECART_FURNACE, SpawnerType.MINECART_HOPPER, SpawnerType.MINECART_SPAWNER, SpawnerType.MINECART_TNT)
-					.map(SpawnerType::name).collect(Collectors.toList()));
+			file.addDefault("Spawner-view.ignore-entities", 
+					Stream.of(SpawnerType.ARMOR_STAND, SpawnerType.BOAT, SpawnerType.EXPERIENCE_BOTTLE,
+			SpawnerType.EXPERIENCE_ORB, SpawnerType.MINECART, SpawnerType.MINECART_CHEST,
+			SpawnerType.MINECART_COMMAND, SpawnerType.MINECART_FURNACE, SpawnerType.MINECART_HOPPER,
+			SpawnerType.MINECART_SPAWNER, SpawnerType.MINECART_TNT)
+					.map(SpawnerType::name)
+					.toList());
 			
 			file.addDefault("Commands.spawner-view", "spawnerview");
 			file.addDefault("Commands.spawner-shop", "spawnershop");
@@ -371,12 +378,18 @@ public class ConfigurationFile {
 						"  an entity spawns.");
 				c.comment("Spawners.disable-item-spawners",
 						"Are item spawners disabled.");
+				c.comment("Spawners.allow-renaming",
+						"If spawners can be renamed in an anvil.");
 				c.comment("Spawners.nearby-entity-limit",
 						"If there are this amount of entities",
 						"  in a 4 block radius of the spawner",
 						"  then no entities will be spawned.");
 				c.comment("Spawners.kill-entities-on-spawn",
 						"Will entities be killed when they spawn.");
+				c.comment("Spawners.drop-xp-when-instant-kill",
+						"Will entities drop drop xp when killed.",
+						"Only applies when kill-entities-on-spawn",
+						"  is set to true.");
 				c.comment("Spawners.default-slime-size",
 						"What size slimes and magma cubes spawners will spawn.",
 						"If the value is 0 then the size will vary (1-3).");
@@ -532,6 +545,10 @@ public class ConfigurationFile {
 				c.comment("Modifiers.breaking.drop-on-ground",
 						"Should the spawner be dropped on the ground",
 						"  or automatically be teleported into player inventory.");
+				c.comment("Modifiers.breaking.show-owner",
+						"If set to true then when a player fails",
+						"  to break another player's owned spawner",
+						"  their name will be shown in the chat.");
 				c.comment("Modifiers.breaking.permissions",
 						"Permissions with specific dropping chance can be created.",
 						"Permission layout:",
@@ -545,6 +562,10 @@ public class ConfigurationFile {
 				c.comment("Modifiers.breaking.silk-requirement.level", "Minumum required silk touch enchantment level.");
 				c.comment("Modifiers.breaking.silk-requirement.break-owned", "Can player owned spawners be broken with silk touch.");
 				c.comment("Modifiers.breaking.silk-requirement.break-natural", "Can natural spawners be broken with silk touch.");
+				c.comment("Modifiers.breaking.silk-requirement.destroy-on-fail",
+						"Will the spawner be destroyed if broken",
+						"  with a pickaxe that does not have",
+						"  silk touch enchantment.");
 				c.comment("Modifiers.breaking.can-break-natural", "Are natural spawners breakable.");
 				c.comment("Modifiers.breaking.enable-durability", "Is durability loss enabled.");
 				c.comment("Modifiers.breaking.xp-on-failure",
