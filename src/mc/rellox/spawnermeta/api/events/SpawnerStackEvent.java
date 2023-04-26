@@ -9,10 +9,13 @@ import mc.rellox.spawnermeta.prices.Price;
 public class SpawnerStackEvent extends SpawnerInteractEvent {
 	
 	private final VirtualSpawner item;
+	public final boolean direct;
 
-	public SpawnerStackEvent(Player player, Block block, Price price, VirtualSpawner item) {
+	public SpawnerStackEvent(Player player, Block block, Price price,
+			VirtualSpawner item, boolean direct) {
 		super(player, block, BlockAction.STACK, price);
 		this.item = item;
+		this.direct = direct;
 	}
 	
 	public final VirtualSpawner getItem() {

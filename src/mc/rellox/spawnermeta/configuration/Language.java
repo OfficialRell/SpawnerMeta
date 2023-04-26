@@ -165,6 +165,7 @@ public final class Language {
 		put("Spawners.stacking.stacked.finite", "<#008000>(!) <#00ffff>Spawners have been stacked! <#ffff00>(%stack%/%limit% Stacked)");
 		put("Spawners.stacking.unequal-spawner", "<#800000>(!) <#ff8000>Spawners must be the same to stack!");
 		put("Spawners.stacking.limit-reached", "<#800000>(!) <#ff8000>This spawner has reached its stacking limit!");
+		put("Spawners.stacking.nearby.none-match", "<#800000>(!) <#ff8000>Unable to find any nearby spawner to stack to that matches!");
 		put("Spawners.stacking.permission", "<#800000>(!) <#ff8000>You do not have a permission to stack this!");
 		put("Spawners.chunks.limit-reached", "<#800000>(!) <#ff8000>This chunk has reached its spawner limit!");
 		put("Spawners.ownership.limit.place", "<#008000>(!) <#00ffff>Spawner placed <#ff8000>(<#ffff00>%placed%<#ff8000>/<#ffff00>%limit%<#ff8000>)");

@@ -102,6 +102,9 @@ public final class Settings {
 	public boolean stacking_enabled;
 	public int stacking_spawner_limit;
 	public boolean stacking_ignore_limit;
+	public boolean stacking_nearby_enabled;
+	public int stacking_nearby_radius;
+	public boolean stacking_nearby_particles;
 
 	public final SinglePriceMap breaking_price;
 	public boolean breaking_enabled;
@@ -251,6 +254,11 @@ public final class Settings {
 		stacking_price.load();
 		stacking_spawner_limit = CF.s.getInteger("Modifiers.stacking.spawner-limit");
 		stacking_ignore_limit = CF.s.getBoolean("Modifiers.stacking.ignore-limit");
+		stacking_nearby_enabled = CF.s.getBoolean("Modifiers.stacking.when-nearby.enabled");
+		stacking_nearby_radius = CF.s.getInteger("Modifiers.stacking.when-nearby.radius");
+		if(stacking_nearby_radius < 1) stacking_nearby_radius = 1;
+		if(stacking_nearby_radius > 16) stacking_nearby_radius = 16;
+		stacking_nearby_particles = CF.s.getBoolean("Modifiers.stacking.when-nearby.particles");
 		
 		stacking_ticks = CF.s.getInteger("Modifiers.stacking.ticks-per");
 		

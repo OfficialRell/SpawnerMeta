@@ -173,7 +173,42 @@ public final class EventRegistry implements Listener {
 					&& block.getType() == Material.SPAWNER) event.setCancelled(true);
 			return;
 		}
-		if(block.getType() != Material.SPAWNER) return;
+		if(block.getType() != Material.SPAWNER) {
+			if(Settings.settings.stacking_nearby_enabled == true) {
+				ItemStack item = event.getItem();
+				if(item == null || item.getType() != Material.SPAWNER) return;
+				if(player.isSneaking() == false) return;
+				event.setCancelled(true);
+				VirtualSpawner data = VirtualSpawner.of(item);
+				if(data == null) return;
+				final int r = Settings.settings.stacking_nearby_radius;
+				Block valid = null;
+				int x = -r, y, z;
+				f: do {
+					y = -r;
+					do {
+						z = -r;
+						do {
+							Block rel = block.getRelative(x, y, z);
+							if(rel.getType() != Material.SPAWNER) continue;
+							VirtualSpawner of = VirtualSpawner.of(rel);
+							if(of == null) continue;
+							if(data.exact(of) == true) {
+								valid = rel;
+								break f;
+							}
+						} while(++z <= r);
+					} while(++y <= r);
+				} while(++x <= r);
+				if(valid == null) {
+					m.send(Language.list("Spawners.stacking.nearby.none-match"));
+					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+					return;
+				}
+				stacking(player, m, valid, Spawner.of(valid), item, false);
+			}
+			return;
+		}
 		Spawner spawner = getAPI().getSpawner(block);
 		try {
 			if(DataManager.isItemSpawner(block) == true) return;
@@ -247,95 +282,7 @@ public final class EventRegistry implements Listener {
 							event.setCancelled(false);
 							break y;
 						}
-						int stack = spawner.getStack();
-						if(Settings.settings.stacking_ignore_limit == false) {
-							if(stack >= Settings.settings.stacking_spawner_limit) {
-								m.send(Language.list("Spawners.stacking.limit-reached"));
-								player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-								break y;
-							}
-						}
-						int tt = Settings.settings.stacking_ticks;
-						if(tt > 0) {
-							long b = System.currentTimeMillis() / 50;
-							if(time >= b - tt) return;
-							time = b;
-						}
-						VirtualSpawner data = VirtualSpawner.of(item);
-						if(data == null) return;
-						if(player.hasPermission("spawnermeta.stacking") == false) {
-							m.send(Language.list("Spawners.stacking.permission"));
-							player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-							return;
-						}
-						if(Settings.settings.natural_can_stack == false && spawner.isNatural() == true) {
-							if(player.hasPermission("spawnermeta.natural.bypass.stacking") == false) {
-								m.send(Language.list("Spawners.natural.breaking.warning"));
-								player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-								return;
-							}
-						}
-						if(Settings.settings.owned_can_stack == false && spawner.isOwner(player, true) == false) {
-							if(player.hasPermission("spawnermeta.ownership.bypass.stacking") == false) {
-								m.send(Language.list("Spawners.ownership.stacking.warning"));
-								player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-								return;
-							}
-						}
-						VirtualSpawner other = VirtualSpawner.of(block);
-						if(data.exact(other) == false) {
-							m.send(Language.list("Spawners.stacking.unequal-spawner"));
-							player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-							return;
-						}
-						if(Settings.settings.owned_ignore_limit == false) {
-							int p = LF.placed(player);
-							if(p >= Settings.settings.owned_spawner_limit) {
-								m.send(Language.list("Spawners.ownership.limit.reached",
-										"limit", Settings.settings.owned_spawner_limit));
-								player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-								return;
-							}
-						}
-						Price price = null;
-						if(Settings.settings.stacking_price.using() == true)
-							price = Price.of(Group.stacking, Settings.settings.stacking_price.get(type));
-
-						SpawnerStackEvent call = call(new SpawnerStackEvent(player, block, price, data));
-						if(call.cancelled() == true) return;
-						
-						if(call.withdraw(player) == false) {
-							price = call.getUnsafePrice();
-							m.send(Language.list("Prices.insufficient", 
-									"insufficient", price.insufficient(), "price", price.requires(player)));
-							player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-							return;
-						}
-						stack++;
-						spawner.setStack(stack);
-						m.send((Settings.settings.stacking_ignore_limit
-								? Language.list("Spawners.stacking.stacked.infinite", "stack", stack)
-										: Language.list("Spawners.stacking.stacked.finite", "stack", stack,
-												"limit", Settings.settings.stacking_spawner_limit)));
-						player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 0.75f, 1.5f);
-						if(Settings.settings.spawnable_enabled == true) {
-							int s = spawner.getSpawnable() + data.getSpawnable();
-							spawner.setSpawnable(s);
-						}
-						if(Settings.settings.charges_enabled == true
-								&& Settings.settings.charges_allow_stacking == true) {
-							int b = spawner.getCharges() * (stack - 1) + data.getCharges();
-							int r = b / stack;
-							spawner.setCharges(r);
-							int f = b % stack;
-							if(f > 0)
-								m.send(Language.list("Spawners.charges.lose-by-stacking", 
-										"charges", f));
-						}
-						ItemMatcher.remove(player, item, 1);
-						LF.add(block, player);
-						SpawnerUpgrade.update(block);
-						HologramRegistry.update(block);
+						if(stacking(player, m, block, spawner, item, true) == true) break y;
 						return;
 					}
 					SpawnerType change = SpawnerManager.fromEgg(item.getType());
@@ -487,6 +434,111 @@ public final class EventRegistry implements Listener {
 		} catch (Exception e) {
 			RF.debug(e);
 		}
+	}
+
+	private boolean stacking(Player player, Messagable m, Block block,
+			Spawner spawner, ItemStack item, boolean direct) {
+		int stack = spawner.getStack();
+		if(Settings.settings.stacking_ignore_limit == false) {
+			if(stack >= Settings.settings.stacking_spawner_limit) {
+				m.send(Language.list("Spawners.stacking.limit-reached"));
+				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+				return true;
+			}
+		}
+		int tt = Settings.settings.stacking_ticks;
+		if(tt > 0) {
+			long b = System.currentTimeMillis() / 50;
+			if(time >= b - tt) return false;
+			time = b;
+		}
+		VirtualSpawner data = VirtualSpawner.of(item);
+		if(data == null) return false;
+		if(player.hasPermission("spawnermeta.stacking") == false) {
+			m.send(Language.list("Spawners.stacking.permission"));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return false;
+		}
+		if(Settings.settings.natural_can_stack == false && spawner.isNatural() == true) {
+			if(player.hasPermission("spawnermeta.natural.bypass.stacking") == false) {
+				m.send(Language.list("Spawners.natural.breaking.warning"));
+				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+				return false;
+			}
+		}
+		if(Settings.settings.owned_can_stack == false && spawner.isOwner(player, true) == false) {
+			if(player.hasPermission("spawnermeta.ownership.bypass.stacking") == false) {
+				m.send(Language.list("Spawners.ownership.stacking.warning"));
+				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+				return false;
+			}
+		}
+		VirtualSpawner other = VirtualSpawner.of(block);
+		if(data.exact(other) == false) {
+			m.send(Language.list("Spawners.stacking.unequal-spawner"));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return false;
+		}
+		if(Settings.settings.owned_ignore_limit == false) {
+			int p = LF.placed(player);
+			if(p >= Settings.settings.owned_spawner_limit) {
+				m.send(Language.list("Spawners.ownership.limit.reached",
+						"limit", Settings.settings.owned_spawner_limit));
+				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+				return false;
+			}
+		}
+		Price price = null;
+		if(Settings.settings.stacking_price.using() == true)
+			price = Price.of(Group.stacking, Settings.settings.stacking_price.get(spawner.getType()));
+
+		SpawnerStackEvent call = call(new SpawnerStackEvent(player, block, price, data, direct));
+		if(call.cancelled() == true) return false;
+		
+		if(call.withdraw(player) == false) {
+			price = call.getUnsafePrice();
+			m.send(Language.list("Prices.insufficient", 
+					"insufficient", price.insufficient(), "price", price.requires(player)));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return false;
+		}
+		stack++;
+		spawner.setStack(stack);
+		m.send((Settings.settings.stacking_ignore_limit
+				? Language.list("Spawners.stacking.stacked.infinite", "stack", stack)
+						: Language.list("Spawners.stacking.stacked.finite", "stack", stack,
+								"limit", Settings.settings.stacking_spawner_limit)));
+		player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 0.75f, 1.5f);
+		if(Settings.settings.spawnable_enabled == true) {
+			int s = spawner.getSpawnable() + data.getSpawnable();
+			spawner.setSpawnable(s);
+		}
+		if(Settings.settings.charges_enabled == true
+				&& Settings.settings.charges_allow_stacking == true) {
+			int b = spawner.getCharges() * (stack - 1) + data.getCharges();
+			int r = b / stack;
+			spawner.setCharges(r);
+			int f = b % stack;
+			if(f > 0)
+				m.send(Language.list("Spawners.charges.lose-by-stacking", 
+						"charges", f));
+		}
+		if(direct == false && Settings.settings.stacking_nearby_particles == true) {
+			Location start = block.getLocation().add(0.5, 0.5, 0.5);
+			Location end = player.getLocation().add(0, 1, 0);
+			Vector dis = end.toVector().subtract(start.toVector())
+					.normalize().multiply(0.25);
+			double loops = start.distance(end) / 0.25;
+			for(int i = 0; i < loops; i++) {
+				start.add(dis);
+				player.spawnParticle(Particle.CRIT_MAGIC, start, 1, 0, 0, 0, 0);
+			}
+		}
+		ItemMatcher.remove(player, item, 1);
+		LF.add(block, player);
+		SpawnerUpgrade.update(block);
+		HologramRegistry.update(block);
+		return false;
 	}
 
 	private void removeEggs(Player player, Block block, SpawnerType type) {

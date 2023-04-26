@@ -201,6 +201,9 @@ public class ConfigurationFile {
 			file.addDefault("Modifiers.stacking.prices.DEFAULT", 100);
 			file.addDefault("Modifiers.stacking.spawner-limit", 16);
 			file.addDefault("Modifiers.stacking.ignore-limit", true);
+			file.addDefault("Modifiers.stacking.when-nearby.enabled", false);
+			file.addDefault("Modifiers.stacking.when-nearby.radius", 8);
+			file.addDefault("Modifiers.stacking.when-nearby.particles", true);
 			
 			file.addDefault("Modifiers.breaking.enabled", false);
 			file.addDefault("Modifiers.breaking.use-price", false);
@@ -516,6 +519,15 @@ public class ConfigurationFile {
 						"Replace <entity> with the specific entity name.");
 				c.comment("Modifiers.stacking.spawner-limit", "Maximum stack size a spawner can have.");
 				c.comment("Modifiers.stacking.ignore-limit", "Is stacking limit ignored.");
+				c.comment("Modifiers.stacking.when-nearby.enabled",
+						"Player will be able to place same-type",
+						"  spawners near another spawner and",
+						"  it will be stacked to it if this",
+						"  is set to true.");
+				c.comment("Modifiers.stacking.when-nearby.radius",
+						"Radius in which the nearest same-type spawner",
+						"  will be searched.",
+						"Radius interval: [1; 16]");
 				c.comment("Modifiers.breaking.enabled",
 						"Will players be checked if they have spawner",
 						"  breaking permission (spawnermeta.break).");
