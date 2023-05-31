@@ -75,7 +75,7 @@ public class ConfigurationFile {
 	
 	public Set<String> getKeys(String path) {
 		ConfigurationSection cs = file.getConfigurationSection(path);
-		return cs == null ? new HashSet<>(0) : cs.getKeys(false);
+		return cs == null ? new HashSet<>() : cs.getKeys(false);
 	}
 	
 	public boolean is(String path) {
@@ -167,6 +167,63 @@ public class ConfigurationFile {
 			
 			file.addDefault("Items.taking-ticks", 60 * 20);
 			file.addDefault("Items.taking-remind-ticks", 30 * 20);
+			
+			boolean i_h = file.getBoolean("Modifiers.spawner-item.show-header", true);
+			boolean i_r = file.getBoolean("Modifiers.spawner-item.show-range", true);
+			boolean i_d = file.getBoolean("Modifiers.spawner-item.show-delay", true);
+			boolean i_a = file.getBoolean("Modifiers.spawner-item.show-amount", true);
+			
+			file.addDefault("Items.layout.spawner-item", List.of(
+					"!",
+					"HEADER",
+					"RANGE",
+					"DELAY",
+					"AMOUNT",
+					"!",
+					"CHARGES",
+					"SPAWNABLE",
+					"!",
+					"INFO"
+					).stream()
+					.map(e -> {
+						return switch(e) {
+						case "HEADER" -> i_h ? e : e + "!";
+						case "RANGE" -> i_r ? e : e + "!";
+						case "DELAY" -> i_d ? e : e + "!";
+						case "AMOUNT" -> i_a ? e : e + "!";
+						default -> e;
+						};
+					}).toList());
+			file.addDefault("Items.layout.upgrades.stat-item", List.of(
+					"EMPTY",
+					"SWITCHING",
+					"!",
+					"LOCATION",
+					"STACK",
+					"SPAWNABLE",
+					"!",
+					"WARNING",
+					"!",
+					"INFO"
+					));
+			file.addDefault("Items.layout.upgrades.upgrade-item", List.of(
+					"HELP",
+					"!",
+					"INFO",
+					"!",
+					"CURRENT",
+					"!",
+					"NEXT",
+					"!",
+					"PRICE"
+					));
+			file.addDefault("Items.layout.upgrades.disabled-upgrade-item", List.of(
+					"HELP",
+					"!",
+					"INFO",
+					"!",
+					"CURRENT"
+					));
 
 			file.addDefault("Modifiers.holograms.enabled", false);
 			file.addDefault("Modifiers.holograms.show-natural", false);
@@ -244,10 +301,10 @@ public class ConfigurationFile {
 			file.addDefault("Modifiers.chunk-limits.spawner-limit", 16);
 			file.addDefault("Modifiers.chunk-limits.entities-in-chuck", 0);
 			
-			file.addDefault("Modifiers.spawner-item.show-header", true);
-			file.addDefault("Modifiers.spawner-item.show-range", true);
-			file.addDefault("Modifiers.spawner-item.show-delay", true);
-			file.addDefault("Modifiers.spawner-item.show-amount", true);
+//			file.addDefault("Modifiers.spawner-item.show-header", true);
+//			file.addDefault("Modifiers.spawner-item.show-range", true);
+//			file.addDefault("Modifiers.spawner-item.show-delay", true);
+//			file.addDefault("Modifiers.spawner-item.show-amount", true);
 
 			file.addDefault("Modifiers.players.owned.ignore-limit", true);
 			file.addDefault("Modifiers.players.owned.spawner-limit", 16);
@@ -310,6 +367,8 @@ public class ConfigurationFile {
 			file.options().header("In this file you can configure all plugin values.\n"
 					+ "To reload this file do /sm update configuration");
 			file.options().copyHeader(true);
+			
+			file.set("Modifiers.spawner-item", null);
 			
 			if(first == true) {
 				save();
@@ -390,7 +449,7 @@ public class ConfigurationFile {
 				c.comment("Spawners.kill-entities-on-spawn",
 						"Will entities be killed when they spawn.");
 				c.comment("Spawners.drop-xp-when-instant-kill",
-						"Will entities drop drop xp when killed.",
+						"Will entities drop xp when killed.",
 						"Only applies when kill-entities-on-spawn",
 						"  is set to true.");
 				c.comment("Spawners.default-slime-size",
@@ -462,7 +521,7 @@ public class ConfigurationFile {
 						"  they are purchased by players in game.");
 				c.comment("Modifiers.charges.allow-stacking",
 						"Will spawners with different charge amount be stacked.",
-						"If true, player will be able stack spawners which",
+						"If true, players will be able stack spawners which",
 						"  has different amount of charges.",
 						"For example, if one spawner has 10 charges and the other 8",
 						"  then the stacked spawner will have 9 charges",
@@ -680,6 +739,30 @@ public class ConfigurationFile {
 				c.comment("Prices.stacking", "Price type for stacking.");
 				c.comment("Prices.breaking", "Price type for breaking.");
 				c.comment("Prices.changing", "Price type for changing.");
+				
+				c.comment("Items.layout",
+						"In this section you can change",
+						"  the order of item lore and even",
+						"  delete lines.",
+						"You can delete a line by deleting",
+						"  the line in this file or add '!'",
+						"  after the line.",
+						"  E.g. 'INFO' -> 'INFO!'");
+				c.comment("Items.layout.spawner-item",
+						"Keys:",
+						"  HEADER, RANGE, DELAY, AMOUNT",
+						"  CHARGES, SPAWNABLE, INFO");
+				c.comment("Items.layout.upgrades.stat-item",
+						"Keys:",
+						"  EMPTY, SWITCHING, LOCATION, STACK",
+						"  WARNING, SPAWNABLE, INFO");
+				c.comment("Items.layout.upgrades.upgrade-item",
+						"Keys:",
+						"  HELP, INFO, CURRENT, NEXT, PRICE");
+				c.comment("Items.layout.upgrades.disabled-upgrade-item",
+						"Keys:",
+						"  HELP, INFO, CURRENT");
+				
 				c.comment("Configuration-version", "Version of this configuration file.",
 						"Should not be changed.");
 				c.comment("Spawner-version", "Version of spawners in the server.",

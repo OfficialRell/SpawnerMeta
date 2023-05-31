@@ -1,5 +1,6 @@
 package mc.rellox.spawnermeta.text;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,22 @@ public final class Text {
 	
 	public static String color(int rgb) {
 		return color(String.format("%06x", rgb));
+	}
+	
+	public static void clean(List<String> list) {
+		boolean n = false;
+		Iterator<String> it = list.iterator();
+		while(it.hasNext() == true) {
+			if(it.next().isEmpty() == true) {
+				if(n == true) it.remove();
+				n = true;
+			} else n = false;
+		}
+		if(list.isEmpty() == false) {
+			int last = list.size() - 1;
+			if(list.get(last).isEmpty() == true)
+				list.remove(last);
+		}
 	}
 	
 	public static List<String> fromLegacy(List<String> list) {

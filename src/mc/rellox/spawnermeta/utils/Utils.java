@@ -129,8 +129,10 @@ public final class Utils {
 			if(meta.getClass().equals(craft_meta_class) == false) return;
 			Accessor<Integer> a = RF.access(craft_meta, "hideFlag", int.class);
 			int h = a.field(0);
-			a.set(h | 64);
-		} catch (Exception e) {}
+			a.set(h | 64 | 128);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static double round(double d) {

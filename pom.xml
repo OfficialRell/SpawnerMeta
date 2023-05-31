@@ -6,6 +6,17 @@
   <version>19.0</version>
   <name>SpawnerMeta</name>
   <description>Implements spawner customization and upgrading</description>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.spigotmc</groupId>
+      <artifactId>spigot-api</artifactId>
+      <version>1.19.4-R0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    
+  </dependencies>
+  
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>

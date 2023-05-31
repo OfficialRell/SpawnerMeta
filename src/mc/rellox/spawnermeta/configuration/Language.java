@@ -46,11 +46,16 @@ public final class Language {
 		
 		convertLegacy();
 		
-		String s = file.getString("Inventory.upgrades.items.charges.purchase.all");
-		if(s != null) {
-			if(s.contains("Middle") == true)
-				file.set("Inventory.upgrades.items.charges.purchase.all", s.replace("Middle", "Shift"));
-		}
+//		String s = file.getString("Inventory.upgrades.items.charges.purchase.all");
+//		if(s != null) {
+//			if(s.contains("Middle") == true)
+//				file.set("Inventory.upgrades.items.charges.purchase.all", s.replace("Middle", "Shift"));
+//		}
+//		replace("Inventory.upgrades.items.disabled-upgrade.info", "Inventory.upgrades.items.disabled-upgrade.help");
+//		replace("Inventory.upgrades.items.upgrade.always.range", "Inventory.upgrades.items.upgrade.info.range");
+//		replace("Inventory.upgrades.items.upgrade.always.delay", "Inventory.upgrades.items.upgrade.info.delay");
+//		replace("Inventory.upgrades.items.upgrade.always.amount", "Inventory.upgrades.items.upgrade.info.amount");
+//		file.set("Inventory.upgrades.items.upgrade.always", null);
 		
 		text.clear();
 		put("Inventory.upgrades.purchase.range", "<#00ff00>(!) <#80ff00>Upgraded <#00ffff-#008080><!italic>range <#80ff00>to level %level%");
@@ -60,7 +65,10 @@ public final class Language {
 		put("Inventory.upgrades.items.upgrade.name.range", "<#00ffff-#008080>-= Range %level% =-");
 		put("Inventory.upgrades.items.upgrade.name.delay", "<#ffff00-#ff8000>-= Delay %level% =-");
 		put("Inventory.upgrades.items.upgrade.name.amount", "<#ff00ff-#800080>-= Amount %level% =-");
-		put("Inventory.upgrades.items.upgrade.info", "<#808080><!italic>Click to upgrade!");
+		put("Inventory.upgrades.items.upgrade.help", "<#808080><!italic>Click to upgrade!");
+		put("Inventory.upgrades.items.upgrade.info.range", List.of());
+		put("Inventory.upgrades.items.upgrade.info.delay", List.of());
+		put("Inventory.upgrades.items.upgrade.info.amount", List.of());
 		put("Inventory.upgrades.items.upgrade.current.range", "<#bfbfbf>Current range: <#80ffff-#00ffff><!italic>%value% Blocks");
 		put("Inventory.upgrades.items.upgrade.current.delay", "<#bfbfbf>Current delay: <#ffff80-#ffff00><!italic>%value% Seconds");
 		put("Inventory.upgrades.items.upgrade.current.amount", "<#bfbfbf>Current amount: <#ff80ff-#ff00ff><!italic>%value% Entities");
@@ -72,7 +80,7 @@ public final class Language {
 		put("Inventory.upgrades.items.disabled-upgrade.name.range", "<#00ffff-#008080>-= Range =-");
 		put("Inventory.upgrades.items.disabled-upgrade.name.delay", "<#ffff00-#ff8000>-= Delay =-");
 		put("Inventory.upgrades.items.disabled-upgrade.name.amount", "<#ff00ff-#800080>-= Amount =-");
-		put("Inventory.upgrades.items.disabled-upgrade.info", "<#800000>Cannot be upgraded!");
+		put("Inventory.upgrades.items.disabled-upgrade.help", "<#800000>Cannot be upgraded!");
 		put("Inventory.upgrades.items.disabled-upgrade.current.range", "<#bfbfbf><!italic>Current range: <#80ffff-#00ffff>%value% Blocks");
 		put("Inventory.upgrades.items.disabled-upgrade.current.delay", "<#bfbfbf><!italic>Current delay: <#ffff80-#ffff00>%value% Seconds");
 		put("Inventory.upgrades.items.disabled-upgrade.current.amount", "<#bfbfbf><!italic>Current amount: <#ff80ff-#ff00ff>%value% Entities");
@@ -94,12 +102,13 @@ public final class Language {
 		put("Spawners.item.regular.name", "<#bfffff-#00ffff>Spawner <#ffff00-#ffaa00>(%type%)");
 		put("Spawners.item.empty.name", "<#ff8000><Empty> <#bfffff-#00ffff>Spawner");
 		put("Spawners.item.empty-stored.name", "<#ff8000><Empty : %type%> <#bfffff-#00ffff>Spawner");
-		put("Spawners.item.header", "<#808080>- <#ffffff>Upgrades:");
-		put("Spawners.item.upgrade.range", "    <#00ffff-#008080><!italic>Range <#00ffff>%level%");
-		put("Spawners.item.upgrade.delay", "    <#ffff00-#ff8000><!italic>Delay <#00ffff>%level%");
-		put("Spawners.item.upgrade.amount", "    <#ff00ff-#800080><!italic>Amount <#00ffff>%level%");
-		put("Spawners.item.charges", "<#808080>- <#ff0080-#ff0000>Charges: <#00ffff>%charges%");
-		put("Spawners.item.spawnable", "<#808080>- <#ffff00-#ff8000>Spawnable Entities: <#00ffff>%spawnable%");
+		put("Spawners.item.header", "<#ffffff>Upgrades:");
+		put("Spawners.item.upgrade.range", "<#808080>- <#00ffff-#008080><!italic>Range <#00ffff>%level%");
+		put("Spawners.item.upgrade.delay", "<#808080>- <#ffff00-#ff8000><!italic>Delay <#00ffff>%level%");
+		put("Spawners.item.upgrade.amount", "<#808080>- <#ff00ff-#800080><!italic>Amount <#00ffff>%level%");
+		put("Spawners.item.charges", "<#ff0080-#ff0000>Charges: <#00ffff>%charges%");
+		put("Spawners.item.spawnable", "<#ffff00-#ff8000>Spawnable Entities: <#00ffff>%spawnable%");
+		put("Spawners.item.info", List.of());
 		put("Inventory.spawner-view.name", "<#000000>All Spawners");
 		put("Inventory.spawner-view.items.name", "<#ffff00>-=[ <#00ffff>%type% Spawner<#ffff00> ]=-");
 		put("Inventory.spawner-view.items.price", "<#808080>- <#bfbfbf>Price: <#ffffff><!italic>%price%");
@@ -197,6 +206,7 @@ public final class Language {
 		put("Spawners.view.empty", "<#800000>(!) <#008080>Nothing to view!");
 		put("Spawners.view.disabled", "<#800000>(!) <#008080>Spawner viewing is disabled!");
 		put("Inventory.upgrades.items.stats.lore", List.of());
+		put("Spawners.give.success", "<#008000>(!) <#008080>Added <#00ffff>%amount% <#008080>× <#00ffff>%type% Spawner <#008080>to your inventory!");
 		
 		Stream.of(SpawnerType.values())
 			.filter(SpawnerType::regular)
@@ -260,6 +270,11 @@ public final class Language {
 		});
 		keys.clear();
 	}
+	
+//	private void replace(String from, String to) {
+//		file.set(to, file.get(from));
+//		file.set(from, null);
+//	}
 	
 	public static Content get(String key) {
 		List<Content> list = language.text.get(key);

@@ -28,6 +28,7 @@ import mc.rellox.spawnermeta.spawner.SpawnerSpawning;
 import mc.rellox.spawnermeta.spawner.SpawnerSpawning.SpawningType;
 import mc.rellox.spawnermeta.spawner.SpawnerType;
 import mc.rellox.spawnermeta.spawner.UpgradeType;
+import mc.rellox.spawnermeta.text.order.OrderList;
 import mc.rellox.spawnermeta.utils.DataManager;
 
 public final class Settings {
@@ -169,6 +170,8 @@ public final class Settings {
 	public String command_drops;
 	
 	public int spawner_version;
+	
+	public OrderList order_spawner, order_stats, order_upgrade, order_disabled;
 	
 	private Settings() {
 		this.spawner_values = new TripleIntegerMap("Spawners.values");
@@ -348,6 +351,11 @@ public final class Settings {
 		command_drops = CF.s.getString("Commands.spawner-drops");
 		
 		spawner_version = CF.s.getInteger("Spawner-version");
+		
+		order_spawner = new OrderList(CF.s.getStringList("Items.layout.spawner-item"));
+		order_stats = new OrderList(CF.s.getStringList("Items.layout.upgrades.stat-item"));
+		order_upgrade = new OrderList(CF.s.getStringList("Items.layout.upgrades.upgrade-item"));
+		order_disabled = new OrderList(CF.s.getStringList("Items.layout.upgrades.disabled-upgrade-item"));
 		
 		PriceManager.reload();
 	}

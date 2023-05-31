@@ -15,6 +15,8 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
@@ -130,6 +132,22 @@ public final class HologramRegistry {
 			for(Chunk chunk : world.getLoadedChunks()) hm.load(chunk);
 		}
 		
+		public void unload(World world) {
+			if(registered == false || map.containsKey(world) == false) return;
+			HologramMap hm = map.remove(world);
+			hm.clear();
+		}
+		
+		@EventHandler
+		private void onWorldLoad(WorldLoadEvent event) {
+			load(event.getWorld());
+		}
+		
+		@EventHandler
+		private void onWorldUnload(WorldUnloadEvent event) {
+			unload(event.getWorld());
+		}
+		
 		@EventHandler
 		private void onLoad(ChunkLoadEvent event) {
 			Chunk chunk = event.getChunk();
@@ -159,8 +177,13 @@ public final class HologramRegistry {
 		@EventHandler
 		private void onWorldChange(PlayerChangedWorldEvent event) {
 			Player player = event.getPlayer();
-			HologramMap hm = map.get(player.getWorld());
-			if(hm != null) hm.spawn(player);
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					HologramMap hm = map.get(player.getWorld());
+					if(hm != null) hm.spawn(player);
+				}
+			}.runTaskLater(SpawnerMeta.instance(), 20);
 		}
 		
 	}

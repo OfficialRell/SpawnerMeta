@@ -54,13 +54,16 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 		List<Entity> affected = new ArrayList<>(1);
 		Location at = block.getLocation().add(0.5, 0.5, 0.5);
 		StackedEntity link = linked.get(block);
+//		System.out.println();
 		if(link == null) {
+//			System.out.println("none linked");
 			Block other = linked.keySet().stream()
 					.filter(b -> b.getWorld().equals(block.getWorld()))
 					.filter(b -> b.getLocation().distanceSquared(at) <= 16)
 					.findFirst()
 					.orElse(null);
 			if(other != null) {
+//				System.out.println("- found other");
 				StackedEntity nearby = linked.get(other);
 				if(nearby.getLivingEntity().getType() == type)
 					linked.put(block, link = nearby);
@@ -69,6 +72,7 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 		x: if(link != null) {
 			LivingEntity le = link.getLivingEntity();
 			if(le.isDead() == true) {
+//				System.out.println("- linked dead");
 				linked.values().removeIf(se -> se.getLivingEntity().isDead());
 				break x;
 			}
@@ -78,6 +82,7 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 			int s = link.getStackAmount(), m = link.getStackLimit();
 			if(s >= m) break x;
 			int t = s + count;
+//			System.out.println("- set linked to " + t);
 			if(t < m) link.setStackAmount(t, true);
 			else if(t == m) {
 				link.setStackAmount(t, true);
@@ -90,6 +95,7 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 				break x;
 			}
 			affected.add(le);
+			modify(le);
 			return affected;
 		}
 		
@@ -124,8 +130,7 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 				stacked = create(type, spread, f, affected, cs);
 				linked.put(block, stacked);
 			}
-			if(Settings.settings.modify_stacked_entities == true)
-				EventRegistry.modify(entity);
+			modify(entity);
 		} else {
 //			System.out.println("  - many near");
 			int i = 0, l = count;
@@ -155,13 +160,17 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 						l = f;
 //						System.out.println("   - stacking to limit, left: " + l);
 					}
-					if(Settings.settings.modify_stacked_entities == true)
-						EventRegistry.modify(entity);
+					modify(entity);
 				}
 				i++;
 			}
 		}
 		return affected;
+	}
+	
+	private void modify(Entity entity) {
+		if(Settings.settings.modify_stacked_entities == true)
+			EventRegistry.modify(entity);
 	}
 
 	private StackedEntity create(EntityType type, SpawnerSpawning spread, int count, List<Entity> affected, CreatureSpawner cs) {

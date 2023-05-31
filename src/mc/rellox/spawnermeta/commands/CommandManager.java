@@ -26,6 +26,7 @@ import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.shop.ShopRegistry;
 import mc.rellox.spawnermeta.spawner.SpawnerType;
 import mc.rellox.spawnermeta.utils.DataManager;
+import mc.rellox.spawnermeta.utils.Messagable;
 import mc.rellox.spawnermeta.utils.Reflections.RF;
 import mc.rellox.spawnermeta.utils.Utils;
 import mc.rellox.spawnermeta.views.SpawnerEditor;
@@ -123,7 +124,8 @@ public final class CommandManager {
 							if(amount < 1) warn(sender, "Amount must be greater then 0!");
 							else if(args.length < 4) {
 								if(player != null) {
-									success(player, "Added #0 × #1 to your inventory!", amount, type.formated() + " Spawner");
+									new Messagable(player).send(Language.list("Spawners.give.success",
+											"amount", amount, "type", type.formated()));
 									player.getInventory().addItem(DataManager.getSpawners(type, amount, empty, true).get(0));
 								}
 							} else {

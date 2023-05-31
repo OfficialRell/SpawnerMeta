@@ -12,6 +12,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -25,6 +26,7 @@ import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.SpawnerType;
 import mc.rellox.spawnermeta.text.Text;
+import mc.rellox.spawnermeta.text.order.IOrder;
 
 public final class DataManager {
 	
@@ -83,32 +85,33 @@ public final class DataManager {
 		return getSpawners(type, i(), 0, Settings.settings.spawnable_amount.get(type), amount, empty, ignore);
 	}
 
-	public static List<ItemStack> getSpawners(SpawnerType type, int[] levels, int charges, int spawnable_limit, int amount,
+	public static List<ItemStack> getSpawners(SpawnerType type, int[] levels, int charges, int spawnable, int amount,
 			boolean empty, boolean ignore) {
 		List<ItemStack> list = new ArrayList<>();
 		if(type == null) type = SpawnerType.PIG;
 		if(empty == true && Settings.settings.empty_store_inside == false) type = SpawnerType.EMPTY;
 		if(Settings.settings.spawnable_enabled == true) {
-			if(spawnable_limit <= 0 || amount <= 0) return list;
+			if(spawnable <= 0 || amount <= 0) return list;
 			if(amount > 1) {
 				if(ignore == true) {
-					list.addAll(getSpawner(type, levels, charges, spawnable_limit, amount, empty));
+					list.addAll(getSpawner(type, levels, charges, spawnable, amount, empty));
 					return list;
 				}
-				if(amount > spawnable_limit) amount = spawnable_limit;
-				int e = spawnable_limit % amount;
-				if(e == 0) list.addAll(getSpawner(type, levels, charges, spawnable_limit / amount, amount, empty));
+				if(amount > spawnable) amount = spawnable;
+				int e = spawnable % amount;
+				if(e == 0) list.addAll(getSpawner(type, levels, charges, spawnable / amount, amount, empty));
 				else {
-					int d = spawnable_limit / amount;
+					int d = spawnable / amount;
 					list.addAll(getSpawner(type, levels, charges, d, amount - 1, empty));
 					list.addAll(getSpawner(type, levels, charges, e + d, 1, empty));
 				}
-			} else list.addAll(getSpawner(type, levels, charges, spawnable_limit, amount, empty));
-		} else list.addAll(getSpawner(type, levels, charges, spawnable_limit, amount, empty));
+			} else list.addAll(getSpawner(type, levels, charges, spawnable, amount, empty));
+		} else list.addAll(getSpawner(type, levels, charges, spawnable, amount, empty));
 		return list;
 	}
 	
-	public static List<ItemStack> getSpawner(SpawnerType type, int[] levels, int charges, int spawnable, int amount, boolean empty) {
+	public static List<ItemStack> getSpawner(SpawnerType type, int[] levels, int charges,
+			int spawnable, int amount, boolean empty) {
 		ItemStack item = new ItemStack(Material.SPAWNER, 1);
 		ItemMeta meta = item.getItemMeta();
 		if(empty == true) {
@@ -116,28 +119,25 @@ public final class DataManager {
 				meta.setDisplayName(Language.get("Spawners.item.empty-stored.name", "type", type).text());
 			else meta.setDisplayName(Language.get("Spawners.item.empty.name").text());
 		} else meta.setDisplayName(Language.get("Spawners.item.regular.name", "type", type).text());
-		List<String> lore = new ArrayList<>();
-		lore.add("");
-		if(Settings.settings.item_show_header == true) lore.addAll(Text.toText(Language.list("Spawners.item.header")));
-		if(Settings.settings.item_show_range == true)
-			lore.addAll(Text.toText(Language.list("Spawners.item.upgrade.range", "level", Utils.roman(levels[0]))));
-		if(Settings.settings.item_show_delay == true)
-			lore.addAll(Text.toText(Language.list("Spawners.item.upgrade.delay", "level", Utils.roman(levels[1]))));
-		if(Settings.settings.item_show_amount == true)
-			lore.addAll(Text.toText(Language.list("Spawners.item.upgrade.amount", "level", Utils.roman(levels[2]))));
-		boolean k = false;
+		
+		IOrder order = Settings.settings.order_spawner.oderer();
+		
+		order.submit("HEADER", () -> Language.list("Spawners.item.header"));
+		order.submit("RANGE", () -> Language.list("Spawners.item.upgrade.range", "level", Utils.roman(levels[0])));
+		order.submit("DELAY", () -> Language.list("Spawners.item.upgrade.delay", "level", Utils.roman(levels[1])));
+		order.submit("AMOUNT", () -> Language.list("Spawners.item.upgrade.amount", "level", Utils.roman(levels[2])));
 		if(Settings.settings.charges_enabled == true) {
-			k = lore.add("");
 			boolean inf = charges >= 1_000_000_000;
-			lore.addAll(Text.toText(Language.list("Spawners.item.charges",
-					"charges", inf ? Text.infinity : charges)));
+			order.submit("CHARGES", () -> Language.list("Spawners.item.charges",
+					"charges", inf ? Text.infinity : charges));
 		}
 		if(Settings.settings.spawnable_enabled == true) {
-			if(k == false) k = lore.add("");
-			if(spawnable < 1_000_000_000)
-				lore.addAll(Text.toText(Language.list("Spawners.item.spawnable", "spawnable", spawnable)));
+			order.submit("SPAWNABLE", () -> Language.list("Spawners.item.spawnable", "spawnable", spawnable));
 		}
-		meta.setLore(lore);
+
+		meta.setLore(order.build());
+		
+		meta.addItemFlags(ItemFlag.values());
 		Utils.hideCustomFlags(meta);
 		item.setItemMeta(meta);
 		modify(item, type, levels, charges, spawnable, empty);
@@ -182,7 +182,8 @@ public final class DataManager {
 		setNewSpawner(player, block, type, i(), 0, Settings.settings.spawnable_amount.get(type), empty);
 	}
 
-	public static void setNewSpawner(Player player, Block block, SpawnerType type, int[] levels, int charges, int entity_limit, boolean empty) {
+	public static void setNewSpawner(Player player, Block block, SpawnerType type, int[] levels,
+			int charges, int spawnable, boolean empty) {
 		setOwner(block, player);
 		setNew(block);
 		setStack(block, 1);
@@ -190,7 +191,7 @@ public final class DataManager {
 		setUpgradeAttributes(block, r);
 		setUpgradeLevels(block, levels);
 		setDelayConstant(block, r[1]);
-		setSpawnable(block, entity_limit);
+		setSpawnable(block, spawnable);
 		setDefault(block);
 		setOneCount(block);
 		setNearbyLimit(block);
@@ -238,13 +239,14 @@ public final class DataManager {
 		cs.update();
 	}
 
-	public static void modify(ItemStack item, SpawnerType type, int[] levels, int charges, int entity_limit, boolean empty) {
+	public static void modify(ItemStack item, SpawnerType type, int[] levels,
+			int charges, int spawnable, boolean empty) {
 		ItemMeta meta = item.getItemMeta();
 		PersistentDataContainer p = meta.getPersistentDataContainer();
 		p.set(key_type, PersistentDataType.STRING, type.name());
 		p.set(key_upgrades, PersistentDataType.INTEGER_ARRAY, Arrays.copyOf(levels, 3));
 		p.set(key_charges, PersistentDataType.INTEGER, charges);
-		p.set(key_spawnable, PersistentDataType.INTEGER, entity_limit);
+		p.set(key_spawnable, PersistentDataType.INTEGER, spawnable);
 		if(empty == true) p.set(key_empty, PersistentDataType.INTEGER, 1);
 		item.setItemMeta(meta);
 	}
