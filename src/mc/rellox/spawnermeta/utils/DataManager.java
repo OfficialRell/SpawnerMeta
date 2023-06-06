@@ -26,6 +26,7 @@ import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.SpawnerType;
 import mc.rellox.spawnermeta.text.Text;
+import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.text.order.IOrder;
 
 public final class DataManager {
@@ -75,6 +76,10 @@ public final class DataManager {
 		return getSpawners(spawner.getType(), spawner.getUpgradeLevels(), spawner.getCharges(), spawner.getSpawnable(),
 				a, spawner.isEmpty(), true).get(0);
 	}
+
+	public static ItemStack getSpawner(SpawnerType type, int amount) {
+		return getSpawners(type, i(), 0, Settings.settings.spawnable_amount.get(type), amount, false, true).get(0);
+	}
 	
 	public static List<ItemStack> getSpawners(Block block, boolean ignore) {
 		return getSpawners(getType(block), getUpgradeLevels(block), getCharges(block),
@@ -114,14 +119,18 @@ public final class DataManager {
 			int spawnable, int amount, boolean empty) {
 		ItemStack item = new ItemStack(Material.SPAWNER, 1);
 		ItemMeta meta = item.getItemMeta();
+		List<Content> name;
 		if(empty == true) {
 			if(Settings.settings.empty_store_inside == true && type != SpawnerType.EMPTY)
-				meta.setDisplayName(Language.get("Spawners.item.empty-stored.name", "type", type).text());
-			else meta.setDisplayName(Language.get("Spawners.item.empty.name").text());
-		} else meta.setDisplayName(Language.get("Spawners.item.regular.name", "type", type).text());
+				name = Language.list("Spawners.item.empty-stored.name", "type", type);
+			else name = Language.list("Spawners.item.empty.name");
+		} else name = Language.list("Spawners.item.regular.name", "type", type);
+		
+		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 		
 		IOrder order = Settings.settings.order_spawner.oderer();
 		
+		order.named(name);
 		order.submit("HEADER", () -> Language.list("Spawners.item.header"));
 		order.submit("RANGE", () -> Language.list("Spawners.item.upgrade.range", "level", Utils.roman(levels[0])));
 		order.submit("DELAY", () -> Language.list("Spawners.item.upgrade.delay", "level", Utils.roman(levels[1])));

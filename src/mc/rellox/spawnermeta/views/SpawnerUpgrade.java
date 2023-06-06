@@ -40,6 +40,7 @@ import mc.rellox.spawnermeta.prices.Price;
 import mc.rellox.spawnermeta.spawner.SpawnerType;
 import mc.rellox.spawnermeta.spawner.UpgradeType;
 import mc.rellox.spawnermeta.text.Text;
+import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.text.order.IOrder;
 import mc.rellox.spawnermeta.utils.Messagable;
 import mc.rellox.spawnermeta.utils.Utils;
@@ -56,6 +57,21 @@ public final class SpawnerUpgrade implements Listener {
 		SpawnerUpgrade su = SPAWNERS.get(block);
 		if(su == null) SPAWNERS.put(block, su = new SpawnerUpgrade(block));
 		su.open(player);
+	}
+	
+	/**
+	 * Opens spawner upgrade GUI and closes the previous inventory.
+	 * Useful when opening from other inventories.
+	 * Removes the requirement of using a bukkit runnable.
+	 * 
+	 * @param player - player who opens
+	 * @param block - spawner block
+	 * @param previous - previous inventory
+	 */
+	
+	public static void newUpgrade(Player player, Block block, Inventory previous) {
+		if(previous != null && previous.getViewers().contains(player) == true) player.closeInventory(); 
+		newUpgrade(player, block);
 	}
 	
 	public static void removeUpgrade(Block block) {
@@ -87,7 +103,8 @@ public final class SpawnerUpgrade implements Listener {
 		this.players = new ArrayList<>();
 		this.block = block;
 		this.spawner = Spawner.of(block);
-		this.v = Bukkit.createInventory(null, 27, Language.get("Inventory.upgrades.name").text());
+		this.v = Bukkit.createInventory(null, 27, Language.get("Inventory.upgrades.name",
+				"type", spawner.getType().formated()).text());
 		this.t = true;
 		this.enabled = spawner.isEnabled();
 		Bukkit.getPluginManager().registerEvents(this, SpawnerMeta.instance());
@@ -207,8 +224,7 @@ public final class SpawnerUpgrade implements Listener {
 					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 					return;
 				}
-				if(call.cancelled() == true) return;
-				if(call.withdraw(player) == false) return;
+				if(call.cancelled() == true || call.withdraw(player) == false) return;
 				
 				int u = call.upgrade_level;
 				ls[i] = u < 1 ? 1 : u > ms[i] ? ms[i] : u;
@@ -267,45 +283,50 @@ public final class SpawnerUpgrade implements Listener {
 		int[] levels = spawner.getUpgradeLevels();
 		int level = levels[i];
 		UpgradeType u = UpgradeType.of(i);
-		meta.setDisplayName(Language.get("Inventory.upgrades.items.upgrade.name." + u.lower(),
-				"level", Utils.roman(level)).text());
+		
 		meta.addItemFlags(ItemFlag.values());
 		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		if(slot.o > 0) meta.setCustomModelData(slot.o);
+		
+		List<Content> name = Language.list("Inventory.upgrades.items.upgrade.name." + u.lower(),
+				"level", Utils.roman(level));
+		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 
-		IOrder orderer = Settings.settings.order_upgrade.oderer();
+		IOrder order = Settings.settings.order_upgrade.oderer();
+		
+		order.named(name);
 
 		SpawnerType type = spawner.getType();
 		int[] max_levels = Settings.settings.upgrades_levels.get(type);
 		if(level < max_levels[i]) {
-			orderer.submit("HELP", () -> {
+			order.submit("HELP", () -> {
 				return Language.list("Inventory.upgrades.items.upgrade.help");
 			});
 		}
-		orderer.submit("INFO", () -> {
+		order.submit("INFO", () -> {
 			return Language.list("Inventory.upgrades.items.upgrade.info." + u.lower());
 		});
-		orderer.submit("CURRENT", () -> {
+		order.submit("CURRENT", () -> {
 			return Language.list("Inventory.upgrades.items.upgrade.current." + u.lower(),
 					"value", value(type, level, i));
 		});
 		if(level < max_levels[i]) {
-			orderer.submit("NEXT", () -> {
+			order.submit("NEXT", () -> {
 				return Language.list("Inventory.upgrades.items.upgrade.next." + u.lower(),
 						"value", value(type, level + 1, i));
 			});
-			orderer.submit("PRICE", () -> {
+			order.submit("PRICE", () -> {
 				Price price = price(type, level, i);
 				return Language.list("Inventory.upgrades.items.upgrade.price",
 						"price", price);
 			});
 		} else {
-			orderer.submit("PRICE", () -> {
+			order.submit("PRICE", () -> {
 				return Language.list("Inventory.upgrades.items.upgrade.maximum-reached");
 			});
 		}
 		
-		meta.setLore(orderer.build());
+		meta.setLore(order.build());
 		
 		item.setItemMeta(meta);
 		return item;
@@ -315,27 +336,32 @@ public final class SpawnerUpgrade implements Listener {
 		UpgradeType u = UpgradeType.of(i);
 		ItemStack item = new ItemStack(Material.BARRIER);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.upgrades.items.disabled-upgrade.name." + u.lower()).text());
+		
 		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 		meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
+		
+		List<Content> name = Language.list("Inventory.upgrades.items.disabled-upgrade.name." + u.lower());
+		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 
-		IOrder orderer = Settings.settings.order_disabled.oderer();
+		IOrder order = Settings.settings.order_disabled.oderer();
 
+		order.named(name);
+		
 		int level = spawner.getUpgradeLevels()[i];
 		SpawnerType type = spawner.getType();
 		
-		orderer.submit("HELP", () -> {
+		order.submit("HELP", () -> {
 			return Language.list("Inventory.upgrades.items.disabled-upgrade.help");
 		});
-		orderer.submit("INFO", () -> {
+		order.submit("INFO", () -> {
 			return Language.list("Inventory.upgrades.items.upgrade.info." + u.lower());
 		});
-		orderer.submit("CURRENT", () -> {
+		order.submit("CURRENT", () -> {
 			return Language.list("Inventory.upgrades.items.disabled-upgrade.current." + u.lower(),
 					"value", value(type, level, i));
 		});
 		
-		meta.setLore(orderer.build());
+		meta.setLore(order.build());
 
 		item.setItemMeta(meta);
 		return item;
@@ -344,33 +370,38 @@ public final class SpawnerUpgrade implements Listener {
 	private ItemStack stats(Slot slot) {
 		ItemStack item = new ItemStack(slot.m);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.upgrades.items.stats.name",
-				"type", spawner.getType()).text());
+		
 		meta.addItemFlags(ItemFlag.values());
 		if(slot.o > 0) meta.setCustomModelData(slot.o);
 		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		
-		IOrder orderer = Settings.settings.order_stats.oderer();
+		List<Content> name = Language.list("Inventory.upgrades.items.stats.name",
+				"type", spawner.getType());
+		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
+		
+		IOrder order = Settings.settings.order_stats.oderer();
+
+		order.named(name);
 
 		if(spawner.isEmpty() == true) {
-			orderer.submit("EMPTY", () -> {
+			order.submit("EMPTY", () -> {
 				return Language.list("Inventory.upgrades.items.stats.empty");
 			});
 		}
 		if(Settings.settings.spawner_switching == true) {
-			orderer.submit("SWITCHING", () -> {
+			order.submit("SWITCHING", () -> {
 				return enabled == true ? Language.list("Inventory.upgrades.items.stats.enabled")
 						: Language.list("Inventory.upgrades.items.stats.disabled");
 			});
 		}
 		int[] l = Utils.location(block);
-		orderer.submit("LOCATION", () -> {
+		order.submit("LOCATION", () -> {
 			return Language.list("Inventory.upgrades.items.stats.location",
 					"x", c(l[0]), "y", l[1], "z", c(l[2]));
 		});
 		int stack = spawner.getStack();
 		if(Settings.settings.stacking_enabled == true) {
-			orderer.submit("STACK", () -> {
+			order.submit("STACK", () -> {
 				if(Settings.settings.stacking_ignore_limit == true)
 					return Language.list("Inventory.upgrades.items.stats.stacking.infinite",
 							"stack", stack);
@@ -381,7 +412,7 @@ public final class SpawnerUpgrade implements Listener {
 		if(Settings.settings.spawnable_enabled == true) {
 			int spawnable = spawner.getSpawnable();
 			if(spawnable < 1_000_000_000) {
-				orderer.submit("SPAWNABLE", () -> {
+				order.submit("SPAWNABLE", () -> {
 					return Language.list("Inventory.upgrades.items.stats.spawnable",
 							"spawnable", spawnable);
 				});
@@ -392,17 +423,17 @@ public final class SpawnerUpgrade implements Listener {
 			if(c <= 0) {
 				boolean n = Settings.settings.charges_ignore_natural == true && spawner.isNatural() == true;
 				if(n == false) {
-					orderer.submit("WARNING", () -> {
+					order.submit("WARNING", () -> {
 						return Language.list("Inventory.upgrades.items.stats.charges.insufficient");
 					});
 				}
 			}
 		}
-		orderer.submit("INFO", () -> {
+		order.submit("INFO", () -> {
 			return Language.list("Inventory.upgrades.items.stats.lore");
 		});
 		
-		meta.setLore(orderer.build());
+		meta.setLore(order.build());
 		
 		item.setItemMeta(meta);
 		return item;

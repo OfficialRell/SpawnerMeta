@@ -15,6 +15,8 @@ public interface IOrder {
 	
 	List<String> build();
 	
+	void named(List<Content> overflow);
+	
 	class Orderer implements IOrder {
 		
 		private final OrderList list;
@@ -29,6 +31,12 @@ public interface IOrder {
 		@Override
 		public void submit(String key, Supplier<List<Content>> supplier) {
 			map.put(key, supplier);
+		}
+		
+		@Override
+		public void named(List<Content> name) {
+			if(name.isEmpty() == true) return;
+			map.put("NAMED", () -> name);
 		}
 
 		@Override
