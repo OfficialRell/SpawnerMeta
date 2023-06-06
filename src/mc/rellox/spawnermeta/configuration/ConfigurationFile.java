@@ -14,6 +14,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.events.SpawnerExplodeEvent.ExplosionType;
+import mc.rellox.spawnermeta.configuration.Configuration.CF;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.prices.IncreaseType;
 import mc.rellox.spawnermeta.prices.PriceType;
@@ -116,9 +117,16 @@ public class ConfigurationFile {
 		
 	}
 	
+	protected void copy(String from, String to) {
+		Object o = file.get(from);
+		if(o == null) return;
+		file.set(to, o);
+		file.set(from, null);
+	}
+	
 	public static final class SettingsFile extends ConfigurationFile {
 		
-		private static final int version = 1;
+		private static final int version = 2;
 
 		public SettingsFile() {
 			super("configuration");
@@ -127,6 +135,8 @@ public class ConfigurationFile {
 		@Override
 		protected void initialize() {
 			super.initialize();
+			
+			CF.version = file.getInt("Configuration-version");
 
 			file.addDefault("Debug-errors", true);
 			
@@ -261,8 +271,9 @@ public class ConfigurationFile {
 			file.addDefault("Modifiers.stacking.when-nearby.enabled", false);
 			file.addDefault("Modifiers.stacking.when-nearby.radius", 8);
 			file.addDefault("Modifiers.stacking.when-nearby.particles", true);
-			
-			file.addDefault("Modifiers.breaking.enabled", false);
+
+			file.addDefault("Modifiers.breaking.unbreakable", false);
+			file.addDefault("Modifiers.breaking.ignore-permission", false);
 			file.addDefault("Modifiers.breaking.use-price", false);
 			file.addDefault("Modifiers.breaking.prices.DEFAULT", 100);
 			file.addDefault("Modifiers.breaking.dropping-chance", 100);
@@ -300,11 +311,6 @@ public class ConfigurationFile {
 			file.addDefault("Modifiers.chunk-limits.enabled", false);
 			file.addDefault("Modifiers.chunk-limits.spawner-limit", 16);
 			file.addDefault("Modifiers.chunk-limits.entities-in-chuck", 0);
-			
-//			file.addDefault("Modifiers.spawner-item.show-header", true);
-//			file.addDefault("Modifiers.spawner-item.show-range", true);
-//			file.addDefault("Modifiers.spawner-item.show-delay", true);
-//			file.addDefault("Modifiers.spawner-item.show-amount", true);
 
 			file.addDefault("Modifiers.players.owned.ignore-limit", true);
 			file.addDefault("Modifiers.players.owned.spawner-limit", 16);
@@ -359,7 +365,7 @@ public class ConfigurationFile {
 			file.addDefault("Prices.changing.price-type", type.name());
 			file.addDefault("Prices.changing.item.material", Material.GOLD_INGOT.name());
 			
-			file.addDefault("Configuration-version", version);
+			file.set("Configuration-version", version);
 			file.addDefault("Spawner-version", 0);
 
 			file.options().copyDefaults(true);
@@ -369,6 +375,10 @@ public class ConfigurationFile {
 			file.options().copyHeader(true);
 			
 			file.set("Modifiers.spawner-item", null);
+			
+			if(CF.version() < version) {
+				copy("Modifiers.breaking.enabled", "Modifiers.breaking.ignore-permission");
+			}
 			
 			if(first == true) {
 				save();
@@ -587,9 +597,17 @@ public class ConfigurationFile {
 						"Radius in which the nearest same-type spawner",
 						"  will be searched.",
 						"Radius interval: [1; 16]");
-				c.comment("Modifiers.breaking.enabled",
-						"Will players be checked if they have spawner",
-						"  breaking permission (spawnermeta.break).");
+				c.comment("Modifiers.breaking.unbreakable",
+						"Is this spawner unbreakable.",
+						"Players only with permission will",
+						"  be able to break spawners.",
+						"  (spawnermeta.unbreakable.bypass) - this",
+						"  permission is set to false by default.");
+				c.comment("Modifiers.breaking.ignore-permission",
+						"Will spawner breaking permission be ignored.",
+						"  (spawnermeta.break)",
+						"Note, this option may be removed in future,",
+						"  instead use 'unbreakable' option.");
 				c.comment("Modifiers.breaking.use-price", "Does breaking cost.");
 				c.comment("Modifiers.breaking.prices.DEFAULT",
 						"Default breaking price.",

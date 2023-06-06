@@ -108,7 +108,8 @@ public final class Settings {
 	public boolean stacking_nearby_particles;
 
 	public final SinglePriceMap breaking_price;
-	public boolean breaking_enabled;
+	public boolean unbreakable;
+	public boolean ignore_permission;
 	public double breaking_dropping_chance;
 	public ValueChanger breaking_chance_changer_owned;
 	public ValueChanger breaking_chance_changer_not_owned;
@@ -264,8 +265,9 @@ public final class Settings {
 		stacking_nearby_particles = CF.s.getBoolean("Modifiers.stacking.when-nearby.particles");
 		
 		stacking_ticks = CF.s.getInteger("Modifiers.stacking.ticks-per");
-		
-		breaking_enabled = CF.s.getBoolean("Modifiers.breaking.enabled");
+
+		unbreakable = CF.s.getBoolean("Modifiers.breaking.unbreakable");
+		ignore_permission = CF.s.getBoolean("Modifiers.breaking.ignore-permission");
 		breaking_price.load();
 		breaking_dropping_chance = CF.s.getDouble("Modifiers.breaking.dropping-chance");
 		breaking_chance_changer_owned = ValueChanger.of("Modifiers.breaking.chance-changing.owned");

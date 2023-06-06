@@ -12,6 +12,12 @@ public final class Configuration {
 		
 		public static final SettingsFile s = new SettingsFile();
 		
+		protected static int version;
+		
+		public static int version() {
+			return version;
+		}
+		
 	}
 
 }

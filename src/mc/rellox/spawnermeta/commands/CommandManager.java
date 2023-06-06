@@ -20,7 +20,7 @@ import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.configuration.Configuration;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.events.EventRegistry;
+import mc.rellox.spawnermeta.events.EventListeners;
 import mc.rellox.spawnermeta.holograms.HologramRegistry;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.shop.ShopRegistry;
@@ -83,7 +83,7 @@ public final class CommandManager {
 					if(player != null) player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
 					SpawnerMeta.ECONOMY.load();
 					Configuration.initialize();
-					EventRegistry.update();
+					EventListeners.update();
 					SpawnerViewLayout.initialize();
 				} else if(args[1].equalsIgnoreCase("language") == true) {
 					sender.sendMessage(ChatColor.DARK_GREEN + "(!) " + ChatColor.AQUA + "Updating language...");
