@@ -14,10 +14,12 @@ import mc.rellox.spawnermeta.commands.CommandManager;
 import mc.rellox.spawnermeta.configuration.Configuration;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.LocationFile;
-import mc.rellox.spawnermeta.events.EventRegistry;
+import mc.rellox.spawnermeta.events.EventListeners;
 import mc.rellox.spawnermeta.holograms.HologramRegistry;
 import mc.rellox.spawnermeta.hook.HookEconomy;
+import mc.rellox.spawnermeta.hook.HookShopGUI;
 import mc.rellox.spawnermeta.hook.HookWildStacker;
+import mc.rellox.spawnermeta.hook.HookWildTools;
 import mc.rellox.spawnermeta.shop.ShopRegistry;
 import mc.rellox.spawnermeta.utils.DataManager;
 import mc.rellox.spawnermeta.utils.Metrics;
@@ -27,12 +29,14 @@ import mc.rellox.spawnermeta.views.SpawnerViewLayout;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 19.2;
+	public static final double PLUGIN_VERSION = 20.0;
 	
 	private static SpawnerMeta plugin;
 	
     public static final HookEconomy ECONOMY = new HookEconomy();
     public static final HookWildStacker WILD_STACKER = new HookWildStacker();
+    public static final HookWildTools WILD_TOOLS = new HookWildTools();
+    public static final HookShopGUI SHOP_GUI = new HookShopGUI();
     
     private static boolean loaded;
     
@@ -63,6 +67,12 @@ public final class SpawnerMeta extends JavaPlugin {
 			WILD_STACKER.load();
 			if(WILD_STACKER.exists() == true) Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta"
 					+ ChatColor.DARK_PURPLE + "] " + ChatColor.GRAY + "Wild Stacker has been found, entity stacking enabled!");
+			WILD_TOOLS.load();
+			if(WILD_TOOLS.exists() == true) Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta"
+					+ ChatColor.DARK_PURPLE + "] " + ChatColor.GRAY + "Wild Tools has been found, custom drop provided!");
+			SHOP_GUI.load();
+			if(SHOP_GUI.exists() == true) Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta"
+					+ ChatColor.DARK_PURPLE + "] " + ChatColor.GRAY + "ShopGUI+ has been found, custom spawners provided!");
 			initializeMetrics();
 			Configuration.initialize();
 			Language.initialize();
@@ -71,7 +81,7 @@ public final class SpawnerMeta extends JavaPlugin {
 			SpawnerViewLayout.initialize();
 			ShopRegistry.initialize();
 			HologramRegistry.initialize();
-			EventRegistry.initialize();
+			EventListeners.initialize();
 			LocationFile.initialize();
 			
 			this.api = new APIRegistry();

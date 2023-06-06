@@ -1,8 +1,8 @@
 name: SpawnerMeta
 main: mc.rellox.spawnermeta.SpawnerMeta
-softdepend: [Vault]
+softdepend: [Vault, WildStacker, WildTools, ShopGUIPlus]
 api-version: 1.14
-version: 19.2
+version: 20.0
 author: Rellox
 commands:
   spawnermeta:
@@ -28,6 +28,9 @@ permissions:
   spawnermeta.break:
      description: Allow players to break spawners
      default: true
+  spawnermeta.unbreakable.bypass:
+     description: Allow players to bypass unbreakable spawners
+     default: false
   spawnermeta.upgrades.open:
      description: Allow players to open spawner upgrades
      default: true

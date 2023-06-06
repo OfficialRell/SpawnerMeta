@@ -3,10 +3,17 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>mc.rellox</groupId>
   <artifactId>SpawnerMeta</artifactId>
-  <version>19.0</version>
+  <version>20.0</version>
   <name>SpawnerMeta</name>
   <description>Implements spawner customization and upgrading</description>
   
+  <repositories>
+  	<repository>
+	  <id>jitpack.io</id>
+	  <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+	
   <dependencies>
     <dependency>
       <groupId>org.spigotmc</groupId>
@@ -14,6 +21,12 @@
       <version>1.19.4-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+	    <groupId>com.github.brcdev-minecraft</groupId>
+	    <artifactId>shopgui-api</artifactId>
+	    <version>3.0.0</version>
+	    <scope>provided</scope>
+	</dependency>
     
   </dependencies>
   
