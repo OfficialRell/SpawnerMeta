@@ -484,7 +484,10 @@ public final class EventRegistry {
 					return;
 				}
 				SpawnerType change = SpawnerManager.fromEgg(item.getType());
-				if(change == null) return;
+				if(change == null) {
+					if(item.getType().name().endsWith("_EGG") == true) event.setCancelled(true);
+					return;
+				}
 				event.setCancelled(true);
 				if(change.disabled() == true) return;
 				if(spawner.isEmpty() == true) {
@@ -551,6 +554,11 @@ public final class EventRegistry {
 			player.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.35f, 0f);
 			m.send(Language.list("Spawners.breaking.success"));
 			event.setCancelled(false);
+			
+			SpawnerUpgrade.removeUpgrade(block);
+			SpawnerManager.dropEggs(player, block);
+			HologramRegistry.remove(block);
+			unlink(block);
 			return;
 		}
 		
