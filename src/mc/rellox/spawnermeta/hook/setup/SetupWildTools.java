@@ -28,7 +28,7 @@ public class SetupWildTools {
 				}
 				providers.addDropsProvider(new SpawnerMetaDropsProvider());
 			}
-		};
+		}.runTaskLater(SpawnerMeta.instance(), 1);
 	}
 	
 	private static class SpawnerMetaDropsProvider implements DropsProvider {
