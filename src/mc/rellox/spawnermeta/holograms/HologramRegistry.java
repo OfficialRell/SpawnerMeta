@@ -39,6 +39,7 @@ public final class HologramRegistry {
 		case v_19_1 -> new HologramInstance1_19_1();
 		case v_19_2 -> new HologramInstance1_19_2();
 		case v_19_3 -> new HologramInstance1_19_3();
+		case v_20_1 -> new HologramInstance1_20_1();
 		default -> null;
 		};
 	}

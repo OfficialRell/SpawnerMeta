@@ -137,6 +137,17 @@ public final class Reflections {
 			return (Construct<R>) C_NULL;
 		}
 
+		public static Accessor<?> access(Object o, String f) {
+			try {
+				Field field = field(o.getClass(), f);
+				field.setAccessible(true);
+				return of(field, o);
+			} catch (Exception e) {
+				debug(e);
+			}
+			return null_accessor;
+		}
+
 		@SuppressWarnings("unchecked")
 		public static <R> Accessor<R> access(Object o, String f, Class<R> r) {
 			try {

@@ -33,5 +33,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/paper 1.19.3"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/paper"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/wild tools"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/spigot 1.20"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
