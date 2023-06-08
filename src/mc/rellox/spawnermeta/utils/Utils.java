@@ -106,6 +106,10 @@ public final class Utils {
 				m = c.getDeclaredMethod("x");
 				o = m.invoke(o);
 				m = o.getClass().getMethod("getString");
+			} else if(Version.version == VersionType.v_20_1) {
+				m = c.getDeclaredMethod("y");
+				o = m.invoke(o);
+				m = o.getClass().getMethod("getString");
 			} else {
 				m = c.getDeclaredMethod("getName");
 				o = m.invoke(o);
