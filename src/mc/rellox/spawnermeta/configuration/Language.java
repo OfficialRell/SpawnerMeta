@@ -261,14 +261,19 @@ public final class Language {
 			List<Content> list;
 			if(file.isString(key) == true) {
 				String s = file.getString(key);
-				if(s == null || s.isEmpty() == true) list = List.of();
-				else list = List.of(ContentParser.parse(s));
+				if(s == null || s.isEmpty() == true) list = of();
+				else list = of(ContentParser.parse(s));
 			}
 			else list = ContentParser.parse(file.getStringList(key));
 			if(list == null || list.isEmpty() == true) return; 
 			text.put(key, list);
 		});
 		keys.clear();
+	}
+	
+	private static List<Content> of(Content... cs) {
+		return cs == null ? new ArrayList<>()
+				: Stream.of(cs).collect(Collectors.toList());
 	}
 	
 //	private void replace(String from, String to) {
@@ -295,12 +300,12 @@ public final class Language {
 
 	public static List<Content> list(String key) {
 		List<Content> list = language.text.get(key);
-		return list == null ? List.of() : list;
+		return list == null ? of() : list;
 	}
 
 	public static List<Content> list(String key, String k, Object o) {
 		List<Content> list = language.text.get(key);
-		if(list == null) return List.of(); 
+		if(list == null) return of(); 
 		Variables v = Variables.with(k, o);
 		return list.stream()
 				.map(c -> c.modified(v))
@@ -309,7 +314,7 @@ public final class Language {
 
 	public static List<Content> list(String key, Object... vs) {
 		List<Content> list = language.text.get(key);
-		if(list == null) return List.of(); 
+		if(list == null) return of(); 
 		Variables v = Variables.with(vs);
 		return list.stream()
 				.map(c -> c.modified(v))

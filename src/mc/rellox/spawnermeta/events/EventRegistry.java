@@ -559,6 +559,7 @@ public final class EventRegistry {
 			SpawnerManager.dropEggs(player, block);
 			HologramRegistry.remove(block);
 			unlink(block);
+			LF.remove(block);
 			return;
 		}
 		
@@ -1035,15 +1036,15 @@ public final class EventRegistry {
 	public static void particle(Location loc) {
 		if(Settings.settings.spawning_particles == false) return;
 		loc.getWorld().spawnParticle(Particle.CLOUD, loc.add(0, 0.25, 0), 5, 0.2, 0.2, 0.2, 0.1);
-	}
+ 	}
 	
 	private static boolean isLiving(EntityType type) {
 		return LivingEntity.class.isAssignableFrom(type.getEntityClass());
 	}
 
 	private static Invoker<Entity> spawner(World world) {
-		return RF.order(RF.craft("CraftWorld").cast(world), Entity.class, "spawn",
-				Location.class, Class.class, Consumer.class, SpawnReason.class);
+		return RF.order(RF.craft("CraftWorld").cast(world), "spawn",
+				Location.class, Class.class, Consumer.class, SpawnReason.class).as(Entity.class);
 	}
 
 	public static Entity spawn(Class<?> entity_class, Invoker<Entity> invoker, Location at, Consumer<Entity> function) {
@@ -1065,10 +1066,10 @@ public final class EventRegistry {
 				}
 				if(Settings.settings.check_spawner_nerf == true && entity instanceof Mob mob) {
 					Object w = RF.order(mob.getWorld(), "getHandle").invoke();
-					SpigotWorldConfig f = RF.access(w, "spigotConfig", SpigotWorldConfig.class).field();
+					SpigotWorldConfig f = RF.access(w, "spigotConfig").as(SpigotWorldConfig.class).field();
 					if(f.nerfSpawnerMobs == true) {
 						Object a = RF.order(mob, "getHandle").invoke();
-						RF.access(a, "aware", boolean.class).set(false);
+						RF.access(a, "aware").as(boolean.class).set(false);
 					}
 				}
 				if(Settings.settings.spawn_babies == false && entity instanceof Ageable ageable) ageable.setAdult();
@@ -1077,8 +1078,8 @@ public final class EventRegistry {
 					e.clear();
 				}
 				Object o = RF.order(entity, "getHandle").invoke();
-				RF.accessI(o, "spawnedViaMobSpawner", boolean.class).set(true);
-				RF.accessI(o, "spawnReason", SpawnReason.class).set(SpawnReason.SPAWNER);
+				RF.accessI(o, "spawnedViaMobSpawner").as(boolean.class).set(true);
+				RF.accessI(o, "spawnReason").as(SpawnReason.class).set(SpawnReason.SPAWNER);
 				if(Settings.settings.send_spawning_event == true) {
 					SpawnerSpawnEvent event = new SpawnerSpawnEvent(entity, cs);
 					entity.getServer().getPluginManager().callEvent(event);
@@ -1099,15 +1100,15 @@ public final class EventRegistry {
 			}
 			if(Settings.settings.check_spawner_nerf == true && entity instanceof Mob mob) {
 				Object w = RF.order(mob.getWorld(), "getHandle").invoke();
-				SpigotWorldConfig f = RF.access(w, "spigotConfig", SpigotWorldConfig.class).field();
+				SpigotWorldConfig f = RF.access(w, "spigotConfig").as(SpigotWorldConfig.class).field();
 				if(f.nerfSpawnerMobs == true) {
 					Object a = RF.order(mob, "getHandle").invoke();
-					RF.access(a, "aware", boolean.class).set(false);
+					RF.access(a, "aware").as(boolean.class).set(false);
 				}
 			}
 			Object o = RF.order(entity, "getHandle").invoke();
-			RF.accessI(o, "spawnedViaMobSpawner", boolean.class).set(true);
-			RF.accessI(o, "spawnReason", SpawnReason.class).set(SpawnReason.SPAWNER);
+			RF.accessI(o, "spawnedViaMobSpawner").as(boolean.class).set(true);
+			RF.accessI(o, "spawnReason").as(SpawnReason.class).set(SpawnReason.SPAWNER);
 		} catch (Exception e) {
 			RF.debug(e);
 		}
