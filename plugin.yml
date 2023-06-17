@@ -2,7 +2,7 @@ name: SpawnerMeta
 main: mc.rellox.spawnermeta.SpawnerMeta
 softdepend: [Vault, WildStacker, WildTools, ShopGUIPlus]
 api-version: 1.14
-version: 20.1
+version: 20.2
 author: Rellox
 commands:
   spawnermeta:
