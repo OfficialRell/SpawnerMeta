@@ -21,8 +21,8 @@ import mc.rellox.spawnermeta.prices.PriceType;
 import mc.rellox.spawnermeta.spawner.SpawnerType;
 import mc.rellox.spawnermeta.spawner.UpgradeType;
 import mc.rellox.spawnermeta.utils.Reflections.RF;
-import mc.rellox.spawnermeta.utils.Version;
-import mc.rellox.spawnermeta.utils.Version.VersionType;
+import mc.rellox.spawnermeta.version.Version;
+import mc.rellox.spawnermeta.version.Version.VersionType;
 
 public class ConfigurationFile {
 	
@@ -132,6 +132,7 @@ public class ConfigurationFile {
 			super("configuration");
 		}
 		
+		@SuppressWarnings("deprecation")
 		@Override
 		protected void initialize() {
 			super.initialize();

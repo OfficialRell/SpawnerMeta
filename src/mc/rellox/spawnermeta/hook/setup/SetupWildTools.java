@@ -22,7 +22,7 @@ public class SetupWildTools {
 			public void run() {
 				ProvidersHandler providers = SpawnerMeta.WILD_TOOLS.get().getProviders();
 				try {
-					RF.access(providers, "dropsProviders", List.class).field().clear();
+					RF.access(providers, "dropsProviders").as(List.class).field().clear();
 				} catch (Exception x) {
 					RF.debug(x);
 				}

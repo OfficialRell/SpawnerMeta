@@ -16,8 +16,8 @@ public class Hologram {
 	public Hologram(Block block) {
 		this.block = block;
 		String title = title(Spawner.of(block)).text();
-		this.hologram = HologramRegistry.HI.create(block.getLocation().add(0.5, 1.25, 0.5), title);
-		HologramRegistry.HI.spawn(hologram);
+		this.hologram = HologramRegistry.modifier.create(block.getLocation().add(0.5, 1.25, 0.5), title);
+		HologramRegistry.modifier.spawn(hologram);
 	}
 	
 	public boolean is(Block block) {
@@ -26,15 +26,15 @@ public class Hologram {
 	
 	public void update() {
 		String title = title(Spawner.of(block)).text();
-		HologramRegistry.HI.update(hologram, title);
+		HologramRegistry.modifier.update(hologram, title);
 	}
 	
 	public void spawn(Player player) {
-		HologramRegistry.HI.spawn(player, hologram);
+		HologramRegistry.modifier.spawn(player, hologram);
 	}
 	
 	public void destroy() {
-		HologramRegistry.HI.destroy(hologram);
+		HologramRegistry.modifier.destroy(hologram);
 	}
 	
 	private Content title(Spawner spawner) {

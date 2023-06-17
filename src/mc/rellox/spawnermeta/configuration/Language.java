@@ -34,6 +34,7 @@ public final class Language {
 	private final Map<String, List<Content>> text = new HashMap<>();
 	private final List<String> keys = new ArrayList<>();
 	
+	@SuppressWarnings("deprecation")
 	private void load() {
 		f = new File(SpawnerMeta.instance().getDataFolder(), "language.yml");
 		if(f.getParentFile().exists() == false) f.getParentFile().mkdirs();
@@ -45,17 +46,6 @@ public final class Language {
 		file = YamlConfiguration.loadConfiguration(f);
 		
 		convertLegacy();
-		
-//		String s = file.getString("Inventory.upgrades.items.charges.purchase.all");
-//		if(s != null) {
-//			if(s.contains("Middle") == true)
-//				file.set("Inventory.upgrades.items.charges.purchase.all", s.replace("Middle", "Shift"));
-//		}
-//		replace("Inventory.upgrades.items.disabled-upgrade.info", "Inventory.upgrades.items.disabled-upgrade.help");
-//		replace("Inventory.upgrades.items.upgrade.always.range", "Inventory.upgrades.items.upgrade.info.range");
-//		replace("Inventory.upgrades.items.upgrade.always.delay", "Inventory.upgrades.items.upgrade.info.delay");
-//		replace("Inventory.upgrades.items.upgrade.always.amount", "Inventory.upgrades.items.upgrade.info.amount");
-//		file.set("Inventory.upgrades.items.upgrade.always", null);
 		
 		text.clear();
 		put("Inventory.upgrades.purchase.range", "<#00ff00>(!) <#80ff00>Upgraded <#00ffff-#008080><!italic>range <#80ff00>to level %level%");

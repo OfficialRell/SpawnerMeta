@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import mc.rellox.spawnermeta.configuration.Settings;
+import mc.rellox.spawnermeta.version.Version;
 
 public final class Reflections {
 
@@ -81,7 +82,7 @@ public final class Reflections {
 			} catch (Exception e) {
 				debug(e);
 			}
-			return I_NULL;
+			return null_invoker;
 		}
 
 		public static Invoker<?> order(Class<?> c, String m, Class<?>... cs) {
@@ -98,29 +99,27 @@ public final class Reflections {
 			} catch (Exception e) {
 				debug(e);
 			}
-			return I_NULL;
+			return null_invoker;
+		}
+		
+		public static Object direct(Object o, String m) {
+			return order(o, m).invoke();
+		}
+		
+		public static Object direct(Class<?> c, String m) {
+			return order(c, m).invoke();
+		}
+		
+		public static <R> R direct(Object o, String m, Class<R> r) {
+			return order(o, m).as(r).invoke();
+		}
+		
+		public static <R> R direct(Class<?> c, String m, Class<R> r) {
+			return order(c, m).as(r).invoke();
 		}
 
 		@SuppressWarnings("unchecked")
-		public static <R> Invoker<R> order(Object o, Class<R> cr, String m, Class<?>... cs) {
-			try {
-				Method method = o.getClass().getMethod(m, cs);
-				return os -> {
-					try {
-						return (R) method.invoke(o, os);
-					} catch (Exception e) {
-						debug(e);
-					}
-					return null;
-				};
-			} catch (Exception e) {
-				debug(e);
-			}
-			return (Invoker<R>) I_NULL;
-		}
-
-		@SuppressWarnings("unchecked")
-		public static <R> Construct<R> construct(Class<R> c, Class<?>... cs) {
+		public static <R> Construct<R> build(Class<R> c, Class<?>... cs) {
 			try {
 				Constructor<?> constructor = c.getConstructor(cs);
 				return os -> {
@@ -134,7 +133,7 @@ public final class Reflections {
 			} catch (Exception e) {
 				debug(e);
 			}
-			return (Construct<R>) C_NULL;
+			return (Construct<R>) null_constructor;
 		}
 
 		public static Accessor<?> access(Object o, String f) {
@@ -148,26 +147,21 @@ public final class Reflections {
 			return null_accessor;
 		}
 
-		@SuppressWarnings("unchecked")
-		public static <R> Accessor<R> access(Object o, String f, Class<R> r) {
-			try {
-				Field field = field(o.getClass(), f);
-				field.setAccessible(true);
-				return of(field, o);
-			} catch (Exception e) {
-				debug(e);
-			}
-			return (Accessor<R>) null_accessor;
-		}
-
-		@SuppressWarnings("unchecked")
-		public static <R> Accessor<R> accessI(Object o, String f, Class<R> r) {
+		public static Accessor<?> accessI(Object o, String f) {
 			try {
 				Field field = field(o.getClass(), f);
 				field.setAccessible(true);
 				return ofI(field, o);
 			} catch (Exception e) {}
-			return (Accessor<R>) null_accessor;
+			return null_accessor;
+		}
+		
+		public static Object fetch(Object o, String f) {
+			return access(o, f).field();
+		}
+		
+		public static Object fetch(Class<?> c, String f) {
+			return access(c, f).field();
 		}
 
 		private static Field field(Class<?> c, String n) throws Exception {
@@ -178,8 +172,8 @@ public final class Reflections {
 			}
 		}
 
-		private static final Invoker<?> I_NULL = o -> null;
-		private static final Construct<?> C_NULL = o -> null;
+		private static final Invoker<?> null_invoker = o -> null;
+		private static final Construct<?> null_constructor = o -> null;
 		private static final Accessor<?> null_accessor = () -> null;
 
 		@FunctionalInterface
@@ -191,6 +185,11 @@ public final class Reflections {
 				R r = invoke(os);
 				return r == null ? d : r;
 			}
+			
+			@SuppressWarnings("unchecked")
+			default <O> Invoker<O> as(Class<O> c) {
+				return (Invoker<O>) this;
+			}
 
 		}
 
@@ -198,6 +197,11 @@ public final class Reflections {
 		public static interface Construct<R> {
 
 			R instance(Object... os);
+			
+			@SuppressWarnings("unchecked")
+			default <O> Construct<O> as(Class<O> c) {
+				return (Construct<O>) this;
+			}
 
 		}
 
@@ -216,6 +220,11 @@ public final class Reflections {
 			@SuppressWarnings("unchecked")
 			default void force(Object o) {
 				set((R) o);
+			}
+			
+			@SuppressWarnings("unchecked")
+			default <O> Accessor<O> as(Class<O> c) {
+				return (Accessor<O>) this;
 			}
 
 		}

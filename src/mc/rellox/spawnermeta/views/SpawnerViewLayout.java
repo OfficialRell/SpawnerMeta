@@ -159,6 +159,7 @@ public final class SpawnerViewLayout {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static void setDefaultLayout() {
 		for(int i = 0; i < 27; i++) defaultSlot(DEFAULT[i]);
 		layout.options().copyDefaults(true);

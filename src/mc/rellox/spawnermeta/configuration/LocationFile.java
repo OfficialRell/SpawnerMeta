@@ -35,6 +35,7 @@ public class LocationFile {
 	
 	private static boolean legacy;
 	
+	@SuppressWarnings("deprecation")
 	public static void initialize() {
 		f = new File(SpawnerMeta.instance().getDataFolder(), "locations.yml");
 		if(f.getParentFile().exists() == false) f.getParentFile().mkdirs();

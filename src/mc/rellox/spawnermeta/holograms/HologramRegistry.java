@@ -21,28 +21,27 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.utils.Version;
 
 public final class HologramRegistry {
 
-	public static final HologramInstance HI;
-	static {
-		HI = switch(Version.version) {
-		case v_14_1 -> new HologramInstance1_14();
-		case v_15_1 -> new HologramInstance1_15();
-		case v_16_1 -> new HologramInstance1_16_1();
-		case v_16_2 -> new HologramInstance1_16_2();
-		case v_16_3 -> new HologramInstance1_16_3();
-		case v_17_1 -> new HologramInstance1_17();
-		case v_18_1 -> new HologramInstance1_18_1();
-		case v_18_2 -> new HologramInstance1_18_2();
-		case v_19_1 -> new HologramInstance1_19_1();
-		case v_19_2 -> new HologramInstance1_19_2();
-		case v_19_3 -> new HologramInstance1_19_3();
-		case v_20_1 -> new HologramInstance1_20_1();
-		default -> null;
-		};
-	}
+	public static final HologramModifier modifier = new HologramModifier();
+//	static {
+//		HI = switch(Version.version) {
+//		case v_14_1 -> new HologramInstance1_14();
+//		case v_15_1 -> new HologramInstance1_15();
+//		case v_16_1 -> new HologramInstance1_16_1();
+//		case v_16_2 -> new HologramInstance1_16_2();
+//		case v_16_3 -> new HologramInstance1_16_3();
+//		case v_17_1 -> new HologramInstance1_17();
+//		case v_18_1 -> new HologramInstance1_18_1();
+//		case v_18_2 -> new HologramInstance1_18_2();
+//		case v_19_1 -> new HologramInstance1_19_1();
+//		case v_19_2 -> new HologramInstance1_19_2();
+//		case v_19_3 -> new HologramInstance1_19_3();
+//		case v_20_1 -> new HologramInstance1_20_1();
+//		default -> null;
+//		};
+//	}
 	
 	private static final HologramLoader LOADER = new HologramLoader();
 	

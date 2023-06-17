@@ -39,9 +39,14 @@ public final class CommandManager {
 	
 	public static void initialize() {
 		String name = Settings.settings.command_view;
+		CommandMap cm;
 		try {
-			CommandMap scm = RF.access(Bukkit.getServer(), "commandMap", CommandMap.class).field();
-			scm.register(name, new CommandSpawners(name));
+			cm = RF.access(Bukkit.getServer(), "commandMap").as(CommandMap.class).field();
+		} catch (Exception e) {
+			return;
+		}
+		try {
+			cm.register(name, new CommandSpawners(name));
 		} catch(Exception e) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
 					+ ChatColor.DARK_RED + "An error accured while registering spawner view command (" + name + ")! "
@@ -50,8 +55,7 @@ public final class CommandManager {
 		}
 		name = Settings.settings.command_shop;
 		try {
-			CommandMap scm = RF.access(Bukkit.getServer(), "commandMap", CommandMap.class).field();
-			scm.register(name, new CommandShop(name));
+			cm.register(name, new CommandShop(name));
 		} catch(Exception e) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
 					+ ChatColor.DARK_RED + "An error accured while registering spawner shop command (" + name + ")! "
@@ -60,8 +64,7 @@ public final class CommandManager {
 		}
 		name = Settings.settings.command_drops;
 		try {
-			CommandMap scm = RF.access(Bukkit.getServer(), "commandMap", CommandMap.class).field();
-			scm.register(name, new CommandDrops(name));
+			cm.register(name, new CommandDrops(name));
 		} catch(Exception e) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
 					+ ChatColor.DARK_RED + "An error accured while registering spawner drops command (" + name + ")! "

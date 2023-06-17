@@ -21,7 +21,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.utils.Reflections.RF;
 import mc.rellox.spawnermeta.utils.Reflections.RF.Accessor;
-import mc.rellox.spawnermeta.utils.Version.VersionType;
+import mc.rellox.spawnermeta.version.Version;
+import mc.rellox.spawnermeta.version.Version.VersionType;
 
 public final class Utils {
 	
@@ -131,9 +132,9 @@ public final class Utils {
 			Class<?> craft_meta_class = RF.craft("inventory.CraftMetaItem");
 			Object craft_meta = craft_meta_class.cast(meta);
 			if(meta.getClass().equals(craft_meta_class) == false) return;
-			Accessor<Integer> a = RF.access(craft_meta, "hideFlag", int.class);
+			Accessor<Integer> a = RF.access(craft_meta, "hideFlag").as(int.class);
 			int h = a.field(0);
-			a.set(h | 64 | 128);
+			a.set(h | 64);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

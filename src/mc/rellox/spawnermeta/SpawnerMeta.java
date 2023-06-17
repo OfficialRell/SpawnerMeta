@@ -24,12 +24,12 @@ import mc.rellox.spawnermeta.shop.ShopRegistry;
 import mc.rellox.spawnermeta.utils.DataManager;
 import mc.rellox.spawnermeta.utils.Metrics;
 import mc.rellox.spawnermeta.utils.Utils;
-import mc.rellox.spawnermeta.utils.Version;
+import mc.rellox.spawnermeta.version.Version;
 import mc.rellox.spawnermeta.views.SpawnerViewLayout;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 20.1;
+	public static final double PLUGIN_VERSION = 20.2;
 	
 	private static SpawnerMeta plugin;
 	

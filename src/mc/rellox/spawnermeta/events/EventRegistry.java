@@ -58,7 +58,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Consumer;
 import org.bukkit.util.Vector;
-import org.spigotmc.SpigotWorldConfig;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.APIInstance;
@@ -1066,8 +1065,10 @@ public final class EventRegistry {
 				}
 				if(Settings.settings.check_spawner_nerf == true && entity instanceof Mob mob) {
 					Object w = RF.order(mob.getWorld(), "getHandle").invoke();
-					SpigotWorldConfig f = RF.access(w, "spigotConfig").as(SpigotWorldConfig.class).field();
-					if(f.nerfSpawnerMobs == true) {
+					Object f = RF.fetch(w, "spigotConfig");
+					if(RF.access(f, "nerfSpawnerMobs")
+							.as(boolean.class)
+							.field(false) == true) {
 						Object a = RF.order(mob, "getHandle").invoke();
 						RF.access(a, "aware").as(boolean.class).set(false);
 					}
@@ -1100,8 +1101,10 @@ public final class EventRegistry {
 			}
 			if(Settings.settings.check_spawner_nerf == true && entity instanceof Mob mob) {
 				Object w = RF.order(mob.getWorld(), "getHandle").invoke();
-				SpigotWorldConfig f = RF.access(w, "spigotConfig").as(SpigotWorldConfig.class).field();
-				if(f.nerfSpawnerMobs == true) {
+				Object f = RF.fetch(w, "spigotConfig");
+				if(RF.access(f, "nerfSpawnerMobs")
+						.as(boolean.class)
+						.field(false) == true) {
 					Object a = RF.order(mob, "getHandle").invoke();
 					RF.access(a, "aware").as(boolean.class).set(false);
 				}

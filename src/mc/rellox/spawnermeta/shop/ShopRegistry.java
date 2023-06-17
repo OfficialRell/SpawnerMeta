@@ -22,8 +22,8 @@ import org.bukkit.entity.Player;
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.spawner.SpawnerType;
 import mc.rellox.spawnermeta.utils.Reflections.RF;
-import mc.rellox.spawnermeta.utils.Version;
-import mc.rellox.spawnermeta.utils.Version.VersionType;
+import mc.rellox.spawnermeta.version.Version;
+import mc.rellox.spawnermeta.version.Version.VersionType;
 
 public final class ShopRegistry {
 	
