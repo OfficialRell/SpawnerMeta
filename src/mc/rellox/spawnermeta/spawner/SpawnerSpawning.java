@@ -7,8 +7,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 
-import mc.rellox.spawnermeta.utils.EntityBox;
-import mc.rellox.spawnermeta.utils.Utils;
+import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.region.EntityBox;
 
 public interface SpawnerSpawning {
 	
@@ -34,7 +34,7 @@ public interface SpawnerSpawning {
 							for(int j = -r; j <= r; j++) {
 								for(int k = -r; k <= r; k++) {
 									b = block.getRelative(i, j, k);
-									Location l = box.check(at, b, g);
+									Location l = b.getLocation();//box.check(at, b, g);
 									if(l == null) continue;
 									list.add(l);
 								}
@@ -68,7 +68,7 @@ public interface SpawnerSpawning {
 							for(int j = -r; j <= r; j++) {
 								for(int k = -r; k <= r; k++) {
 									b = block.getRelative(i, j, k);
-									Location l = box.check(at, b, g);
+									Location l = block.getLocation();// box.check(at, b, g);
 									if(l == null) continue;
 									list.add(l);
 								}

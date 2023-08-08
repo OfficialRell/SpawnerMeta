@@ -1,9 +1,8 @@
-package mc.rellox.spawnermeta.views;
+package mc.rellox.spawnermeta.view;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -11,8 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.Sound;
-import org.bukkit.block.Block;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,85 +28,74 @@ import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.events.SpawnerChargeEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerSwitchEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerUpgradeEvent;
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.api.spawner.SpawnerWarning;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
+import mc.rellox.spawnermeta.api.view.IUpgrades;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.events.EventRegistry;
 import mc.rellox.spawnermeta.prices.Group;
 import mc.rellox.spawnermeta.prices.Price;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
-import mc.rellox.spawnermeta.spawner.UpgradeType;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.text.order.IOrder;
-import mc.rellox.spawnermeta.utils.Messagable;
-import mc.rellox.spawnermeta.utils.Utils;
-import mc.rellox.spawnermeta.views.SpawnerViewLayout.Slot;
-import mc.rellox.spawnermeta.views.SpawnerViewLayout.SlotType;
-import mc.rellox.spawnermeta.views.SpawnerViewLayout.WL;
+import mc.rellox.spawnermeta.utility.Messagable;
+import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.view.SpawnerViewLayout.Slot;
+import mc.rellox.spawnermeta.view.SpawnerViewLayout.SlotType;
+import mc.rellox.spawnermeta.view.SpawnerViewLayout.WL;
 
-public final class SpawnerUpgrade implements Listener {
-	
-	private static final Map<Block, SpawnerUpgrade> SPAWNERS = new HashMap<>();
-	
-	public static void newUpgrade(Player player, Block block) {
-		if(block.getState() instanceof CreatureSpawner == false) return;
-		SpawnerUpgrade su = SPAWNERS.get(block);
-		if(su == null) SPAWNERS.put(block, su = new SpawnerUpgrade(block));
-		su.open(player);
-	}
-	
-	/**
-	 * Opens spawner upgrade GUI and closes the previous inventory.
-	 * Useful when opening from other inventories.
-	 * Removes the requirement of using a bukkit runnable.
-	 * 
-	 * @param player - player who opens
-	 * @param block - spawner block
-	 * @param previous - previous inventory
-	 */
-	
-	public static void newUpgrade(Player player, Block block, Inventory previous) {
-		if(previous != null && previous.getViewers().contains(player) == true) player.closeInventory(); 
-		newUpgrade(player, block);
-	}
-	
-	public static void removeUpgrade(Block block) {
-		SPAWNERS.remove(block);
-	}
-	
-	public static void close(Block block) {
-		SpawnerUpgrade u = SPAWNERS.remove(block);
-		if(u != null) u.close();
-	}
-	
-	public static void update(Block block) {
-		SpawnerUpgrade u = SPAWNERS.get(block);
-		if(u != null) u.update();
-	}
-	
-	public static void updateAll() {
-		SPAWNERS.values().forEach(SpawnerUpgrade::update);
-	}
+public final class ActiveUpgrades implements Listener, IUpgrades {
 
+	private final IGenerator generator;
+	private final ISpawner spawner;
+	
 	private final List<Player> players;
-	private final Block block;
-	private final Spawner spawner;
 	private final Inventory v;
 	private boolean t;
 	private boolean enabled;
+	
+	private boolean active;
 
-	private SpawnerUpgrade(Block block) {
+	public ActiveUpgrades(IGenerator generator) {
+		this.generator = generator;
+		this.spawner = generator.spawner();
+		
 		this.players = new ArrayList<>();
-		this.block = block;
-		this.spawner = Spawner.of(block);
-		this.v = Bukkit.createInventory(null, 27, Language.get("Inventory.upgrades.name",
-				"type", spawner.getType().formated()).text());
+		this.v = Bukkit.createInventory(null, WL.size(), Language.get("Upgrade-GUI.name",
+				"type", generator.cache().type().formated()).text());
 		this.t = true;
-		this.enabled = spawner.isEnabled();
+		this.enabled = generator.cache().enabled();
+		
+		this.active = true;
+		
 		Bukkit.getPluginManager().registerEvents(this, SpawnerMeta.instance());
 	}
 
+	@Override
+	public IGenerator generator() {
+		return generator;
+	}
+	
+	@Override
+	public ISpawner spawner() {
+		return spawner;
+	}
+	
+	@Override
+	public List<Player> viewers() {
+		return players;
+	}
+	
+	@Override
+	public boolean active() {
+		return active;
+	}
+
+	@Override
 	public void open(Player player) {
 		players.add(player);
 		player.openInventory(v);
@@ -117,17 +103,24 @@ public final class SpawnerUpgrade implements Listener {
 		update();
 	}
 
+	@Override
 	public void close() {
+		if(active == true) {
+			HandlerList.unregisterAll(this);
+			active = false;
+			generator.close();
+		}
 		players.forEach(Player::closeInventory);
 	}
 	
 	@EventHandler
 	private void onClick(InventoryClickEvent event) {
 		if(event.getInventory().equals(v) == true) event.setCancelled(true);
-		Inventory c = event.getClickedInventory();
+		Inventory clicked = event.getClickedInventory();
 		Player player = (Player) event.getWhoClicked();
+		if(clicked == null || clicked.equals(v) == false
+				|| players.contains(player) == false) return;
 		Messagable m = new Messagable(player);
-		if(c == null || c.equals(v) == false || players.contains(player) == false) return;
 		try {
 			if(t == false) return;
 			t = false;
@@ -148,7 +141,6 @@ public final class SpawnerUpgrade implements Listener {
 				spawner.setEnabled(enabled = !enabled);
 				player.playSound(player.getEyeLocation(), enabled
 						? Sound.ENTITY_ITEM_FRAME_ADD_ITEM : Sound.ENTITY_ITEM_FRAME_REMOVE_ITEM, 2f, 1f);
-				spawner.setRotating(enabled);
 				update();
 				return;
 			} else if(WL.is(SlotType.UPGRADE_RANGE, o) == true) upgrade = UpgradeType.RANGE;
@@ -159,7 +151,7 @@ public final class SpawnerUpgrade implements Listener {
 					ClickType ct = event.getClick();
 					SpawnerType type = spawner.getType();
 					
-					int r = Settings.settings.charges_price(type, block);
+					int r = Settings.settings.charges_price(type, spawner);
 					int a;
 					if(ct.isShiftClick() == true) {
 						a = lowestCharges() / r;
@@ -177,7 +169,7 @@ public final class SpawnerUpgrade implements Listener {
 					
 					int charges = spawner.getCharges() + call.charges;
 					spawner.setCharges(charges);
-					m.send(Language.list("Inventory.upgrades.charges.purchase", "charges", call.charges));
+					m.send(Language.list("Upgrade-GUI.charges.purchase", "charges", call.charges));
 					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
 					update();
 				}
@@ -190,7 +182,7 @@ public final class SpawnerUpgrade implements Listener {
 				return;
 			}
 			if(allowed(i) == false) {
-				m.send(Language.list("Inventory.upgrades.disabled-upgrade"));
+				m.send(Language.list("Upgrade-GUI.disabled-upgrade"));
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 				return;
 			}
@@ -232,10 +224,10 @@ public final class SpawnerUpgrade implements Listener {
 				spawner.setUpgradeLevels(ls);
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
 				UpgradeType ut = UpgradeType.of(i);
-				m.send(Language.list("Inventory.upgrades.purchase." + ut.lower(),
+				m.send(Language.list("Upgrade-GUI.purchase." + ut.lower(),
 						"level", Utils.roman(ls[i])));
 				DustOptions d = new DustOptions(ut.color, 2f);
-				player.spawnParticle(Particle.REDSTONE, Utils.center(block), 50, 0.25, 0.25, 0.25, 0, d);
+				player.spawnParticle(Particle.REDSTONE, Utils.center(spawner.block()), 50, 0.25, 0.25, 0.25, 0, d);
 				
 				int[] a = spawner.getUpgradeAttributes();
 				a[i] += Settings.settings.spawner_value_increase.get(type)[i];
@@ -256,16 +248,15 @@ public final class SpawnerUpgrade implements Listener {
 	private void onClose(InventoryCloseEvent event) {
 		Player player = (Player) event.getPlayer();
 		players.remove(player);
-		if(players.isEmpty() == true) {
-			HandlerList.unregisterAll(this);
-			removeUpgrade(block);
-		} else update();
+		if(players.isEmpty() == true) close();
+		else update();
 	}
-	
+
+	@Override
 	public void update() {
 		SpawnerType type = spawner.getType();
 		Slot s;
-		for(int i = 0; i < 27; i++) {
+		for(int i = 0; i < v.getSize(); i++) {
 			if((s = SpawnerViewLayout.LAYOUT[i]).t == SlotType.BACKGROUND) v.setItem(i, x(s));
 			else if(s.t == SlotType.STATS) v.setItem(i, stats(s));
 			else if(s.t == SlotType.UPGRADE_RANGE) v.setItem(i, allowed(0) ? upgrade(s, 0) : denied(0));
@@ -274,6 +265,7 @@ public final class SpawnerUpgrade implements Listener {
 			else if(s.t == SlotType.CHARGES) v.setItem(i, Settings.settings.charges_enabled
 					? charges(type, s) : x(SpawnerViewLayout.background_slot));
 		}
+		generator.update();
 	}
 	
 	private ItemStack upgrade(Slot slot, int i) {
@@ -288,7 +280,7 @@ public final class SpawnerUpgrade implements Listener {
 		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		if(slot.o > 0) meta.setCustomModelData(slot.o);
 		
-		List<Content> name = Language.list("Inventory.upgrades.items.upgrade.name." + u.lower(),
+		List<Content> name = Language.list("Upgrade-GUI.items.upgrade.name." + u.lower(),
 				"level", Utils.roman(level));
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 
@@ -300,29 +292,29 @@ public final class SpawnerUpgrade implements Listener {
 		int[] max_levels = Settings.settings.upgrades_levels.get(type);
 		if(level < max_levels[i]) {
 			order.submit("HELP", () -> {
-				return Language.list("Inventory.upgrades.items.upgrade.help");
+				return Language.list("Upgrade-GUI.items.upgrade.help");
 			});
 		}
 		order.submit("INFO", () -> {
-			return Language.list("Inventory.upgrades.items.upgrade.info." + u.lower());
+			return Language.list("Upgrade-GUI.items.upgrade.info." + u.lower());
 		});
 		order.submit("CURRENT", () -> {
-			return Language.list("Inventory.upgrades.items.upgrade.current." + u.lower(),
+			return Language.list("Upgrade-GUI.items.upgrade.current." + u.lower(),
 					"value", value(type, level, i));
 		});
 		if(level < max_levels[i]) {
 			order.submit("NEXT", () -> {
-				return Language.list("Inventory.upgrades.items.upgrade.next." + u.lower(),
+				return Language.list("Upgrade-GUI.items.upgrade.next." + u.lower(),
 						"value", value(type, level + 1, i));
 			});
 			order.submit("PRICE", () -> {
 				Price price = price(type, level, i);
-				return Language.list("Inventory.upgrades.items.upgrade.price",
+				return Language.list("Upgrade-GUI.items.upgrade.price",
 						"price", price);
 			});
 		} else {
 			order.submit("PRICE", () -> {
-				return Language.list("Inventory.upgrades.items.upgrade.maximum-reached");
+				return Language.list("Upgrade-GUI.items.upgrade.maximum-reached");
 			});
 		}
 		
@@ -340,7 +332,7 @@ public final class SpawnerUpgrade implements Listener {
 		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 		meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		
-		List<Content> name = Language.list("Inventory.upgrades.items.disabled-upgrade.name." + u.lower());
+		List<Content> name = Language.list("Upgrade-GUI.items.disabled-upgrade.name." + u.lower());
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 
 		IOrder order = Settings.settings.order_disabled.oderer();
@@ -351,13 +343,13 @@ public final class SpawnerUpgrade implements Listener {
 		SpawnerType type = spawner.getType();
 		
 		order.submit("HELP", () -> {
-			return Language.list("Inventory.upgrades.items.disabled-upgrade.help");
+			return Language.list("Upgrade-GUI.items.disabled-upgrade.help");
 		});
 		order.submit("INFO", () -> {
-			return Language.list("Inventory.upgrades.items.upgrade.info." + u.lower());
+			return Language.list("Upgrade-GUI.items.upgrade.info." + u.lower());
 		});
 		order.submit("CURRENT", () -> {
-			return Language.list("Inventory.upgrades.items.disabled-upgrade.current." + u.lower(),
+			return Language.list("Upgrade-GUI.items.disabled-upgrade.current." + u.lower(),
 					"value", value(type, level, i));
 		});
 		
@@ -375,8 +367,8 @@ public final class SpawnerUpgrade implements Listener {
 		if(slot.o > 0) meta.setCustomModelData(slot.o);
 		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		
-		List<Content> name = Language.list("Inventory.upgrades.items.stats.name",
-				"type", spawner.getType());
+		List<Content> name = Language.list("Upgrade-GUI.items.stats.name",
+				"type", generator.cache().type());
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 		
 		IOrder order = Settings.settings.order_stats.oderer();
@@ -385,52 +377,58 @@ public final class SpawnerUpgrade implements Listener {
 
 		if(spawner.isEmpty() == true) {
 			order.submit("EMPTY", () -> {
-				return Language.list("Inventory.upgrades.items.stats.empty");
+				return Language.list("Upgrade-GUI.items.stats.empty");
 			});
 		}
 		if(Settings.settings.spawner_switching == true) {
 			order.submit("SWITCHING", () -> {
-				return enabled == true ? Language.list("Inventory.upgrades.items.stats.enabled")
-						: Language.list("Inventory.upgrades.items.stats.disabled");
+				return enabled == true ? Language.list("Upgrade-GUI.items.stats.enabled")
+						: Language.list("Upgrade-GUI.items.stats.disabled");
 			});
 		}
-		int[] l = Utils.location(block);
+		int[] l = Utils.location(spawner.block());
 		order.submit("LOCATION", () -> {
-			return Language.list("Inventory.upgrades.items.stats.location",
+			return Language.list("Upgrade-GUI.items.stats.location",
 					"x", c(l[0]), "y", l[1], "z", c(l[2]));
 		});
-		int stack = spawner.getStack();
+		int stack = generator.cache().stack();
 		if(Settings.settings.stacking_enabled == true) {
 			order.submit("STACK", () -> {
 				if(Settings.settings.stacking_ignore_limit == true)
-					return Language.list("Inventory.upgrades.items.stats.stacking.infinite",
+					return Language.list("Upgrade-GUI.items.stats.stacking.infinite",
 							"stack", stack);
-				return Language.list("Inventory.upgrades.items.stats.stacking.finite",
+				return Language.list("Upgrade-GUI.items.stats.stacking.finite",
 						"stack", stack, "limit", Settings.settings.stacking_spawner_limit);
 			});
 		}
 		if(Settings.settings.spawnable_enabled == true) {
-			int spawnable = spawner.getSpawnable();
+			int spawnable = generator.cache().spawnable();
 			if(spawnable < 1_000_000_000) {
 				order.submit("SPAWNABLE", () -> {
-					return Language.list("Inventory.upgrades.items.stats.spawnable",
+					return Language.list("Upgrade-GUI.items.stats.spawnable",
 							"spawnable", spawnable);
 				});
 			}
 		}
-		if(Settings.settings.charges_enabled == true) {
-			int c = spawner.getCharges();
-			if(c <= 0) {
-				boolean n = Settings.settings.charges_ignore_natural == true && spawner.isNatural() == true;
-				if(n == false) {
-					order.submit("WARNING", () -> {
-						return Language.list("Inventory.upgrades.items.stats.charges.insufficient");
-					});
-				}
-			}
+		if(generator.warned() == true) {
+			order.submit("WARNING", () -> {
+				List<Content> list = new ArrayList<>();
+				long count = Stream.of(SpawnerWarning.values())
+						.filter(generator::warned)
+						.map(type -> Language
+								.list("Upgrade-GUI.items.stats.warnings."
+										+ type.name().toLowerCase()))
+						.peek(list::addAll)
+						.count();
+				list.addAll(0, Language
+						.list("Upgrade-GUI.items.stats.warnings.header",
+								"count", count));
+				return list;
+			});
 		}
+		
 		order.submit("INFO", () -> {
-			return Language.list("Inventory.upgrades.items.stats.lore");
+			return Language.list("Upgrade-GUI.items.stats.lore");
 		});
 		
 		meta.setLore(order.build());
@@ -459,8 +457,8 @@ public final class SpawnerUpgrade implements Listener {
 		ItemMeta meta = item.getItemMeta();
 		int c = spawner.getCharges();
 		boolean b = c >= 1_000_000_000;
-		String charges = b ? "" + '\u221E' : "" + spawner.getCharges();
-		meta.setDisplayName(Language.get("Inventory.upgrades.items.charges.name",
+		String charges = b ? Text.infinity : "" + spawner.getCharges();
+		meta.setDisplayName(Language.get("Upgrade-GUI.items.charges.name",
 				"charges", charges).text());
 		meta.addItemFlags(ItemFlag.values());
 		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
@@ -470,16 +468,16 @@ public final class SpawnerUpgrade implements Listener {
 			lore.add("");
 			int f0 = Settings.settings.charges_buy_first;
 			int f1 = Settings.settings.charges_buy_second;
-			int r = Settings.settings.charges_price(type, block);
+			int r = Settings.settings.charges_price(type, spawner);
 			int c0 = r * f0;
 			int c1 = r * f1;
 			int a = lowestCharges() / r;
 			int c2 = r * a;
-			lore.addAll(Text.toText(Language.list("Inventory.upgrades.items.charges.purchase.first",
+			lore.addAll(Text.toText(Language.list("Upgrade-GUI.items.charges.purchase.first",
 					"charges", f0, "price", Price.of(Group.charges, c0))));
-			lore.addAll(Text.toText(Language.list("Inventory.upgrades.items.charges.purchase.second",
+			lore.addAll(Text.toText(Language.list("Upgrade-GUI.items.charges.purchase.second",
 					"charges", f1, "price", Price.of(Group.charges, c1))));
-			if(a > 0) lore.addAll(Text.toText(Language.list("Inventory.upgrades.items.charges.purchase.all",
+			if(a > 0) lore.addAll(Text.toText(Language.list("Upgrade-GUI.items.charges.purchase.all",
 					"price", Price.of(Group.charges, c2), "charges", a)));
 			meta.setLore(lore);
 		}
