@@ -47,6 +47,7 @@ public interface Colorer {
 		
 		public static final int red = 0xff0000,
 				red_50 = 0x800000,
+				pink = 0xff80bf,
 				green = 0x00ff00,
 				green_50 = 0x008000,
 				blue = 0x0000ff,

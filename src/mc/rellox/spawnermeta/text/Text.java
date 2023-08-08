@@ -4,11 +4,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
+
+import mc.rellox.spawnermeta.commands.CommandManager;
 import mc.rellox.spawnermeta.text.content.Content;
 
 public final class Text {
 	
 	public static final String infinity = "" + '\u221E';
+	
+	public static void success(String success, Object... os) {
+		CommandManager.success(Bukkit.getConsoleSender(), success, os);
+	}
+	
+	public static void failure(String error, Object... os) {
+		CommandManager.warn(Bukkit.getConsoleSender(), error, os);
+	}
 	
 	public static List<String> toText(List<Content> list) {
 		return list.stream()

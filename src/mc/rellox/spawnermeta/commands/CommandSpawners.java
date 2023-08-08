@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.views.SpawnerView;
+import mc.rellox.spawnermeta.view.SpawnerView;
 
 public class CommandSpawners extends Command {
 
