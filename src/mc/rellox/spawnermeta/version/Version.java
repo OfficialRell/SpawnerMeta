@@ -2,7 +2,7 @@ package mc.rellox.spawnermeta.version;
 
 import org.bukkit.Bukkit;
 
-import mc.rellox.spawnermeta.utils.Reflections.RF;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public final class Version {
 	

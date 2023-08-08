@@ -6,8 +6,8 @@ import java.util.stream.Stream;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import mc.rellox.spawnermeta.utils.Reflections.RF;
-import mc.rellox.spawnermeta.utils.Reflections.RF.Invoker;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
+import mc.rellox.spawnermeta.utility.reflect.type.Invoker;
 import mc.rellox.spawnermeta.version.IVersion;
 
 public class IVersion1_14_1 implements IVersion {
