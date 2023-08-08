@@ -1,5 +1,7 @@
 package mc.rellox.spawnermeta.holograms;
 
+import java.util.Set;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -18,21 +20,17 @@ public class HologramModifier {
 		return v.hologram(l, name);
 	}
 	
-	public void spawn(Object entity) {
-		v.send(v.spawn(entity), v.meta(entity));
-	}
-	
 	public void spawn(Player player, Object entity) {
 		v.send(player, v.spawn(entity), v.meta(entity));
 	}
 
-	public void destroy(Object entity) {
-		v.send(v.destroy(entity));
+	public void destroy(Player player, Object entity) {
+		v.send(player, v.destroy(entity));
 	}
 
-	public void update(Object entity, String name) {
+	public void update(Set<Player> players, Object entity, String name) {
 		v.name(entity, name);
-		v.send(v.meta(entity));
+		v.send(players, v.meta(entity));
 	}
 
 }

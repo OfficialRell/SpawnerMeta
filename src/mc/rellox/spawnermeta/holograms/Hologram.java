@@ -1,49 +1,25 @@
 package mc.rellox.spawnermeta.holograms;
 
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.configuration.Language;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
+import mc.rellox.spawnermeta.configuration.Settings;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.text.content.Content;
 
-public class Hologram {
+public class Hologram extends AbstractHologram {
 	
-	protected final Block block;
-	private final Object hologram;
-	
-	public Hologram(Block block) {
-		this.block = block;
-		String title = title(Spawner.of(block)).text();
-		this.hologram = HologramRegistry.modifier.create(block.getLocation().add(0.5, 1.25, 0.5), title);
-		HologramRegistry.modifier.spawn(hologram);
+	public Hologram(IGenerator generator) {
+		super(generator, false, Settings.settings.holograms_regular_radius);
 	}
 	
-	public boolean is(Block block) {
-		return this.block.equals(block);
-	}
-	
-	public void update() {
-		String title = title(Spawner.of(block)).text();
-		HologramRegistry.modifier.update(hologram, title);
-	}
-	
-	public void spawn(Player player) {
-		HologramRegistry.modifier.spawn(player, hologram);
-	}
-	
-	public void destroy() {
-		HologramRegistry.modifier.destroy(hologram);
-	}
-	
-	private Content title(Spawner spawner) {
-		SpawnerType type = spawner.getType();
+	@Override
+	public Content title() {
+		SpawnerType type = generator.cache().type();
 		String r = type == SpawnerType.EMPTY ? "empty" : "regular";
-		int stack = spawner.getStack();
-		return stack > 1 ? Language.get("Spawners.hologram." + r + ".multiple",
+		int stack = generator.cache().stack();
+		return stack > 1 ? Language.get("Holograms." + r + ".multiple",
 				"name", type, "stack", stack)
-				: Language.get("Spawners.hologram." + r + ".single",
+				: Language.get("Holograms." + r + ".single",
 						"name", type);
 	}
 

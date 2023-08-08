@@ -15,7 +15,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Player;
 
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.utils.DataManager;
+import mc.rellox.spawnermeta.utility.DataManager;
 
 public final class HologramMap {
 	
