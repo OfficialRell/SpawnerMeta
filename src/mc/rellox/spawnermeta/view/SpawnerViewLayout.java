@@ -1,4 +1,4 @@
-package mc.rellox.spawnermeta.views;
+package mc.rellox.spawnermeta.view;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,8 +19,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.utils.Reflections.RF;
-import mc.rellox.spawnermeta.utils.Utils;
+import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public final class SpawnerViewLayout {
 
@@ -65,6 +65,7 @@ public final class SpawnerViewLayout {
 	public static Slot background_slot;
 	public static Material background;
 	public static int background_model;
+	private static int rows;
 	
 	public static void initialize() {
 		lf = new File(SpawnerMeta.instance().getDataFolder(), "layout.yml");
@@ -91,6 +92,8 @@ public final class SpawnerViewLayout {
 				}
 			}
 		}.runTaskLater(SpawnerMeta.instance(), 5);
+		rows = layout.getInt("Upgrade-Rows", 3);
+		if(rows < 1 || rows > 6) rows = 3;
 	}
 
 	public static void saveLayout() {
@@ -100,6 +103,10 @@ public final class SpawnerViewLayout {
 	}
 	
 	public static final class WL {
+		
+		public static int size() {
+			return rows * 9;
+		}
 		
 		public static boolean is(SlotType type, int o) {
 			return Stream.of(LAYOUT).anyMatch(s -> s.t == type && s.i == o);
@@ -162,6 +169,7 @@ public final class SpawnerViewLayout {
 	@SuppressWarnings("deprecation")
 	public static void setDefaultLayout() {
 		for(int i = 0; i < 27; i++) defaultSlot(DEFAULT[i]);
+		layout.addDefault("Upgrade-Rows", 3);
 		layout.options().copyDefaults(true);
 		layout.options().header("In this file you can modify spawner upgrade inventory layout.\n"
 				+ "After any modifications do /sm update");

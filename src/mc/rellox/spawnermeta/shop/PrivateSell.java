@@ -12,14 +12,15 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import mc.rellox.spawnermeta.api.spawner.VirtualSpawner;
+import mc.rellox.spawnermeta.api.spawner.IVirtual;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.prices.Group;
 import mc.rellox.spawnermeta.prices.Price;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
-import mc.rellox.spawnermeta.utils.DataManager;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import mc.rellox.spawnermeta.utility.DataManager;
+import mc.rellox.spawnermeta.utility.Utils;
 
 public class PrivateSell {
 	
@@ -64,12 +65,12 @@ public class PrivateSell {
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			} else if(s == v.getSize() - 4) {
 				if(spawners.isEmpty() == true) {
-					player.sendMessage(Language.get("Inventory.sell-shop.selling.empty").text());
+					player.sendMessage(Language.get("Shop-sell.selling.empty").text());
 					return true;
 				}
-				player.sendMessage(Language.get("Inventory.sell-shop.selling.success").text());
+				player.sendMessage(Language.get("Shop-sell.selling.success").text());
 				Price[] cs = total();
-				for(Price cc : cs) player.sendMessage(Language.get("Inventory.sell-shop.items.selling.price",
+				for(Price cc : cs) player.sendMessage(Language.get("Shop-sell.items.selling.price",
 						"price", cc).text());
 				spawners.forEach(si -> si.refund(player));
 				spawners.clear();
@@ -88,19 +89,19 @@ public class PrivateSell {
 		} else {
 			if(spawners.size() >= v.getSize() - 18) return true;
 			ItemStack item = c.getItem(s);
-			VirtualSpawner sd = DataManager.getSpawnerItem(item);
+			IVirtual sd = DataManager.getSpawnerItem(item);
 			if(sd == null) return true;
 			if(sd.isEmpty() == true) {
-				player.sendMessage(Language.get("Inventory.sell-shop.selling.unable").text());
+				player.sendMessage(Language.get("Shop-sell.selling.unable").text());
 				return true;
 			}
 			SellData sell = group.get(sd.getType());
 			if(sell == null) {
-				player.sendMessage(Language.get("Inventory.sell-shop.selling.unable").text());
+				player.sendMessage(Language.get("Shop-sell.selling.unable").text());
 				return true;
 			}
 			if(ShopRegistry.canSell(player, sell.type) == false) {
-				player.sendMessage(Language.get("Inventory.sell-shop.permission.selling").text());
+				player.sendMessage(Language.get("Shop-sell.permission.selling").text());
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 				return true;
 			}
@@ -167,17 +168,18 @@ public class PrivateSell {
 	private ItemStack sell() {
 		ItemStack item = new ItemStack(group.sell());
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.sell-shop.accept").text());
+		meta.setDisplayName(Language.get("Shop-sell.accept").text());
 		Price[] cs = total();
 		if(cs != null) {
 			List<String> lore = new ArrayList<>();
 			lore.add("");
-			lore.add(Language.get("Inventory.sell-shop.items.selling.name").text());
-			for(Price c : cs) lore.add(Language.get("Inventory.sell-shop.items.selling.price",
+			lore.add(Language.get("Shop-sell.items.selling.name").text());
+			for(Price c : cs) lore.add(Language.get("Shop-sell.items.selling.price",
 					"price", c).text());
 			meta.setLore(lore);
 		}
 		meta.addItemFlags(ItemFlag.values());
+		Utils.hideCustomFlags(meta);
 		meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		item.setItemMeta(meta);
 		return item;
@@ -186,8 +188,9 @@ public class PrivateSell {
 	private ItemStack close() {
 		ItemStack item = new ItemStack(group.close());
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.sell-shop.cancel").text());
+		meta.setDisplayName(Language.get("Shop-sell.cancel").text());
 		meta.addItemFlags(ItemFlag.values());
+		Utils.hideCustomFlags(meta);
 		meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		item.setItemMeta(meta);
 		return item;
@@ -197,11 +200,11 @@ public class PrivateSell {
 		
 		private final SellData sell;
 		public final ItemStack item;
-		public final VirtualSpawner spawner;
+		public final IVirtual spawner;
 		private final int amount;
 		public final int[] refund;
 		
-		public SpawnerItem(SellData sell, ItemStack item, VirtualSpawner spawner, int amount) {
+		public SpawnerItem(SellData sell, ItemStack item, IVirtual spawner, int amount) {
 			this.sell = sell;
 			this.item = item;
 			item.setAmount(amount);
@@ -216,11 +219,13 @@ public class PrivateSell {
 			List<String> lore = meta.getLore();
 			if(lore == null) lore = new ArrayList<>();
 			lore.add("");
-			lore.add(Language.get("Inventory.sell-shop.items.selling.name").text());
+			lore.add(Language.get("Shop-sell.items.selling.name").text());
 			Price[] cs = prices();
-			for(Price c : cs) lore.add(Language.get("Inventory.sell-shop.items.selling.price",
+			for(Price c : cs) lore.add(Language.get("Shop-sell.items.selling.price",
 					"price", c).text());
 			meta.setLore(lore);
+			meta.addItemFlags(ItemFlag.values());
+			Utils.hideCustomFlags(meta);
 			clone.setItemMeta(meta);
 			return clone;
 		}

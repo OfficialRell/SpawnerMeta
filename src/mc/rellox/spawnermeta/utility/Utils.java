@@ -1,4 +1,4 @@
-package mc.rellox.spawnermeta.utils;
+package mc.rellox.spawnermeta.utility;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,8 +19,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.utils.Reflections.RF;
-import mc.rellox.spawnermeta.utils.Reflections.RF.Accessor;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
+import mc.rellox.spawnermeta.utility.reflect.type.Accessor;
 import mc.rellox.spawnermeta.version.Version;
 import mc.rellox.spawnermeta.version.Version.VersionType;
 
@@ -123,20 +123,18 @@ public final class Utils {
 			}
 			return name;
 		} catch(Exception e) {
+			RF.debug(new RuntimeException("Cannot get item display name"));
 			return "null";
 		}
 	}
 	
 	public static void hideCustomFlags(ItemMeta meta) {
 		try {
-			Class<?> craft_meta_class = RF.craft("inventory.CraftMetaItem");
-			Object craft_meta = craft_meta_class.cast(meta);
-			if(meta.getClass().equals(craft_meta_class) == false) return;
-			Accessor<Integer> a = RF.access(craft_meta, "hideFlag").as(int.class);
-			int h = a.field(0);
+			Accessor<Integer> a = RF.access(meta, "hideFlag", int.class, false);
+			int h = a.get(0);
 			a.set(h | 64);
 		} catch (Exception e) {
-			e.printStackTrace();
+			RF.debug(new RuntimeException("Unable to apply hidden item flag"));
 		}
 	}
 
@@ -182,7 +180,9 @@ public final class Utils {
 	}
 	
 	public static boolean isValid(String s) {
-		for(char c : s.toCharArray()) if(isLetter(c) == false && isNumber(c) == false && c != '_' && c != '.') return false;
+		for(char c : s.toCharArray())
+			if(isLetter(c) == false && isNumber(c) == false && c != '_' && c != '.')
+				return false;
 		return true;
 	}
 
@@ -195,7 +195,8 @@ public final class Utils {
 	}
 
 	public static <E> E random(List<E> list) {
-		return list.get(R.nextInt(list.size()));
+		int size = list.size();
+		return size > 0 ? list.get(R.nextInt(size)) : null;
 	}
 
 	public static void check(final int id, final Consumer<String> action) {

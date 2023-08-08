@@ -1,4 +1,4 @@
-package mc.rellox.spawnermeta.views;
+package mc.rellox.spawnermeta.view;
 
 import java.util.List;
 
@@ -21,8 +21,8 @@ import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.commands.CommandManager;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
-import mc.rellox.spawnermeta.utils.DataManager;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import mc.rellox.spawnermeta.utility.DataManager;
 
 public final class SpawnerView implements Listener {
 	
@@ -36,8 +36,8 @@ public final class SpawnerView implements Listener {
 	
 	public SpawnerView(Player player) {
 		this.player = player;
-		this.total = (types.size() + 1) / 27;
-		this.v = Bukkit.createInventory(null, 36, Language.get("Inventory.spawner-view.name").text());
+		this.total = types.size() / 27;
+		this.v = Bukkit.createInventory(null, 36, Language.get("Spawner-view.name").text());
 		update();
 		Bukkit.getPluginManager().registerEvents(this, SpawnerMeta.instance());
 		
@@ -106,7 +106,7 @@ public final class SpawnerView implements Listener {
 	private ItemStack next() {
 		ItemStack item = new ItemStack(Material.SPECTRAL_ARROW);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.spawner-view.items.page.next").text());
+		meta.setDisplayName(Language.get("Spawner-view.items.page.next").text());
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -114,7 +114,7 @@ public final class SpawnerView implements Listener {
 	private ItemStack page(int p) {
 		ItemStack item = new ItemStack(Material.PAPER, p);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.spawner-view.items.page.current",
+		meta.setDisplayName(Language.get("Spawner-view.items.page.current",
 				"page", p).text());
 		item.setItemMeta(meta);
 		return item;
@@ -123,7 +123,7 @@ public final class SpawnerView implements Listener {
 	private ItemStack previous() {
 		ItemStack item = new ItemStack(Material.SPECTRAL_ARROW);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.spawner-view.items.page.previous").text());
+		meta.setDisplayName(Language.get("Spawner-view.items.page.previous").text());
 		item.setItemMeta(meta);
 		return item;
 	}

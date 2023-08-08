@@ -13,8 +13,8 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
-import mc.rellox.spawnermeta.utils.Reflections.RF;
-import mc.rellox.spawnermeta.utils.Utils;
+import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public final class ItemMatcher {
 	

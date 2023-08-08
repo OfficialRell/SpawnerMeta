@@ -1,4 +1,4 @@
-package mc.rellox.spawnermeta.views;
+package mc.rellox.spawnermeta.view;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -15,8 +15,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.utils.Utils;
-import mc.rellox.spawnermeta.views.SpawnerViewLayout.Slot;
+import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.view.SpawnerViewLayout.Slot;
 
 public class SpawnerEditor implements Listener {
 	

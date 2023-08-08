@@ -19,7 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.utils.Utils;
+import mc.rellox.spawnermeta.utility.Utils;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;

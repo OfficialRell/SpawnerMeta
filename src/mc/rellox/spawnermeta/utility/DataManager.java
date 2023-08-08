@@ -1,4 +1,4 @@
-package mc.rellox.spawnermeta.utils;
+package mc.rellox.spawnermeta.utility;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,11 +20,11 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.api.spawner.FilledVirtualSpawner;
-import mc.rellox.spawnermeta.api.spawner.VirtualSpawner;
+import mc.rellox.spawnermeta.api.spawner.IVirtual;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
+import mc.rellox.spawnermeta.spawner.ActiveVirtual;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.text.order.IOrder;
@@ -72,7 +72,7 @@ public final class DataManager {
 		return new int[] {1, 1, 1};
 	}
 
-	public static ItemStack getSpawner(VirtualSpawner spawner, int a) {
+	public static ItemStack getSpawner(IVirtual spawner, int a) {
 		return getSpawners(spawner.getType(), spawner.getUpgradeLevels(), spawner.getCharges(), spawner.getSpawnable(),
 				a, spawner.isEmpty(), true).get(0);
 	}
@@ -122,26 +122,26 @@ public final class DataManager {
 		List<Content> name;
 		if(empty == true) {
 			if(Settings.settings.empty_store_inside == true && type != SpawnerType.EMPTY)
-				name = Language.list("Spawners.item.empty-stored.name", "type", type);
-			else name = Language.list("Spawners.item.empty.name");
-		} else name = Language.list("Spawners.item.regular.name", "type", type);
+				name = Language.list("Spawner-item.empty-stored.name", "type", type);
+			else name = Language.list("Spawner-item.empty.name");
+		} else name = Language.list("Spawner-item.regular.name", "type", type);
 		
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 		
 		IOrder order = Settings.settings.order_spawner.oderer();
 		
 		order.named(name);
-		order.submit("HEADER", () -> Language.list("Spawners.item.header"));
-		order.submit("RANGE", () -> Language.list("Spawners.item.upgrade.range", "level", Utils.roman(levels[0])));
-		order.submit("DELAY", () -> Language.list("Spawners.item.upgrade.delay", "level", Utils.roman(levels[1])));
-		order.submit("AMOUNT", () -> Language.list("Spawners.item.upgrade.amount", "level", Utils.roman(levels[2])));
+		order.submit("HEADER", () -> Language.list("Spawner-item.header"));
+		order.submit("RANGE", () -> Language.list("Spawner-item.upgrade.range", "level", Utils.roman(levels[0])));
+		order.submit("DELAY", () -> Language.list("Spawner-item.upgrade.delay", "level", Utils.roman(levels[1])));
+		order.submit("AMOUNT", () -> Language.list("Spawner-item.upgrade.amount", "level", Utils.roman(levels[2])));
 		if(Settings.settings.charges_enabled == true) {
 			boolean inf = charges >= 1_000_000_000;
-			order.submit("CHARGES", () -> Language.list("Spawners.item.charges",
+			order.submit("CHARGES", () -> Language.list("Spawner-item.charges",
 					"charges", inf ? Text.infinity : charges));
 		}
 		if(Settings.settings.spawnable_enabled == true) {
-			order.submit("SPAWNABLE", () -> Language.list("Spawners.item.spawnable", "spawnable", spawnable));
+			order.submit("SPAWNABLE", () -> Language.list("Spawner-item.spawnable", "spawnable", spawnable));
 		}
 
 		meta.setLore(order.build());
@@ -161,9 +161,13 @@ public final class DataManager {
 	}
 	
 	public static List<ItemStack> getSpawner(SpawnerType type, String values, int amount, boolean empty) {
-		if(values == null || values.isEmpty() == true || values.contains(";") == false) return null;
-		String[] vs = values.split(";");
-		if(vs.length != 5) return null;
+		if(values == null || values.isEmpty() == true) return List.of();
+		String[] vs = values.split("[,;:]");
+		if(vs.length < 5) {
+			var os = vs;
+			vs = new String[] {"-", "-", "-", "-", "-"};
+			for(int i = 0; i < os.length; i++) vs[i] = os[i];
+		}
 		int[] is = new int[5];
 		int i = 0;
 		for(; i < 5; i++) {
@@ -171,7 +175,7 @@ public final class DataManager {
 					|| vs[i].equals("infinite") == true) is[i] = 1_500_000_000;
 			else if(vs[i].equals("-") == true) is[i] = 0;
 			else if(Utils.isInteger(vs[i]) == true) is[i] = Integer.parseInt(vs[i]);
-			else return null;
+			else return List.of();
 		}
 		int[] ls = Settings.settings.upgrades_levels.get(type);
 		for(i = 0; i < 3; i++) {
@@ -186,8 +190,16 @@ public final class DataManager {
 	public static void setNewSpawner(Player player, Block block, boolean empty) {
 		if(getNew(block) == 1) return;
 		CreatureSpawner cs = (CreatureSpawner) block.getState();
-		SpawnerType type = SpawnerType.of(cs.getSpawnedType());
+		EntityType entity = cs.getSpawnedType();
+		SpawnerType type;
 		if(empty == true) type = SpawnerType.EMPTY;
+		else {
+			if(entity == null) {
+				if(Settings.settings.empty_enabled == true) type = SpawnerType.EMPTY;
+				else type = SpawnerType.PIG;
+			} else type = SpawnerType.of(entity);
+			if(type == null) type = SpawnerType.PIG;
+		}
 		setNewSpawner(player, block, type, i(), 0, Settings.settings.spawnable_amount.get(type), empty);
 	}
 
@@ -203,7 +215,6 @@ public final class DataManager {
 		setSpawnable(block, spawnable);
 		setDefault(block);
 		setOneCount(block);
-		setNearbyLimit(block);
 		setType(block, type);
 		setEnabled(block, true);
 		if(empty == true) setEmpty(block);
@@ -218,7 +229,6 @@ public final class DataManager {
 		setDelay(block, r[1]);
 		setDefault(block);
 		setOneCount(block);
-		setNearbyLimit(block);
 	}
 
 	public static void recalculate(Block block) {
@@ -260,7 +270,7 @@ public final class DataManager {
 		item.setItemMeta(meta);
 	}
 
-	public static VirtualSpawner getSpawnerItem(ItemStack item) {
+	public static IVirtual getSpawnerItem(ItemStack item) {
 		if(item == null || item.getType() != Material.SPAWNER) return null;
 		ItemMeta meta = item.getItemMeta();
 		PersistentDataContainer p = meta.getPersistentDataContainer();
@@ -278,12 +288,12 @@ public final class DataManager {
 		int charges = p.getOrDefault(key_charges, PersistentDataType.INTEGER, 0);
 		int spawnable = p.getOrDefault(key_spawnable, PersistentDataType.INTEGER, 0);
 		boolean empty = p.getOrDefault(key_empty, PersistentDataType.INTEGER, 0) >= 1;
-		return new FilledVirtualSpawner(type, levels, charges, spawnable, empty);
+		return new ActiveVirtual(type, levels, charges, spawnable, empty);
 	}
 
-	public static VirtualSpawner getSpawnerItem(Block block) {
+	public static IVirtual getSpawnerItem(Block block) {
 		if(block == null || block.getType() != Material.SPAWNER) return null;
-		return new FilledVirtualSpawner(getType(block), getUpgradeLevels(block),
+		return new ActiveVirtual(getType(block), getUpgradeLevels(block),
 				getCharges(block), getSpawnable(block), isEmpty(block));
 	}
 
@@ -338,13 +348,6 @@ public final class DataManager {
 		CreatureSpawner cs = cast(block);
 		if(cs == null) return;
 		cs.setSpawnCount(1);
-		cs.update();
-	}
-	
-	private static void setNearbyLimit(Block block) {
-		CreatureSpawner cs = cast(block);
-		if(cs == null) return;
-		cs.setMaxNearbyEntities(Settings.settings.nearby_entity_limit);
 		cs.update();
 	}
 
@@ -510,7 +513,7 @@ public final class DataManager {
 		int min = cs.getMinSpawnDelay();
 		int max = cs.getMaxSpawnDelay();
 		if(s < 1) s = 1;
-		if((s > min && s < max) || s < min) {
+		if((++s > min && s < max) || s < min) {
 			cs.setMinSpawnDelay(s);
 			cs.setMaxSpawnDelay(s);
 		} else {

@@ -7,10 +7,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.api.spawner.VirtualSpawner;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
-import mc.rellox.spawnermeta.utils.DataManager;
-import mc.rellox.spawnermeta.utils.Reflections.RF;
+import mc.rellox.spawnermeta.api.spawner.IVirtual;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import mc.rellox.spawnermeta.utility.DataManager;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import net.brcdev.shopgui.ShopGuiPlusApi;
 import net.brcdev.shopgui.event.ShopGUIPlusPostEnableEvent;
 import net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider;
@@ -49,7 +49,7 @@ public class SetupShopGUI {
 
 		@Override
 		public EntityType getSpawnerEntityType(ItemStack item) {
-			VirtualSpawner virtual = VirtualSpawner.of(item);
+			IVirtual virtual = IVirtual.of(item);
 			return virtual == null ? null : virtual.getType().entity();
 		}
 		

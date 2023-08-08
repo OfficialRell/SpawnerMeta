@@ -28,7 +28,7 @@ public final class PriceManager {
 		PRICES.clear();
 		Stream.of(Group.values()).forEach(group -> {
 			String path = "Prices." + group.name();
-			String type_name = CF.s.getString(path + ".price-type");
+			String type_name = CF.s.file().getString(path + ".price-type");
 			PriceType type = PriceType.of(type_name);
 			if(type == null) type = PriceType.EXPERIENCE;
 			else if(type == PriceType.ECONOMY && SpawnerMeta.ECONOMY.get() == null) type = PriceType.EXPERIENCE;
@@ -37,7 +37,7 @@ public final class PriceManager {
 			else if(type == PriceType.LEVELS) price = PriceLevels::new;
 			else if(type == PriceType.ECONOMY) price = PriceEconomy::new;
 			else {
-				ItemMatcher matcher = CF.s.getMatcher(path + ".item");
+				ItemMatcher matcher = ItemMatcher.from(CF.s.file(), path + ".item");
 				price = i -> new PriceMaterial(i, matcher);
 			}
 			PRICES.put(group, price);

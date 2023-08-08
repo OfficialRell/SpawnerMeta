@@ -1,4 +1,4 @@
-package mc.rellox.spawnermeta.spawner;
+package mc.rellox.spawnermeta.spawner.type;
 
 public enum StackingType {
 	

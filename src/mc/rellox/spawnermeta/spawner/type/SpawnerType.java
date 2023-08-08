@@ -1,4 +1,4 @@
-package mc.rellox.spawnermeta.spawner;
+package mc.rellox.spawnermeta.spawner.type;
 
 import java.util.stream.Stream;
 
@@ -8,8 +8,9 @@ import org.bukkit.entity.EntityType;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.text.content.Content;
-import mc.rellox.spawnermeta.utils.EntityBox;
-import mc.rellox.spawnermeta.utils.Reflections.RF;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
+import mc.rellox.spawnermeta.utility.region.EntityBox;
+import mc.rellox.spawnermeta.utility.region.IEntityMulitbox;
 
 public enum SpawnerType {
 	
@@ -53,7 +54,7 @@ public enum SpawnerType {
 	ILLUSIONER(EntityType.ILLUSIONER, "Illusioner", null, EntityBox.box(1, 2, 1)),
 	IRON_GOLEM(EntityType.IRON_GOLEM, "Iron Golem", _m("IRON_GOLEM_SPAWN_EGG"), EntityBox.box(2, 3, 2)),
 	LLAMA(EntityType.LLAMA, "Llama", Material.LLAMA_SPAWN_EGG, EntityBox.box(1, 2, 1)),
-	MAGMA_CUBE(EntityType.MAGMA_CUBE, "Magma Cube", Material.MAGMA_CUBE_SPAWN_EGG, EntityBox.single()),
+	MAGMA_CUBE(EntityType.MAGMA_CUBE, "Magma Cube", Material.MAGMA_CUBE_SPAWN_EGG, EntityBox.multibox(() -> Settings.settings.slime_box)),
 	MINECART(EntityType.MINECART, "Minecart", Material.MINECART, true, EntityBox.single()),
 	MINECART_CHEST(EntityType.MINECART_CHEST, "Minecart with Chest", Material.CHEST_MINECART, true, EntityBox.single()),
 	MINECART_COMMAND(EntityType.MINECART_COMMAND, "Minecart with Command Block", Material.COMMAND_BLOCK_MINECART, true, EntityBox.single()),
@@ -82,7 +83,7 @@ public enum SpawnerType {
 	SILVERFISH(EntityType.SILVERFISH, "Silverfish", Material.SILVERFISH_SPAWN_EGG, EntityBox.single()),
 	SKELETON(EntityType.SKELETON, "Skeleton", Material.SKELETON_SPAWN_EGG, EntityBox.box(1, 2, 1)),
 	SKELETON_HORSE(EntityType.SKELETON_HORSE, "Skeleton Horse", Material.SKELETON_HORSE_SPAWN_EGG, EntityBox.box(1, 2, 1)),
-	SLIME(EntityType.SLIME, "Slime", Material.SLIME_SPAWN_EGG, EntityBox.single()),
+	SLIME(EntityType.SLIME, "Slime", Material.SLIME_SPAWN_EGG, EntityBox.multibox(() -> Settings.settings.slime_box)),
 	SNIFFER(_e("SNIFFER"), "Sniffer", _m("SNIFFER_SPAWN_EGG"), EntityBox.box(2, 2, 2)),
 	SNOWMAN(EntityType.SNOWMAN, "Snowman", _m("SNOW_GOLEM_SPAWN_EGG"), EntityBox.box(1, 2, 1)),
 	SPIDER(EntityType.SPIDER, "Spider", Material.SPIDER_SPAWN_EGG, EntityBox.box(2, 1, 2)),
@@ -110,21 +111,20 @@ public enum SpawnerType {
 
 	private final EntityType type;
 	private final String name;
-	private boolean unique;
-	private final Material changer;
+	private final boolean unique;
+	private final Material material;
 	private final EntityBox box;
 
-	SpawnerType(EntityType type, String name, Material changer, EntityBox box) {
+	SpawnerType(EntityType type, String name, Material material, boolean unique, EntityBox box) {
 		this.type = type;
 		this.name = name;
-		this.changer = changer;
+		this.material = material;
 		this.box = box;
-		SpawnerManager.EGGS.put(changer, this);
+		this.unique = unique;
 	}
 	
-	SpawnerType(EntityType type, String name, Material changer, boolean unique, EntityBox box) {
-		this(type, name, changer, box);
-		this.unique = unique;
+	SpawnerType(EntityType type, String name, Material material, EntityBox box) {
+		this(type, name, material, false, box);
 	}
 	
 	public boolean exists() {
@@ -144,7 +144,7 @@ public enum SpawnerType {
 	}
 	
 	public EntityBox box() {
-		return box;
+		return box instanceof IEntityMulitbox multi ? multi.box() : box;
 	}
 	
 	public boolean unique() {
@@ -163,8 +163,8 @@ public enum SpawnerType {
 		return Language.or("Entities.name." + type.name(), text());
 	}
 	
-	public Material changer() {
-		return changer;
+	public Material material() {
+		return Settings.settings.changing_materials.getOrDefault(this, material);
 	}
 	
 	public boolean disabled() {
@@ -181,16 +181,27 @@ public enum SpawnerType {
 	}
 	
 	public static SpawnerType of(EntityType type) {
-		return Stream.of(values())
+		return stream()
 				.filter(SpawnerType::regular)
 				.filter(s -> s.equals(type))
 				.findFirst()
 				.orElse(null);
 	}
 	
+	public static SpawnerType of(Material m) {
+		return stream()
+				.filter(type -> type.material() == m)
+				.findFirst()
+				.orElse(null);
+	}
+	
+	public static Stream<SpawnerType> stream() {
+		return Stream.of(values());
+	}
+	
 	private static EntityType _e(String... ns) {
 		return ns.length == 1 ? RF.enumerate(EntityType.class, ns[0])
-				: RF.enumerates(EntityType.class, ns);
+				: RF.enumerate(EntityType.class, ns);
 	}
 	
 	private static Material _m(String name) {

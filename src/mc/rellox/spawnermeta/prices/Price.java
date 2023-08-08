@@ -10,7 +10,7 @@ import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.text.content.Content;
-import mc.rellox.spawnermeta.utils.Utils;
+import mc.rellox.spawnermeta.utility.Utils;
 
 public abstract class Price {
 	

@@ -11,8 +11,8 @@ import com.bgsoftware.wildtools.api.hooks.DropsProvider;
 import com.bgsoftware.wildtools.handlers.ProvidersHandler;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.api.spawner.Spawner;
-import mc.rellox.spawnermeta.utils.Reflections.RF;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class SetupWildTools {
 	
@@ -22,7 +22,7 @@ public class SetupWildTools {
 			public void run() {
 				ProvidersHandler providers = SpawnerMeta.WILD_TOOLS.get().getProviders();
 				try {
-					RF.access(providers, "dropsProviders").as(List.class).field().clear();
+					RF.fetch(providers, "dropsProviders", List.class).clear();
 				} catch (Exception x) {
 					RF.debug(x);
 				}
@@ -40,7 +40,7 @@ public class SetupWildTools {
 		
 		@Override
 		public List<ItemStack> getBlockDrops(Player player, Block block) {
-			return Spawner.of(block).toItems();
+			return ISpawner.of(block).toItems();
 		}
 	}
 }
