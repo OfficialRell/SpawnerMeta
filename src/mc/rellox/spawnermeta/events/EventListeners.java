@@ -25,23 +25,20 @@ import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
-import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.holograms.HologramRegistry;
-import mc.rellox.spawnermeta.utils.DataManager;
-import mc.rellox.spawnermeta.utils.Messagable;
-import mc.rellox.spawnermeta.utils.Reflections.RF;
+import mc.rellox.spawnermeta.utility.DataManager;
+import mc.rellox.spawnermeta.utility.Messagable;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class EventListeners implements Listener {
 	
 	private static final List<RegistryAbstract> REGISTRIES =
-			List.of(new RegistryAI(), new RegistryWorldLoad(), new RegistryLinking(),
-					new RegistrySpawnerRename());
+			List.of(new RegistryAI(), new RegistryLinking(), new RegistrySpawnerRename());
 	
 	public static void initialize() {
 		Bukkit.getPluginManager().registerEvents(new EventListeners(), SpawnerMeta.instance());
@@ -72,7 +69,7 @@ public class EventListeners implements Listener {
 			EventRegistry.stack_nearby(event, player, m, block);
 			return;
 		}
-		Spawner spawner = Spawner.of(block);
+		ISpawner spawner = ISpawner.of(block);
 		try {
 			EventRegistry.interact(event, player, m, block, spawner);
 		} catch (Exception e) {
@@ -170,20 +167,20 @@ public class EventListeners implements Listener {
 		
 	}
 	
-	private static final class RegistryWorldLoad extends RegistryAbstract {
-		
-		@Override
-		public void update() {
-			if(HologramRegistry.loaded() == false) unregister();
-			else register();
-		}
-
-		@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-		private void onWorldLoad(WorldLoadEvent event) {
-			HologramRegistry.load(event.getWorld());
-		}
-		
-	}
+//	private static final class RegistryWorldLoad extends RegistryAbstract {
+//		
+//		@Override
+//		public void update() {
+//			if(HologramRegistry.loaded() == false) unregister();
+//			else register();
+//		}
+//
+//		@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+//		private void onWorldLoad(WorldLoadEvent event) {
+//			HologramRegistry.load(event.getWorld());
+//		}
+//		
+//	}
 	
 	private static final class RegistryLinking extends RegistryAbstract {
 

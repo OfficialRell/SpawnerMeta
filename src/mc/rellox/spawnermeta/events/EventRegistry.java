@@ -1,15 +1,11 @@
 package mc.rellox.spawnermeta.events;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -18,45 +14,32 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.Sound;
-import org.bukkit.World;
-import org.bukkit.attribute.Attributable;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EnderCrystal;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.EnderDragon.Phase;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LargeFireball;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Slime;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Consumer;
 import org.bukkit.util.Vector;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
@@ -70,31 +53,22 @@ import mc.rellox.spawnermeta.api.events.SpawnerExplodeEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerExplodeEvent.ExplosionType;
 import mc.rellox.spawnermeta.api.events.SpawnerOpenEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerPlaceEvent;
-import mc.rellox.spawnermeta.api.events.SpawnerPostSpawnEvent;
-import mc.rellox.spawnermeta.api.events.SpawnerPreSpawnEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerStackEvent;
-import mc.rellox.spawnermeta.api.spawner.Spawner;
-import mc.rellox.spawnermeta.api.spawner.VirtualSpawner;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.api.spawner.IVirtual;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.LocationFile.LF;
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.holograms.HologramRegistry;
 import mc.rellox.spawnermeta.items.ItemCollector;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.prices.Group;
 import mc.rellox.spawnermeta.prices.Price;
-import mc.rellox.spawnermeta.spawner.SpawnerManager;
-import mc.rellox.spawnermeta.spawner.SpawnerSpawning;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
-import mc.rellox.spawnermeta.spawner.UpgradeType;
+import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.text.content.Content;
-import mc.rellox.spawnermeta.utils.DataManager;
-import mc.rellox.spawnermeta.utils.EntityBox;
-import mc.rellox.spawnermeta.utils.Messagable;
-import mc.rellox.spawnermeta.utils.Reflections.RF;
-import mc.rellox.spawnermeta.utils.Reflections.RF.Invoker;
-import mc.rellox.spawnermeta.utils.Utils;
-import mc.rellox.spawnermeta.views.SpawnerUpgrade;
+import mc.rellox.spawnermeta.utility.DataManager;
+import mc.rellox.spawnermeta.utility.Messagable;
+import mc.rellox.spawnermeta.utility.Utils;
 
 public final class EventRegistry {
 	
@@ -116,7 +90,7 @@ public final class EventRegistry {
 		return event;
 	}
 
-	protected static void open_upgrades(Player player, Messagable m, Block block, Spawner spawner) {
+	protected static void open_upgrades(Player player, Messagable m, Block block, ISpawner spawner) {
 		if(Settings.settings.upgrade_interface_enabled == false) return;
 		DataManager.recalculate(block);
 		if(player.hasPermission("spawnermeta.upgrades.open") == false) {
@@ -142,11 +116,10 @@ public final class EventRegistry {
 		SpawnerOpenEvent call = call(new SpawnerOpenEvent(player, block));
 		if(call.cancelled() == true) return;
 		
-		SpawnerUpgrade.newUpgrade(player, block);
-		HologramRegistry.update(block);
+		GeneratorRegistry.get(block).open(player);
 	}
 
-	protected static void changing_regular(Player player, Messagable m, Block block, Spawner spawner, SpawnerType type,
+	protected static void changing_regular(Player player, Messagable m, Block block, ISpawner spawner, SpawnerType type,
 			ItemStack item, SpawnerType change) {
 		if(Settings.settings.changing_enabled == false) return;
 		if(change.unique() == true && !(player.isOp() == true && player.getGameMode() == GameMode.CREATIVE)) return;
@@ -171,6 +144,16 @@ public final class EventRegistry {
 		}
 		if(type == change) {
 			m.send(Language.list("Spawners.changing.same-type"));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return;
+		}
+		if(Settings.settings.changing_deny_from.contains(type) == true) {
+			m.send(Language.list("Spawners.changing.dany.from"));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return;
+		}
+		if(Settings.settings.changing_deny_to.contains(change) == true) {
+			m.send(Language.list("Spawners.changing.dany.to"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
@@ -200,11 +183,11 @@ public final class EventRegistry {
 		ItemMatcher.remove(player, item, stack);
 		spawner.setType(change);
 		spawner.update();
-		HologramRegistry.update(block);
-		unlink(block);
+		
+		GeneratorRegistry.update(block);
 	}
 
-	protected static void changing_empty(Player player, Messagable m, Block block, Spawner spawner, SpawnerType type, ItemStack item,
+	protected static void changing_empty(Player player, Messagable m, Block block, ISpawner spawner, SpawnerType type, ItemStack item,
 			SpawnerType change) {
 		if(change.unique() == true && Utils.op(player) == false) return;
 		if(type != SpawnerType.EMPTY) return;
@@ -218,6 +201,11 @@ public final class EventRegistry {
 		int stack = spawner.getStack();
 		if(ItemMatcher.has(player, item, stack) == false) {
 			m.send(Language.list("Spawners.changing.eggs.insufficient", "required", stack));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return;
+		}
+		if(Settings.settings.changing_deny_to.contains(change) == true) {
+			m.send(Language.list("Spawners.changing.dany.to"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
@@ -242,13 +230,14 @@ public final class EventRegistry {
 		ItemMatcher.remove(player, item, stack);
 		spawner.setType(change);
 		spawner.update();
-		HologramRegistry.update(block);
-		unlink(block);
+		
+		GeneratorRegistry.update(block);
 	}
 	
-	protected static boolean remove_eggs_empty(Player player, Messagable m, Block block, SpawnerType type, ItemStack item, Spawner spawner) {
+	protected static boolean remove_eggs_empty(PlayerInteractEvent event, Player player, Messagable m, Block block, SpawnerType type, ItemStack item, ISpawner spawner) {
 		if(spawner.isEmpty() == false) return true;
 		if(item != null && item.getType() == Material.SPAWNER) return true;
+		event.setCancelled(true);
 		if(Settings.settings.empty_enabled == false) {
 			m.send(Language.list("Spawners.empty.disabled"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
@@ -302,7 +291,7 @@ public final class EventRegistry {
 		if(item == null || item.getType() != Material.SPAWNER
 				|| player.isSneaking() == false) return;
 		event.setCancelled(true);
-		VirtualSpawner data = VirtualSpawner.of(item);
+		IVirtual data = IVirtual.of(item);
 		if(data == null) return;
 		final int r = Settings.settings.stacking_nearby_radius;
 		Block valid = null;
@@ -314,7 +303,7 @@ public final class EventRegistry {
 				do {
 					Block rel = block.getRelative(x, y, z);
 					if(rel.getType() != Material.SPAWNER) continue;
-					VirtualSpawner of = VirtualSpawner.of(rel);
+					IVirtual of = IVirtual.of(rel);
 					if(of == null) continue;
 					if(data.exact(of) == true) {
 						valid = rel;
@@ -328,14 +317,14 @@ public final class EventRegistry {
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
-		stacking(player, m, valid, Spawner.of(valid), item, false);
+		stacking(player, m, valid, ISpawner.of(valid), item, false);
 	}
 
 	protected static void verify_removing(PlayerInteractEvent event, Player player, Messagable m) {
 		if(Settings.settings.empty_verify_removing == false) return;
 		Block block = event.getClickedBlock();
 		if(player.isSneaking() == false || block.getType() != Material.SPAWNER) return;
-		Spawner spawner = getAPI().getSpawner(block);
+		ISpawner spawner = getAPI().getSpawner(block);
 		SpawnerType type = spawner.getType();
 		if(type == SpawnerType.EMPTY || spawner.isEmpty() == false) return;
 		boolean b = Utils.nulled(player.getInventory().getItemInMainHand()) == false;
@@ -354,7 +343,7 @@ public final class EventRegistry {
 	}
 
 	protected static boolean stacking(Player player, Messagable m, Block block,
-			Spawner spawner, ItemStack item, boolean direct) {
+			ISpawner spawner, ItemStack item, boolean direct) {
 		int stack = spawner.getStack();
 		if(Settings.settings.stacking_ignore_limit == false) {
 			if(stack >= Settings.settings.stacking_spawner_limit) {
@@ -369,7 +358,7 @@ public final class EventRegistry {
 			if(time >= b - tt) return false;
 			time = b;
 		}
-		VirtualSpawner data = VirtualSpawner.of(item);
+		IVirtual data = IVirtual.of(item);
 		if(data == null) return false;
 		if(player.hasPermission("spawnermeta.stacking") == false) {
 			m.send(Language.list("Spawners.stacking.permission"));
@@ -390,7 +379,7 @@ public final class EventRegistry {
 				return false;
 			}
 		}
-		VirtualSpawner other = VirtualSpawner.of(block);
+		IVirtual other = IVirtual.of(block);
 		if(data.exact(other) == false) {
 			m.send(Language.list("Spawners.stacking.unequal-spawner"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
@@ -453,36 +442,32 @@ public final class EventRegistry {
 		}
 		ItemMatcher.remove(player, item, 1);
 		LF.add(block, player);
-		SpawnerUpgrade.update(block);
-		HologramRegistry.update(block);
+		
+		GeneratorRegistry.update(block);
 		return false;
 	}
 
-	protected static void interact(PlayerInteractEvent event, Player player, Messagable m, Block block, Spawner spawner) {
+	protected static void interact(PlayerInteractEvent event, Player player, Messagable m, Block block, ISpawner spawner) {
 		if(DataManager.isItemSpawner(block) == true) return;
 		SpawnerType type = spawner.getType();
 		if(type.disabled() == true) return;
-		event.setCancelled(true);
+		event.setCancelled(false);
 		ItemStack item = event.getItem();
 		
-		if(EventRegistry.remove_eggs_empty(player, m, block, type, item, spawner) == false) return;
+		if(EventRegistry.remove_eggs_empty(event, player, m, block, type, item, spawner) == false) return;
 		
 		if(item != null) {
 			if(player.isSneaking() == true) {
 				y: if(Settings.settings.stacking_enabled == true) {
-					
 					/*
 					 * Stacking
 					 */
-					
-					if(item.getType() != Material.SPAWNER) {
-						event.setCancelled(false);
-						break y;
-					}
+					if(item.getType() != Material.SPAWNER) break y;
+					event.setCancelled(true);
 					if(EventRegistry.stacking(player, m, block, spawner, item, true) == true) break y;
 					return;
 				}
-				SpawnerType change = SpawnerManager.fromEgg(item.getType());
+				SpawnerType change = SpawnerType.of(item.getType());
 				if(change == null) {
 					if(item.getType().name().endsWith("_EGG") == true) event.setCancelled(true);
 					return;
@@ -504,19 +489,22 @@ public final class EventRegistry {
 			} else if(item.getType().name().endsWith("_EGG") == true) event.setCancelled(true);
 		}
 		if(spawner.isEmpty() == true && type == SpawnerType.EMPTY) return;
-		if(item != null && item.getType() == Material.SPAWNER) {
-			event.setCancelled(false);
-			return;
+		if(item != null && item.getType() == Material.SPAWNER) return;
+		if(item != null) {
+			if(item.getType() == Material.SPAWNER) return;
+//			Checks if player tries to open spawner with a block placement
+//			if(Settings.settings.cancel_placement_when_opening == false && event.isBlockInHand() == true) return;
 		}
 		EventRegistry.open_upgrades(player, m, block, spawner);
+		event.setCancelled(true);
 	}
 
 	protected static void remove_eggs(Player player, Block block, SpawnerType type) {
-		Spawner spawner = getAPI().getSpawner(block);
+		ISpawner spawner = getAPI().getSpawner(block);
 		
 		ItemStack refund = null;
 		if(Settings.settings.empty_destroy_eggs_removing == false) {
-			Material m = type.changer();
+			Material m = type.material();
 			if(m != null) refund = new ItemStack(m, spawner.getStack());
 		}
 
@@ -529,14 +517,14 @@ public final class EventRegistry {
 		player.spawnParticle(Particle.FIREWORKS_SPARK, block.getLocation().add(0.5, 0.5, 0.5), 25, 0.3, 0.3, 0.3, 0.1);
 		spawner.setType(SpawnerType.EMPTY);
 		spawner.setRotating(false);
-		HologramRegistry.update(block);
-		unlink(block);
+		
+		GeneratorRegistry.update(block);
 		
 		if(block.equals(verify) == true) verify = null;
 	}
 
 	public static void breaking(BlockBreakEvent event, Block block) {
-		Spawner spawner = getAPI().getSpawner(block);
+		ISpawner spawner = getAPI().getSpawner(block);
 		SpawnerType type = spawner.getType();
 		boolean ce = Settings.settings.cancel_break_event;
 		event.setCancelled(true);
@@ -554,10 +542,10 @@ public final class EventRegistry {
 			m.send(Language.list("Spawners.breaking.success"));
 			event.setCancelled(false);
 			
-			SpawnerUpgrade.removeUpgrade(block);
-			SpawnerManager.dropEggs(player, block);
-			HologramRegistry.remove(block);
-			unlink(block);
+			dropAfterChanging(player, block);
+			
+			GeneratorRegistry.remove(block);
+			
 			LF.remove(block);
 			return;
 		}
@@ -608,9 +596,11 @@ public final class EventRegistry {
 		if(Settings.settings.breaking_silk_enabled == true
 				&& Settings.settings.breaking_silk_destroy == false
 				&& silk == false) {
-			m.send(Language.list("Spawners.breaking.failure"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
+			if(player.hasPermission("spawnermeta.breaking.bypass.silktouch") == false) {
+				m.send(Language.list("Spawners.breaking.failure"));
+				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+				return;
+			}
 		}
 		Location bl = block.getLocation().add(0.5, 0.5, 0.5);
 		Price price = null;
@@ -682,12 +672,12 @@ public final class EventRegistry {
 				}
 			}
 		}
-		SpawnerUpgrade.removeUpgrade(block);
-		SpawnerManager.dropEggs(player, block);
+		dropAfterChanging(player, block);
 		LF.remove(block);
 		if(ce == true) block.setType(Material.AIR);
-		unlink(block);
-		HologramRegistry.remove(block);
+		
+		GeneratorRegistry.remove(block);
+		
 		ItemCollector.execute(player);
 		event.setCancelled(ce);
 	}
@@ -722,13 +712,64 @@ public final class EventRegistry {
 			}
 			
 			if(DataManager.isPlaced(block) == true) {
-				if(xs[0] == true) SpawnerManager.breakSpawner(block, xs[1]);
+				if(xs[0] == true) destroy(block, xs[1]);
 			} else {
-				if(xs[2] == true) SpawnerManager.breakSpawner(block, xs[3]);
+				if(xs[2] == true) destroy(block, xs[3]);
 			}
 			block.getWorld().spawnParticle(Particle.VILLAGER_ANGRY,
 					block.getLocation().add(0.5, 0.5, 0.5), 10, 0.2, 0.2, 0.2, 0);
 			it.remove();
+		}
+	}
+	
+	public static boolean destroy(Block block, boolean drop) {
+		return destroy(block, drop, true);
+	}
+	
+	public static boolean destroy(Block block, boolean drop, boolean particles) {
+		if(block == null || block.getType() != Material.SPAWNER) return false;
+		Location loc = block.getLocation().add(0.5, 0.5, 0.5);
+		if(drop == true) {
+			DataManager.getSpawners(block, false).forEach(item -> {
+				loc.getWorld().dropItem(loc, item).setVelocity(new Vector());
+			});
+			dropAfterChanging(null, block);
+		}
+		LF.remove(block);
+		block.setType(Material.AIR);
+		
+		GeneratorRegistry.remove(block);
+		
+		if(particles == true) loc.getWorld().spawnParticle(Particle.CLOUD, loc, 25, 0.25, 0.25, 0.25, 0);
+		return true;
+	}
+	
+	public static void dropAfterChanging(Player player, Block block) {
+		if(Settings.settings.empty_destroy_eggs_breaking == true
+				|| Settings.settings.empty_store_inside == true) {
+			block.getWorld().spawnParticle(Particle.CRIT, Utils.center(block), 10, 0, 0, 0, 0.1);
+			return;
+		}
+		ISpawner spawner = ISpawner.of(block);
+		SpawnerType type = spawner.getType();
+		if(spawner.isEmpty() == true && type != SpawnerType.EMPTY) {
+			if(type.unique() == false) {
+				Material mat = type.material();
+				if(mat != null) {
+					int s = spawner.getStack();
+					if(Settings.settings.breaking_drop_on_ground == true) {
+						ItemStack item = new ItemStack(mat, s);
+						block.getWorld().dropItem(block.getLocation().add(0.5, 0.5, 0.5), item)
+							.setVelocity(new Vector());
+					} else if(player != null) {
+						while(s > 0) {
+							ItemStack item = new ItemStack(mat, s >= 64 ? 64 : s);
+							ItemCollector.add(player, item);
+							s -= 64;
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -760,9 +801,9 @@ public final class EventRegistry {
 			
 			if(xs != null) {
 				if(DataManager.isPlaced(block) == true) {
-					if(xs[0] == true) SpawnerManager.breakSpawner(block, xs[1]);
+					if(xs[0] == true) destroy(block, xs[1]);
 				} else {
-					if(xs[2] == true) SpawnerManager.breakSpawner(block, xs[3]);
+					if(xs[2] == true) destroy(block, xs[3]);
 				}
 			}
 			block.getWorld().spawnParticle(Particle.VILLAGER_ANGRY,
@@ -787,7 +828,7 @@ public final class EventRegistry {
 		Player player = event.getPlayer();
 		Messagable m = new Messagable(player);
 		ItemStack item = event.getItemInHand().clone();
-		VirtualSpawner data = VirtualSpawner.of(item);
+		IVirtual data = IVirtual.of(item);
 		if(data == null) return;
 		event.setCancelled(true);
 		SpawnerType type = data.getType();
@@ -803,7 +844,7 @@ public final class EventRegistry {
 			return;
 		}
 		x: if(Settings.settings.chunk_enabled == true) {
-			int sa = SpawnerManager.getChunkSpawnerAmount(block);
+			int sa = spawnersInChunk(block);
 			if(sa <= Settings.settings.chunk_limit) break x;
 
 			long b = System.currentTimeMillis() / 50;
@@ -844,282 +885,66 @@ public final class EventRegistry {
 			@Override
 			public void run() {
 				if(block.getType() != Material.SPAWNER) return;
-				SpawnerManager.placeSpawner(block, player, data);
+				place(block, player, data);
 			}
 		}.runTaskLater(SpawnerMeta.instance(), 1);
 	}
 	
-	private static final Set<Block> SET = new HashSet<>(4);
+	public static int spawnersInChunk(Block block) {
+		return spawnersInChunk(block.getChunk());
+	}
+	
+	public static int spawnersInChunk(Chunk chunk) {
+		BlockState[] bs = chunk.getTileEntities();
+		if(bs == null) return 0;
+		return (int) Stream.of(bs)
+				.filter(s -> s instanceof CreatureSpawner)
+				.count();
+	}
+
+	public static boolean place(Block block, Player player, IVirtual virtual) {
+		if(block == null || virtual == null) return false;
+		if(block.getType() != Material.SPAWNER) block.setType(Material.SPAWNER);
+		
+		int[] l = virtual.getUpgradeLevels();
+		SpawnerType type = virtual.isEmpty() == true && Settings.settings.empty_store_inside == false
+				? SpawnerType.EMPTY : virtual.getType();
+		DataManager.setNewSpawner(player, block, type,
+				l, virtual.getCharges(), virtual.getSpawnable(), virtual.isEmpty());
+		DataManager.setPlaced(block);
+		if(player != null) {
+			LF.add(block, player);
+			if(Settings.settings.owned_ignore_limit == false)
+				player.sendMessage(Language.get("Spawners.ownership.limit.place",
+						"placed", LF.placed(player), "limit", Settings.settings.owned_spawner_limit).text());
+		}
+		
+		GeneratorRegistry.put(block);
+		
+		return true;
+	}
 
 	protected static void spawn(SpawnerSpawnEvent event, Entity entity) {
-		if(Settings.settings.disable_spawning == true) return;
+		if(Settings.settings.spawning == false) {
+			event.setCancelled(true);
+			return;
+		}
 		if(entity.getType() == EntityType.DROPPED_ITEM) {
 			if(Settings.settings.disable_item_spawners == true) {
 				event.setCancelled(true);
 				if(entity.isDead() == false) entity.remove();
-			} else {
-				event.setCancelled(false);
-				return;
-			}
+			} else event.setCancelled(false);
 			return;
 		}
-		CreatureSpawner cs = event.getSpawner();
-		Block block = event.getSpawner().getBlock();
-		Spawner spawner = getAPI().getSpawner(block);
+		event.setCancelled(Settings.settings.cancel_spawning_event);
+		if(entity.isDead() == false) entity.remove();
 		
-		SpawnerType type = spawner.getType();
-		if(type.disabled() == true) return;
-		if(Settings.settings.spawner_switching == true && spawner.isEnabled() == false) return;
-		if(spawner.isEmpty() == true && DataManager.isEmptyType(block) == true) return;
-		DataManager.recalculate(block);
-
-		if(SET.contains(block) == true) return;
-		SET.add(block);
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				SET.remove(block);
-			}
-		}.runTaskLater(SpawnerMeta.instance(), 1);
-		
-		DataManager.setNewSpawner(null, block, false);
-		DataManager.resetDelay(block);
-		
-		int stack = spawner.getStack();
-		int count = stack * spawner.getUpgradeAttribute(UpgradeType.AMOUNT);
-		if(count > Settings.settings.safety_limit) count = Settings.settings.safety_limit;
-		
-		int cl = Settings.settings.chunk_entity_limit;
-		if(cl > 0) {
-			long ic = Stream.of(block.getChunk().getEntities())
-					.filter(e -> e instanceof LivingEntity)
-					.filter(e -> e instanceof Player == false)
-					.count();
-			if(ic >= cl) return;
-		}
-		
-		SpawnerPreSpawnEvent call = call(new SpawnerPreSpawnEvent(block, count));
-		if(call.cancelled() == true) return;
-		
-		count = call.count;
-		
-		int charges = spawner.getCharges();
-		if(call.bypass_checks == false && Settings.settings.charges_enabled == true && charges <= 0) {
-			boolean n = Settings.settings.charges_ignore_natural == true && spawner.isNatural() == true;
-			if(n == false) {
-				block.getWorld().spawnParticle(Particle.REDSTONE,
-						block.getLocation().add(0.5, 0.5, 0.5), 25, 0.5, 0.5, 0.5, 0.075,
-						new DustOptions(Color.MAROON, 2.5f));
-				return;
-			}
-		}
-		
-		boolean clear = false;
-		x: if(call.bypass_checks == false && Settings.settings.spawnable_enabled == true) {
-			int spawnable = spawner.getSpawnable();
-			if(spawnable >= 1_000_000_000) break x;
-			if(spawnable <= 0) {
-				clear = true;
-				count = 0;
-				break x;
-			}
-			if(spawnable < count) {
-				count = spawnable;
-				spawnable = 0;
-			} else spawnable -= count;
-			spawner.setSpawnable(spawnable);
-			if(spawnable < stack) {
-				if(spawnable <= 0) clear = true;
-				else {
-					spawner.setStack(spawnable);
-					HologramRegistry.update(block);
-				}
-			}
-		}
-		
-		final Location l = event.getLocation();
-		
-		if(count <= 0) {
-			l.getWorld().spawnParticle(Particle.REDSTONE, block.getLocation().add(0.5, 0.5, 0.5), 25, 0.45, 0.45, 0.45, 0.075,
-					new DustOptions(Color.MAROON, 2.5f));
+		if(ISpawner.of(event.getSpawner().getBlock()).getType().disabled() == true) {
+			event.setCancelled(true);
 			return;
 		}
-		
-		List<Entity> entities = spawnEntities(block, l.getBlock(), type, event.getEntityType(), count, cs);
-		if(entities.isEmpty() == true) return;
-		SpawnerUpgrade.update(block);
-		
-		call(new SpawnerPostSpawnEvent(block, entities));
-
-		if(Settings.settings.kill_entities_on_spawn == true) {
-			if(Settings.settings.entities_drop_xp == true) {
-				Optional<Player> opt = block.getWorld().getNearbyEntities(block.getLocation(), 32, 32, 32).stream()
-						.filter(n -> n instanceof Player)
-						.findAny()
-						.map(n -> (Player) n);
-				entities.forEach(e -> {
-					if(e instanceof LivingEntity living) {
-						opt.ifPresent(near -> living.damage(10_000_000, near));
-						living.setHealth(0);
-					}
-				});
-			} else {
-				entities.forEach(e -> {
-					if(e instanceof LivingEntity living) living.setHealth(0);
-				});
-			}
-		}
-		if(call.bypass_checks == false && Settings.settings.charges_enabled == true
-				&& charges < 1_000_000_000) spawner.setCharges(--charges);
-		
-		if(clear == true) {
-			SpawnerUpgrade.close(block);
-			block.setType(Material.AIR);
-			unlink(block);
-			l.getWorld().spawnParticle(Particle.LAVA, block.getLocation().add(0.5, 0.5, 0.5), 25, 0.1, 0.1, 0.1, 0);
-			HologramRegistry.remove(block);
-		}
-	}
-	
-	private static List<Entity> spawnEntities(Block block, Block at, SpawnerType st, EntityType type, int a, CreatureSpawner cs) {
-		List<Entity> entities;
-		try {
-			Class<?> entity_class = type.getEntityClass();
-
-			Invoker<Entity> invoker = spawner(block.getWorld());
-
-			SpawnerSpawning spread = Settings.settings.spawner_spawning;
-			
-			int s = switch(st) {
-			case SLIME, MAGMA_CUBE -> {
-				int z = Settings.settings.slime_size;
-				yield z <= 0 ? Utils.random(3) + 1 : z;
-			}
-			default -> 0;
-			};
-			
-			EntityBox box = st.box();
-			
-			final Consumer<Entity> f, n = function(cs);
-			
-			if(s > 0) {
-				box = box.multiply(s);
-				f = e -> {
-					n.accept(e);
-					if(e instanceof Slime m) m.setSize(s);
-				};
-			} else f = n;
-			
-			spread.set(block, at, box);
-
-			if(isLiving(type) == true && SpawnerMeta.WILD_STACKER.exists() == true
-					&& SpawnerMeta.WILD_STACKER.enabled() == true) {
-//				Bukkit.getLogger().info("Spawning through WS");
-				entities = SpawnerMeta.WILD_STACKER.combine(block, type, spread, a, cs);
-			} else {
-//				Bukkit.getLogger().info("Spawning as regular");
-				entities = Stream.generate(spread::get)
-					.limit(a)
-					.peek(EventRegistry::particle)
-					.map(l -> spawn(entity_class, invoker, l, f))
-					.collect(Collectors.toList());
-			}
-			spread.clear();
-			return entities;
-		} catch(Exception e) {
-			RF.debug(e);
-		}
-		return new ArrayList<>();
-	}
-	
-	public static void particle(Location loc) {
-		if(Settings.settings.spawning_particles == false) return;
-		loc.getWorld().spawnParticle(Particle.CLOUD, loc.add(0, 0.25, 0), 5, 0.2, 0.2, 0.2, 0.1);
- 	}
-	
-	private static boolean isLiving(EntityType type) {
-		return LivingEntity.class.isAssignableFrom(type.getEntityClass());
-	}
-
-	private static Invoker<Entity> spawner(World world) {
-		return RF.order(RF.craft("CraftWorld").cast(world), "spawn",
-				Location.class, Class.class, Consumer.class, SpawnReason.class).as(Entity.class);
-	}
-
-	public static Entity spawn(Class<?> entity_class, Invoker<Entity> invoker, Location at, Consumer<Entity> function) {
-		return invoker.invoke(at, entity_class, function, SpawnReason.SPAWNER);
-	}
-
-	public static Entity spawn(Location l, EntityType type, Consumer<Entity> function) {
-		return spawner(l.getWorld()).invoke(l, type.getEntityClass(), function, SpawnReason.SPAWNER);
-	}
-
-	public static Consumer<Entity> function(CreatureSpawner cs) {
-		return entity -> {
-			try {
-				if(entity instanceof EnderDragon dragon) dragon.setPhase(Phase.CIRCLING);
-				if(Settings.settings.entity_movement == false
-						&& entity instanceof Attributable le) {
-					AttributeInstance at = le.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
-					if(at != null) at.setBaseValue(0);
-				}
-				if(Settings.settings.check_spawner_nerf == true && entity instanceof Mob mob) {
-					Object w = RF.order(mob.getWorld(), "getHandle").invoke();
-					Object f = RF.fetch(w, "spigotConfig");
-					if(RF.access(f, "nerfSpawnerMobs")
-							.as(boolean.class)
-							.field(false) == true) {
-						Object a = RF.order(mob, "getHandle").invoke();
-						RF.access(a, "aware").as(boolean.class).set(false);
-					}
-				}
-				if(Settings.settings.spawn_babies == false && entity instanceof Ageable ageable) ageable.setAdult();
-				if(Settings.settings.spawn_with_equipment == false && entity instanceof LivingEntity a) {
-					EntityEquipment e = a.getEquipment();
-					e.clear();
-				}
-				Object o = RF.order(entity, "getHandle").invoke();
-				RF.accessI(o, "spawnedViaMobSpawner").as(boolean.class).set(true);
-				RF.accessI(o, "spawnReason").as(SpawnReason.class).set(SpawnReason.SPAWNER);
-				if(Settings.settings.send_spawning_event == true) {
-					SpawnerSpawnEvent event = new SpawnerSpawnEvent(entity, cs);
-					entity.getServer().getPluginManager().callEvent(event);
-				}
-			} catch (Exception e) {
-				RF.debug(e);
-			}
-		};
-	}
-
-	public static void modify(Entity entity) {
-		try {
-			if(entity instanceof EnderDragon dragon) dragon.setPhase(Phase.CIRCLING);
-			if(Settings.settings.entity_movement == false
-					&& entity instanceof Attributable le) {
-				AttributeInstance at = le.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
-				if(at != null) at.setBaseValue(0);
-			}
-			if(Settings.settings.check_spawner_nerf == true && entity instanceof Mob mob) {
-				Object w = RF.order(mob.getWorld(), "getHandle").invoke();
-				Object f = RF.fetch(w, "spigotConfig");
-				if(RF.access(f, "nerfSpawnerMobs")
-						.as(boolean.class)
-						.field(false) == true) {
-					Object a = RF.order(mob, "getHandle").invoke();
-					RF.access(a, "aware").as(boolean.class).set(false);
-				}
-			}
-			Object o = RF.order(entity, "getHandle").invoke();
-			RF.accessI(o, "spawnedViaMobSpawner").as(boolean.class).set(true);
-			RF.accessI(o, "spawnReason").as(SpawnReason.class).set(SpawnReason.SPAWNER);
-		} catch (Exception e) {
-			RF.debug(e);
-		}
-	}
-	
-	public static void unlink(Block block) {
-		if(SpawnerMeta.WILD_STACKER.exists() == false) return;
-		SpawnerMeta.WILD_STACKER.unlink(block);
+		// creates new generator if it doesn't exit yet
+		GeneratorRegistry.get(event.getSpawner().getBlock());
 	}
 
 }
