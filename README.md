@@ -1,6 +1,6 @@
 # SpawnerMeta
 
-This plugin implements customizable and upgradeable spawners.
+This plugin implements fully customizable and upgradeable spawners.
 
 ## Using with Maven
 
