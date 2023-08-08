@@ -3,6 +3,8 @@ package mc.rellox.spawnermeta.configuration;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -11,6 +13,8 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -25,8 +29,10 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.utils.DataManager;
-import mc.rellox.spawnermeta.utils.Utils;
+import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
+import mc.rellox.spawnermeta.utility.DataManager;
+import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class LocationFile {
 	
@@ -102,34 +108,147 @@ public class LocationFile {
 	
 	public static final class LF {
 		
-		private static String parse(Location loc) {
+		public static String parse(Location loc) {
 			int x = loc.getBlockX(), z = loc.getBlockZ();
 			String sx = (x < 0 ? x == -1 ? "-0" : "" + (x + 1) : "" + x);
 			String sz = (z < 0 ? z == -1 ? "-0" : "" + (z + 1) : "" + z);
 			return "[" + sx + ", " + loc.getBlockY() + ", " + sz + "]";
 		}
 		
+		public static List<String> names() {
+			ConfigurationSection cs = file.getConfigurationSection("Locations");
+			if(cs == null) return List.of();
+			Set<String> keys = cs.getKeys(false);
+			if(keys.isEmpty() == true) return List.of();
+			try {
+				return keys.stream()
+						.map(UUID::fromString)
+						.map(Bukkit::getOfflinePlayer)
+						.map(OfflinePlayer::getName)
+						.filter(o -> o != null)
+						.toList();
+			} catch (Exception e) {
+				RF.debug(e);
+			}
+			return List.of();
+		}
+		
+		public static List<Location> get(World world, String player) {
+			ConfigurationSection cs = file.getConfigurationSection("Locations");
+			if(cs == null) return List.of();
+			Set<String> keys = cs.getKeys(false);
+			if(keys.isEmpty() == true) return List.of();
+			try {
+				return keys.stream()
+						.map(UUID::fromString)
+						.map(Bukkit::getOfflinePlayer)
+						.filter(p -> p.getName().equalsIgnoreCase(player))
+						.map(OfflinePlayer::getUniqueId)
+						.findFirst()
+						.map(id -> get(world, id))
+						.orElse(List.of());
+			} catch (Exception e) {
+				RF.debug(e);
+			}
+			return List.of();
+		}
+		
 		public static List<Location> get(World world, Player player) {
+			return get(world, player.getUniqueId());
+		}
+		
+		public static List<Location> get(World world, UUID id) {
 			List<Location> list = new ArrayList<>();
-			List<String> ss = file.getStringList("Locations." + player.getUniqueId().toString()
+			List<String> ss = file.getStringList("Locations." + id.toString()
 					+ "." + world.getName());
 			if(ss.isEmpty() == true) return list;
 			try {
-				list = ss.stream().map(s -> {
-					String[] ps = s.replace("[", "").replace("]", "").split(",");
-					if(ps.length != 3) return null;
-					int[] is = new int[3];
-					for(int i = 0; i < 3; i++) {
-						if(Utils.isInteger(ps[i]) == false) return null;
-						is[i] = Integer.parseInt(ps[i]);
-					}
-					return new Location(world, is[0], is[1], is[2]);
-				}).filter(l -> l != null).collect(Collectors.toList());
+				list = ss.stream()
+						.map(s -> parse(world, s))
+						.filter(l -> l != null)
+						.collect(Collectors.toList());
 			} catch (Exception e) {
 				Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_RED + "[SM] Unable to get spawner locations: "
 						+ ChatColor.AQUA + e.getMessage());
 			}
 			return list;
+		}
+		
+		private static Location parse(World world, String s) {
+			try {
+				String[] ps = s.replace("[", "").replace("]", "").replace(" ", "").split(",");
+				if(ps.length != 3) return null;
+				int[] is = new int[3];
+				for(int i = 0; i < 3; i++) {
+					if(Utils.isInteger(ps[i]) == false) return null;
+					is[i] = Integer.parseInt(ps[i]);
+				}
+				return new Location(world, is[0], is[1], is[2]);
+			} catch (Exception e) {
+				RF.debug(e);
+			}
+			return null;
+		}
+		
+		public static int clear(World world, String player, boolean validate) {
+			ConfigurationSection cs = file.getConfigurationSection("Locations");
+			if(cs == null) return 0;
+			Set<String> keys = cs.getKeys(false);
+			if(keys.isEmpty() == true) return 0;
+			try {
+				return keys.stream()
+						.map(UUID::fromString)
+						.map(Bukkit::getOfflinePlayer)
+						.filter(p -> p.getName().equalsIgnoreCase(player))
+						.map(OfflinePlayer::getUniqueId)
+						.findFirst()
+						.map(id -> {
+							String path = "Locations." + id.toString()
+								+ "." + world.getName();
+							List<String> ss = file.getStringList(path);
+							if(ss.isEmpty() == true) return 0;
+							if(validate == true) {
+								int r = 0;
+								Set<String> set = new HashSet<>(ss); // make unique
+								if(ss.size() != set.size()) {
+									r = ss.size() - set.size();
+									ss = new ArrayList<>(set);
+								}
+								Iterator<String> it = ss.iterator();
+								while(it.hasNext() == true) {
+									if(it.next()
+											.matches("\\[?-?\\d+,\\s*-?\\d+,\\s*-?\\d+\\]?") == true) continue;
+									it.remove();
+									r++;
+								}
+								it = ss.iterator();
+								while(it.hasNext() == true) {
+									Block block = parse(world, it.next()).getBlock();
+									if(block.getType() == Material.SPAWNER) continue;
+									GeneratorRegistry.remove(block);
+									it.remove();
+									r++;
+								}
+								LocationFile.save(path, ss);
+								return r;
+							} else {
+								LocationFile.clear(path);
+								ss.stream()
+								.map(s -> parse(world, s))
+								.filter(l -> l != null)
+								.forEach(l -> {
+									Block block = l.getBlock();
+									if(block.getType() != Material.SPAWNER) return;
+									block.setType(Material.AIR);
+									GeneratorRegistry.remove(block);
+								});
+								return ss.size();
+							}
+						}).orElse(0);
+			} catch (Exception e) {
+				RF.debug(e);
+			}
+			return 0;
 		}
 		
 		public static int placed(Player player) {

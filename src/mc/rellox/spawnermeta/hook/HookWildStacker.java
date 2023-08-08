@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -17,9 +16,11 @@ import org.bukkit.entity.LivingEntity;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.api.spawner.location.ISelector;
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.events.EventRegistry;
-import mc.rellox.spawnermeta.spawner.SpawnerSpawning;
+import mc.rellox.spawnermeta.spawner.generator.SpawningManager;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 
 public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 	
@@ -50,8 +51,10 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 		wild = (WildStackerPlugin) Bukkit.getPluginManager().getPlugin("WildStacker");
 	}
 	
-	public List<Entity> combine(Block block, EntityType type, SpawnerSpawning spread, int count, CreatureSpawner cs) {
+	public List<Entity> combine(ISpawner spawner, SpawnerType type, ISelector selector, int count) {
 		List<Entity> affected = new ArrayList<>(1);
+		Block block = spawner.block();
+		EntityType et = type.entity();
 		Location at = block.getLocation().add(0.5, 0.5, 0.5);
 		StackedEntity link = linked.get(block);
 //		System.out.println();
@@ -65,7 +68,7 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 			if(other != null) {
 //				System.out.println("- found other");
 				StackedEntity nearby = linked.get(other);
-				if(nearby.getLivingEntity().getType() == type)
+				if(nearby.getLivingEntity().getType() == et)
 					linked.put(block, link = nearby);
 			}
 		}
@@ -101,7 +104,7 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 		
 		List<LivingEntity> near = block.getWorld()
 				.getLivingEntities().stream()
-				.filter(e -> e.getType() == type)
+				.filter(e -> e.getType() == et)
 				.filter(e -> e.getLocation().distanceSquared(at) <= 100)
 				.collect(Collectors.toList());
 		if(link != null) near.remove(link.getLivingEntity());
@@ -110,14 +113,14 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 		
 		if(near.isEmpty() == true) {
 //			System.out.println("  - near empty, creating");
-			StackedEntity stacked = create(type, spread, count, affected, cs);
+			StackedEntity stacked = create(spawner, type, selector, count, affected);
 			linked.put(block, stacked);
 		} else if(near.size() == 1) {
 //			System.out.println("  - only 1 near");
 			LivingEntity entity = near.get(0);
 			StackedEntity stacked = wild.getSystemManager().getStackedEntity(entity);
 			affected.add(entity);
-			EventRegistry.particle(entity.getLocation());
+			SpawningManager.particle(entity.getLocation());
 			int a = stacked.getStackAmount() + count;
 			if(a <= stacked.getStackLimit()) {
 //				System.out.println("   - stacking to it");
@@ -127,7 +130,7 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 				int f = a - stacked.getStackLimit();
 //				System.out.println("   - creating new: " + f);
 				stacked.setStackAmount(stacked.getStackLimit(), true);
-				stacked = create(type, spread, f, affected, cs);
+				stacked = create(spawner, type, selector, f, affected);
 				linked.put(block, stacked);
 			}
 			modify(entity);
@@ -138,7 +141,7 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 //				System.out.println("  - loop" + l);
 				x: if(i >= near.size()) {
 //					System.out.println("   - create new: " + l);
-					StackedEntity stacked = create(type, spread, l, affected, cs);
+					StackedEntity stacked = create(spawner, type, selector, l, affected);
 					linked.put(block, stacked);
 					break;
 				} else {
@@ -148,7 +151,7 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 					if(c == m) break x;
 					int a = c + l, f = a - m;
 					affected.add(entity);
-					EventRegistry.particle(entity.getLocation());
+					SpawningManager.particle(entity.getLocation());
 					if(f < 0) {
 //						System.out.println("   - stacking all");
 						stacked.setStackAmount(a, true);
@@ -170,15 +173,15 @@ public class HookWildStacker implements HookInstance<WildStackerPlugin> {
 	
 	private void modify(Entity entity) {
 		if(Settings.settings.modify_stacked_entities == true)
-			EventRegistry.modify(entity);
+			SpawningManager.modify(entity);
 	}
 
-	private StackedEntity create(EntityType type, SpawnerSpawning spread, int count, List<Entity> affected, CreatureSpawner cs) {
-		LivingEntity entity = (LivingEntity) EventRegistry.spawn(spread.get(), type, EventRegistry.function(cs));
+	private StackedEntity create(ISpawner spawner, SpawnerType type, ISelector selector, int count,
+			List<Entity> affected) {
+		LivingEntity entity = (LivingEntity) SpawningManager.spawn(spawner, type, selector);
 		StackedEntity stacked = wild.getSystemManager().getStackedEntity(entity);
 		stacked.setStackAmount(count, true);
 		affected.add(entity);
-		EventRegistry.particle(entity.getLocation());
 		return stacked;
 	}
 

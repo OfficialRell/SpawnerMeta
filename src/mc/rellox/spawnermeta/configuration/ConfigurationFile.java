@@ -20,7 +20,7 @@ import mc.rellox.spawnermeta.prices.IncreaseType;
 import mc.rellox.spawnermeta.prices.PriceType;
 import mc.rellox.spawnermeta.spawner.SpawnerType;
 import mc.rellox.spawnermeta.spawner.UpgradeType;
-import mc.rellox.spawnermeta.utils.Reflections.RF;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.version.Version;
 import mc.rellox.spawnermeta.version.Version.VersionType;
 
@@ -44,7 +44,9 @@ public class ConfigurationFile {
 			try {
 				first = true;
 				f.createNewFile();
-			} catch(IOException e) {}
+			} catch(IOException e) {
+				RF.debug(e);
+			}
 		}
 		file = YamlConfiguration.loadConfiguration(f);
 		
@@ -100,7 +102,9 @@ public class ConfigurationFile {
 	public final void save() {
 		try {
 			file.save(f);
-		} catch(IOException e) {}
+		} catch(IOException e) {
+			RF.debug(e);
+		}
 	}
 	
 	protected Commenter commenter() {
@@ -258,6 +262,7 @@ public class ConfigurationFile {
 			file.addDefault("Modifiers.changing.enabled", false);
 			file.addDefault("Modifiers.changing.use-price", false);
 			file.addDefault("Modifiers.changing.prices.DEFAULT", 100);
+			file.addDefault("Modifiers.changing.material-type.EXAMPLE", "IRON_INGOT");
 			
 			file.addDefault("Modifiers.placing.enabled", true);
 			file.addDefault("Modifiers.placing.use-price", false);
@@ -567,6 +572,11 @@ public class ConfigurationFile {
 						"Default changing price.",
 						"For specific entities:",
 						"  <entity>: <price>",
+						"Replace <entity> with the specific entity name.");
+				c.comment("Modifiers.changing.material-type",
+						"Default changing material type.",
+						"For specific entities:",
+						"  <entity>: <material>",
 						"Replace <entity> with the specific entity name.");
 				c.comment("Modifiers.placing.enabled", "Is spawner placing enabled.");
 				c.comment("Modifiers.placing.use-price", "Does placing cost.");

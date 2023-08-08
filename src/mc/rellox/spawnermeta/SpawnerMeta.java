@@ -12,24 +12,24 @@ import mc.rellox.spawnermeta.api.APIInstance;
 import mc.rellox.spawnermeta.api.APIRegistry;
 import mc.rellox.spawnermeta.commands.CommandManager;
 import mc.rellox.spawnermeta.configuration.Configuration;
-import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.LocationFile;
 import mc.rellox.spawnermeta.events.EventListeners;
-import mc.rellox.spawnermeta.holograms.HologramRegistry;
 import mc.rellox.spawnermeta.hook.HookEconomy;
 import mc.rellox.spawnermeta.hook.HookShopGUI;
 import mc.rellox.spawnermeta.hook.HookWildStacker;
 import mc.rellox.spawnermeta.hook.HookWildTools;
 import mc.rellox.spawnermeta.shop.ShopRegistry;
-import mc.rellox.spawnermeta.utils.DataManager;
-import mc.rellox.spawnermeta.utils.Metrics;
-import mc.rellox.spawnermeta.utils.Utils;
+import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
+import mc.rellox.spawnermeta.spawner.generator.SpawningManager;
+import mc.rellox.spawnermeta.utility.DataManager;
+import mc.rellox.spawnermeta.utility.Metrics;
+import mc.rellox.spawnermeta.utility.Utils;
 import mc.rellox.spawnermeta.version.Version;
-import mc.rellox.spawnermeta.views.SpawnerViewLayout;
+import mc.rellox.spawnermeta.view.SpawnerViewLayout;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 20.2;
+	public static final double PLUGIN_VERSION = 21.0;
 	
 	private static SpawnerMeta plugin;
 	
@@ -75,14 +75,14 @@ public final class SpawnerMeta extends JavaPlugin {
 					+ ChatColor.DARK_PURPLE + "] " + ChatColor.GRAY + "ShopGUI+ has been found, custom spawners provided!");
 			initializeMetrics();
 			Configuration.initialize();
-			Language.initialize();
 			CommandManager.initialize();
 			DataManager.initialize();
 			SpawnerViewLayout.initialize();
 			ShopRegistry.initialize();
-			HologramRegistry.initialize();
 			EventListeners.initialize();
 			LocationFile.initialize();
+			GeneratorRegistry.initialize();
+			SpawningManager.initialize();
 			
 			this.api = new APIRegistry();
 		} else {
@@ -113,7 +113,7 @@ public final class SpawnerMeta extends JavaPlugin {
 		if(loaded == true) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "Spawner Meta " + ChatColor.AQUA + "v"
 					+ PLUGIN_VERSION + ChatColor.DARK_PURPLE + "]" + ChatColor.RED + " disabled!");
-			HologramRegistry.erase();
+			GeneratorRegistry.clear();
 		}
 	}
 	
