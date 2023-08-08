@@ -6,6 +6,7 @@ import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -13,8 +14,9 @@ import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.prices.Group;
 import mc.rellox.spawnermeta.prices.Price;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
-import mc.rellox.spawnermeta.utils.DataManager;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import mc.rellox.spawnermeta.utility.DataManager;
+import mc.rellox.spawnermeta.utility.Utils;
 
 public record BuyData(SpawnerType type, int value) {
 	
@@ -29,7 +31,7 @@ public record BuyData(SpawnerType type, int value) {
 		price.remove(player);
 		ItemStack item = DataManager.getSpawners(type, a, false, true).get(0);
 		ItemMatcher.add(player, item);
-		player.sendMessage(Language.get("Inventory.buy-shop.purchase.success",
+		player.sendMessage(Language.get("Shop-buy.purchase.success",
 				"amount", a, "type", type).text());
 		player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
 	}
@@ -37,21 +39,23 @@ public record BuyData(SpawnerType type, int value) {
 	public ItemStack info(boolean[] bs) {
 		ItemStack item = new ItemStack(Material.SPAWNER);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.buy-shop.items.spawner.name",
+		meta.setDisplayName(Language.get("Shop-buy.items.spawner.name",
 				"type", type).text());
 		List<String> lore = new ArrayList<>();
 		lore.add("");
-		lore.add(Language.get("Inventory.buy-shop.items.spawner.price",
+		lore.add(Language.get("Shop-buy.items.spawner.price",
 				"price", Price.of(Group.shop, value)).text());
 		lore.add("");
-		if(bs[0] == true) lore.add(Language.get("Inventory.buy-shop.items.spawner.purchase.first",
+		if(bs[0] == true) lore.add(Language.get("Shop-buy.items.spawner.purchase.first",
 				"amount", ShopRegistry.first).text());
-		if(bs[1] == true) lore.add(Language.get("Inventory.buy-shop.items.spawner.purchase.second",
+		if(bs[1] == true) lore.add(Language.get("Shop-buy.items.spawner.purchase.second",
 				"amount", ShopRegistry.second).text());
-		if(bs[2] == true) lore.add(Language.get("Inventory.buy-shop.items.spawner.purchase.third",
+		if(bs[2] == true) lore.add(Language.get("Shop-buy.items.spawner.purchase.third",
 				"amount", ShopRegistry.third).text());
-		if(bs[3] == true) lore.add(Language.get("Inventory.buy-shop.items.spawner.purchase.all").text());
+		if(bs[3] == true) lore.add(Language.get("Shop-buy.items.spawner.purchase.all").text());
 		meta.setLore(lore);
+		meta.addItemFlags(ItemFlag.values());
+		Utils.hideCustomFlags(meta);
 		item.setItemMeta(meta);
 		return item;
 	}

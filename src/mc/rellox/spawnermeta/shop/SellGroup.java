@@ -9,12 +9,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import mc.rellox.spawnermeta.configuration.Language;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 
 public record SellGroup(Material filler, Material sell, Material close, int rows, SellData... data) {
 	
 	public Inventory create() {
-		return Bukkit.createInventory(null, rows * 9, Language.get("Inventory.sell-shop.name").text());
+		return Bukkit.createInventory(null, rows * 9, Language.get("Shop-sell.name").text());
 	}
 	
 	public SellData get(SpawnerType type) {

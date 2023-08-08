@@ -3,7 +3,6 @@ package mc.rellox.spawnermeta.shop;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,8 +19,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
-import mc.rellox.spawnermeta.utils.Reflections.RF;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.version.Version;
 import mc.rellox.spawnermeta.version.Version.VersionType;
 
@@ -35,6 +34,7 @@ public final class ShopRegistry {
 	private static ShopSelection shop_selection;
 	
 	public static int first, second, third;
+	public static Material buy_next, buy_prev, buy_page;
 	
 	private static final Map<String, PermissionHolder>
 		BUY_PERMISSIONS = new HashMap<>(), SELL_PERMISSIONS = new HashMap<>();
@@ -52,6 +52,9 @@ public final class ShopRegistry {
 		first = file.getInt("Settings.Buy.Amount.First");
 		second = file.getInt("Settings.Buy.Amount.Second");
 		third = file.getInt("Settings.Buy.Amount.Third");
+		buy_next = RF.enumerate(Material.class, file.getString("Settings.Buy.Items.Next"), Material.SPECTRAL_ARROW);
+		buy_prev = RF.enumerate(Material.class, file.getString("Settings.Buy.Items.Previous"), Material.SPECTRAL_ARROW);
+		buy_page = RF.enumerate(Material.class, file.getString("Settings.Buy.Items.Page"), Material.PAPER);
 	}
 	
 	private static void loadBuy() {
@@ -98,7 +101,7 @@ public final class ShopRegistry {
 	}
 	
 	private static void order(List<BuyData> list) {
-		List<SpawnerType> order = RF.enumerate(SpawnerType.class, file.getStringList("Settings.Buy.Order"));
+		List<SpawnerType> order = RF.enumerates(SpawnerType.class, file.getStringList("Settings.Buy.Order"));
 		if(order.isEmpty() == true) return;
 		List<BuyData> newest = new ArrayList<>();
 		for(SpawnerType  type : order) {
@@ -205,7 +208,7 @@ public final class ShopRegistry {
 					return;
 				}
 				Set<SpawnerType> set = list.contains("ALL") == true
-						? Set.of(SpawnerType.values()) : new HashSet<>(RF.enumerate(SpawnerType.class, list));
+						? Set.of(SpawnerType.values()) : new HashSet<>(RF.enumerates(SpawnerType.class, list));
 				String sub = file.getString(p + ".sub-permission");
 				BUY_PERMISSIONS.put("spawnermeta.shop.buy.permission." + key, new PermissionHolder(set, sub));
 			});
@@ -222,7 +225,7 @@ public final class ShopRegistry {
 					return;
 				}
 				Set<SpawnerType> set = list.contains("ALL") == true
-						? Set.of(SpawnerType.values()) : new HashSet<>(RF.enumerate(SpawnerType.class, list));
+						? Set.of(SpawnerType.values()) : new HashSet<>(RF.enumerates(SpawnerType.class, list));
 				String sub = file.getString(p + ".sub-permission");
 				SELL_PERMISSIONS.put("spawnermeta.shop.sell.permission." + key, new PermissionHolder(set, sub));
 			});
@@ -322,7 +325,7 @@ public final class ShopRegistry {
 			int r = file.getInt("Rows");
 			file.set("Settings.Buy.Rows", r);
 			file.set("Rows", null);
-		} else file.addDefault("Settings.Buy.Rows", 6);
+		} else file.addDefault("Settings.Buy.Rows", 4);
 		if(file.isString("Filler") == true) {
 			String s = file.getString("Filler");
 			file.set("Settings.Buy.Filler", s);
@@ -358,6 +361,9 @@ public final class ShopRegistry {
 		file.addDefault("Settings.Buy.Amount.First", 1);
 		file.addDefault("Settings.Buy.Amount.Second", 4);
 		file.addDefault("Settings.Buy.Amount.Third", 16);
+		file.addDefault("Settings.Buy.Items.Next", Material.SPECTRAL_ARROW.name());
+		file.addDefault("Settings.Buy.Items.Previous", Material.SPECTRAL_ARROW.name());
+		file.addDefault("Settings.Buy.Items.Page", Material.PAPER.name());
 		
 		map.clear();
 		map.put(250, new SpawnerType[] {
@@ -405,7 +411,7 @@ public final class ShopRegistry {
 					"  Toggle - can this entity spawner be sold",
 					"  Refund - the price that is refunded for the spawner",
 					"  Upgrades - refunded percentage of upgrade value ( 0.5 -> 50% )");
-			c.comment("Permissions.Buy",
+			c.comment("Permissions.buy",
 					"Shop buy permissions can be created:",
 					"  <permission name>:",
 					"    # List of allowed entities.",
@@ -418,7 +424,7 @@ public final class ShopRegistry {
 					"    sub-permission: <permission name>",
 					"",
 					"Final permission name - spawnermeta.shop.buy.permission.<permission name>");
-			c.comment("Permissions.Sell",
+			c.comment("Permissions.sell",
 					"Shop sell permissions can be created:",
 					"  <permission name>:",
 					"    # List of allowed entities.",
@@ -445,7 +451,7 @@ public final class ShopRegistry {
 		
 		protected void comment(String path, String... cs) {
 			RF.order(file, "setComments", String.class, List.class)
-				.invoke(path, Arrays.asList(cs));
+				.invoke(path, List.of(cs));
 		}
 		
 	}

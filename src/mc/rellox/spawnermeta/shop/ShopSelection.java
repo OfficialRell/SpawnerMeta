@@ -27,14 +27,14 @@ public class ShopSelection implements Listener {
 	public ShopSelection(SpawnerShopBuy buy, SpawnerShopSell sell, Material filler, Material mbuy, Material msell) {
 		this.buy = buy;
 		this.sell = sell;
-		this.v = Bukkit.createInventory(null, 9, Language.get("Inventory.select-shop.name").text());
+		this.v = Bukkit.createInventory(null, 9, Language.get("Shop-select.name").text());
 		Bukkit.getPluginManager().registerEvents(this, SpawnerMeta.instance());
 		update(filler, mbuy, msell);
 	}
 	
 	public void open(Player player) {
 		if(player.hasPermission("spawnermeta.shop.selection.open") == false) {
-			player.sendMessage(Language.get("Inventory.select-shop.permission.opening").text());
+			player.sendMessage(Language.get("Shop-select.permission.opening").text());
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
@@ -62,7 +62,7 @@ public class ShopSelection implements Listener {
 	private ItemStack buy(Material m) {
 		ItemStack item = new ItemStack(m);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.select-shop.buy-shop").text());
+		meta.setDisplayName(Language.get("Shop-select.buy-shop").text());
 		meta.addItemFlags(ItemFlag.values());
 		meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		item.setItemMeta(meta);
@@ -72,7 +72,7 @@ public class ShopSelection implements Listener {
 	private ItemStack sell(Material m) {
 		ItemStack item = new ItemStack(m);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.select-shop.sell-shop").text());
+		meta.setDisplayName(Language.get("Shop-select.sell-shop").text());
 		meta.addItemFlags(ItemFlag.values());
 		meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		item.setItemMeta(meta);

@@ -33,7 +33,7 @@ public class SpawnerShopBuy implements Listener {
 		int l = data.length;
 		int i = l > r1 ? l / r0 + 1 : 1;
 		this.vs = new Inventory[i];
-		for(i = 0; i < vs.length; i++) vs[i] = Bukkit.createInventory(null, r1, Language.get("Inventory.buy-shop.name",
+		for(i = 0; i < vs.length; i++) vs[i] = Bukkit.createInventory(null, r1, Language.get("Shop-buy.name",
 				"page_current", i + 1, "page_total", vs.length).text());
 		Bukkit.getPluginManager().registerEvents(this, SpawnerMeta.instance());
 		update(filler);
@@ -68,7 +68,7 @@ public class SpawnerShopBuy implements Listener {
 	
 	private void open(Player player, int i) {
 		if(player.hasPermission("spawnermeta.shop.buy.open") == false) {
-			player.sendMessage(Language.get("Inventory.buy-shop.permission.opening").text());
+			player.sendMessage(Language.get("Shop-buy.permission.opening").text());
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
@@ -92,14 +92,14 @@ public class SpawnerShopBuy implements Listener {
 					int o = s + p * r0;
 					if(s < (vs.length > 1 ? r0 : r1) && o < data.length) {
 						if(player.hasPermission("spawnermeta.shop.buy.purchase") == false) {
-							player.sendMessage(Language.get("Inventory.buy-shop.permission.purchase").text());
+							player.sendMessage(Language.get("Shop-buy.permission.purchase").text());
 							player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 							return;
 						}
 						BuyData sd = data[o];
 						if(sd == null) return;
 						if(ShopRegistry.canBuy(player, sd.type()) == false) {
-							player.sendMessage(Language.get("Inventory.buy-shop.permission.purchase").text());
+							player.sendMessage(Language.get("Shop-buy.permission.purchase").text());
 							player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 							return;
 						}
@@ -131,26 +131,26 @@ public class SpawnerShopBuy implements Listener {
 	}
 	
 	private ItemStack next() {
-		ItemStack item = new ItemStack(Material.SPECTRAL_ARROW);
+		ItemStack item = new ItemStack(ShopRegistry.buy_next);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.buy-shop.items.page.next").text());
+		meta.setDisplayName(Language.get("Shop-buy.items.page.next").text());
 		item.setItemMeta(meta);
 		return item;
 	}
 	
 	private ItemStack page(int p) {
-		ItemStack item = new ItemStack(Material.PAPER, p);
+		ItemStack item = new ItemStack(ShopRegistry.buy_page, p);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.buy-shop.items.page.current",
+		meta.setDisplayName(Language.get("Shop-buy.items.page.current",
 				"page", p).text());
 		item.setItemMeta(meta);
 		return item;
 	}
 	
 	private ItemStack previous() {
-		ItemStack item = new ItemStack(Material.SPECTRAL_ARROW);
+		ItemStack item = new ItemStack(ShopRegistry.buy_prev);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(Language.get("Inventory.buy-shop.items.page.previous").text());
+		meta.setDisplayName(Language.get("Shop-buy.items.page.previous").text());
 		item.setItemMeta(meta);
 		return item;
 	}

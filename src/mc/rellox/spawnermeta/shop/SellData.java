@@ -1,6 +1,6 @@
 package mc.rellox.spawnermeta.shop;
 
-import mc.rellox.spawnermeta.spawner.SpawnerType;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 
 public class SellData {
 	

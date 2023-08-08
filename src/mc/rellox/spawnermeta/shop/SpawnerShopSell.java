@@ -28,7 +28,7 @@ public class SpawnerShopSell implements Listener {
 	
 	public void open(Player player) {
 		if(player.hasPermission("spawnermeta.shop.sell.open") == false) {
-			player.sendMessage(Language.get("Inventory.sell-shop.permission.opening").text());
+			player.sendMessage(Language.get("Shop-sell.permission.opening").text());
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
@@ -44,9 +44,7 @@ public class SpawnerShopSell implements Listener {
 	@EventHandler
 	private void onClick(InventoryClickEvent event) {
 		try {
-			for(PrivateSell p : list) {
-				if(p.click(event) == true) return;
-			}
+			for(PrivateSell p : list) if(p.click(event) == true) return;
 		} catch (Exception e) {}
 	}
 
