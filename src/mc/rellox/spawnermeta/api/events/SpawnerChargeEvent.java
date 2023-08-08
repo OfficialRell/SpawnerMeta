@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.bukkit.entity.Player;
 
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.prices.Price;
 
 public class SpawnerChargeEvent extends SpawnerModifyEvent implements IPriceEvent {
@@ -13,7 +13,7 @@ public class SpawnerChargeEvent extends SpawnerModifyEvent implements IPriceEven
 	
 	private Price price;
 
-	public SpawnerChargeEvent(Player player, Spawner spawner, Price price, int charges) {
+	public SpawnerChargeEvent(Player player, ISpawner spawner, Price price, int charges) {
 		super(player, ModifyType.CHARGE, spawner);
 		this.price = price;
 		this.charges = charges;

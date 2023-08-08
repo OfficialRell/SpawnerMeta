@@ -3,7 +3,7 @@ package mc.rellox.spawnermeta.api.events;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
 
 public class SpawnerOpenEvent extends SpawnerPlayerEvent {
 	
@@ -14,8 +14,8 @@ public class SpawnerOpenEvent extends SpawnerPlayerEvent {
 		this.block = block;
 	}
 	
-	public Spawner getSpawner() {
-		return Spawner.of(block);
+	public ISpawner getSpawner() {
+		return ISpawner.of(block);
 	}
 
 

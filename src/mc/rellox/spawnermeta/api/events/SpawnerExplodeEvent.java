@@ -2,7 +2,7 @@ package mc.rellox.spawnermeta.api.events;
 
 import org.bukkit.block.Block;
 
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
 
 public class SpawnerExplodeEvent extends SpawnerEvent {
 	
@@ -16,8 +16,8 @@ public class SpawnerExplodeEvent extends SpawnerEvent {
 		this.bs = bs;
 	}
 	
-	public Spawner getSpawner() {
-		return Spawner.of(block);
+	public ISpawner getSpawner() {
+		return ISpawner.of(block);
 	}
 	
 	public boolean canBreakOwned() {

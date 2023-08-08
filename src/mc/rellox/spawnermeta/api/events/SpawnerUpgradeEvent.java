@@ -4,9 +4,9 @@ import java.util.Optional;
 
 import org.bukkit.entity.Player;
 
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.prices.Price;
-import mc.rellox.spawnermeta.spawner.UpgradeType;
+import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 
 public class SpawnerUpgradeEvent extends SpawnerModifyEvent implements IPriceEvent {
 	
@@ -16,7 +16,7 @@ public class SpawnerUpgradeEvent extends SpawnerModifyEvent implements IPriceEve
 	
 	private Price price;
 
-	public SpawnerUpgradeEvent(Player player, Spawner spawner, UpgradeType upgrade,
+	public SpawnerUpgradeEvent(Player player, ISpawner spawner, UpgradeType upgrade,
 			int upgrade_level, int upgrade_maximum, Price price) {
 		super(player, ModifyType.UPGRADE, spawner);
 		this.upgrade = upgrade;

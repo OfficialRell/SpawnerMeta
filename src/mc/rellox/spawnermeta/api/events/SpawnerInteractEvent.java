@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.prices.Price;
 
 public class SpawnerInteractEvent extends SpawnerPlayerEvent implements IPriceEvent {
@@ -23,8 +23,8 @@ public class SpawnerInteractEvent extends SpawnerPlayerEvent implements IPriceEv
 		this.price = price;
 	}
 	
-	public final Spawner getSpawner() {
-		return Spawner.of(block);
+	public final ISpawner getSpawner() {
+		return ISpawner.of(block);
 	}
 
 	@Override

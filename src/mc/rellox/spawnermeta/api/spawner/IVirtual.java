@@ -5,16 +5,16 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import mc.rellox.spawnermeta.spawner.SpawnerType;
-import mc.rellox.spawnermeta.utils.DataManager;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import mc.rellox.spawnermeta.utility.DataManager;
 
-public interface VirtualSpawner {
+public interface IVirtual {
 	
-	public static VirtualSpawner of(ItemStack item) {
+	public static IVirtual of(ItemStack item) {
 		return DataManager.getSpawnerItem(item);
 	}
 	
-	public static VirtualSpawner of(Block block) {
+	public static IVirtual of(Block block) {
 		return DataManager.getSpawnerItem(block);
 	}
 	
@@ -23,7 +23,7 @@ public interface VirtualSpawner {
 	 * @return {@code true} if virtual spawners are exactly equal, otherwise {@code false}
 	 */
 	
-	boolean exact(VirtualSpawner other);
+	boolean exact(IVirtual other);
 	
 	/**
 	 * @return Spawner type of this virtual spawner

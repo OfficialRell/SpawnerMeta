@@ -1,24 +1,27 @@
 package mc.rellox.spawnermeta.api.events;
 
-import org.bukkit.block.Block;
-
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
 
 public class SpawnerPreSpawnEvent extends SpawnerEvent {
 	
-	private final Block block;
+	private final IGenerator instance;
 	
 	public int count;
 	public boolean bypass_checks;
 	
-	public SpawnerPreSpawnEvent(Block block, int count) {
-		this.block = block;
+	public SpawnerPreSpawnEvent(IGenerator instance, int count) {
+		this.instance = instance;
 		this.count = count;
 		this.bypass_checks = false;
 	}
 	
-	public Spawner getSpawner() {
-		return Spawner.of(block);
+	public IGenerator getInstance() {
+		return instance;
+	}
+	
+	public ISpawner getSpawner() {
+		return instance.spawner();
 	}
 
 }

@@ -6,7 +6,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
 
 public class SpawnerEmptyEvent extends SpawnerPlayerEvent {
 	
@@ -16,10 +16,11 @@ public class SpawnerEmptyEvent extends SpawnerPlayerEvent {
 	public SpawnerEmptyEvent(Player player, Block block, ItemStack refund) {
 		super(player);
 		this.block = block;
+		this.refund = refund;
 	}
 
-	public Spawner getSpawner() {
-		return Spawner.of(block);
+	public ISpawner getSpawner() {
+		return ISpawner.of(block);
 	}
 	
 	public Optional<ItemStack> getRefund() {

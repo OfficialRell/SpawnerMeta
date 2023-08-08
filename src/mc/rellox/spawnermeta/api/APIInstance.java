@@ -6,11 +6,13 @@ import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.api.events.EventExecutor;
 import mc.rellox.spawnermeta.api.events.IEvent;
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.SpawnerBuilder;
-import mc.rellox.spawnermeta.api.spawner.VirtualSpawner;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import mc.rellox.spawnermeta.api.spawner.IVirtual;
 
+@SuppressWarnings("removal")
 public interface APIInstance {
 	
 	/**
@@ -70,26 +72,26 @@ public interface APIInstance {
 	 * 
 	 * @param block - position
 	 * @param player - spawner owner
-	 * @param spawner - spawner data
+	 * @param virtual - virtual spawner
 	 * @return {@code true} if the spawner was placed, otherwise {@code false}
 	 * 
 	 * @throws NullPointerException if block or spawner is {@code null}
 	 */
 	
-	boolean placeSpawner(Block block, Player player, VirtualSpawner spawner);
+	boolean placeSpawner(Block block, Player player, IVirtual virtual);
 	
 	/**
 	 * Tries to place the spawner at the specified block.
 	 * 
 	 * @param block - position
-	 * @param spawner - spawner data
+	 * @param virtual - virtual spawner
 	 * @return {@code true} if the spawner was placed, otherwise {@code false}
 	 * 
 	 * @throws NullPointerException if block or spawner is {@code null}
 	 */
 	
-	default boolean placeSpawner(Block block, VirtualSpawner spawner) {
-		return placeSpawner(block, null, spawner);
+	default boolean placeSpawner(Block block, IVirtual virtual) {
+		return placeSpawner(block, null, virtual);
 	}
 	
 	/**
@@ -101,7 +103,7 @@ public interface APIInstance {
 	 * @throws NullPointerException if item is {@code null}
 	 */
 	
-	VirtualSpawner getVirtual(ItemStack item);
+	IVirtual getVirtual(ItemStack item);
 	
 	/**
 	 * Returns an immutable spawner with the data from the specified block.
@@ -112,7 +114,7 @@ public interface APIInstance {
 	 * @throws NullPointerException if block is {@code null}
 	 */
 	
-	VirtualSpawner getVirtual(Block block);
+	IVirtual getVirtual(Block block);
 
 	/**
 	 * Returns a mutable spawner with the data from the specified block.
@@ -123,10 +125,23 @@ public interface APIInstance {
 	 * @throws NullPointerException if block is {@code null}
 	 */
 	
-	Spawner getSpawner(Block block);
+	ISpawner getSpawner(Block block);
+	
+	/**
+	 * Returns the entity generator or {@code null} if no spawner at this block.
+	 * 
+	 * @param block - spawner block
+	 * @return Entity generator
+	 * 
+	 * @throws NullPointerException if block is {@code null}
+	 */
+	
+	IGenerator getGenerator(Block block);
 
 	/**
-	 * Returns a spawner builder with the specified spawner type;
+	 * Returns a spawner builder with the specified spawner type.
+	 * 
+	 * This method is deprecated, use {@code Spawner.builder()} method instead.
 	 * 
 	 * @param type - spawner type
 	 * @return Mutable spawner
@@ -134,6 +149,7 @@ public interface APIInstance {
 	 * @throws NullPointerException if type is {@code null}
 	 */
 	
+	@Deprecated(forRemoval = true)
 	SpawnerBuilder buildSpawner(SpawnerType type);
 
 }

@@ -10,12 +10,15 @@ import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.api.events.EventExecutor;
 import mc.rellox.spawnermeta.api.events.IEvent;
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.SpawnerBuilder;
-import mc.rellox.spawnermeta.api.spawner.VirtualSpawner;
-import mc.rellox.spawnermeta.spawner.SpawnerManager;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
+import mc.rellox.spawnermeta.api.spawner.IVirtual;
+import mc.rellox.spawnermeta.events.EventRegistry;
+import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 
+@SuppressWarnings("removal")
 public final class APIRegistry implements APIInstance {
 	
 	private boolean registered;
@@ -49,32 +52,38 @@ public final class APIRegistry implements APIInstance {
 	@Override
 	public boolean breakSpawner(Block block, boolean drop, boolean particles) {
 		Objects.requireNonNull(block, "Block cannot be null");
-		return SpawnerManager.breakSpawner(block, drop, particles);
+		return EventRegistry.destroy(block, drop, particles);
 	}
 	
 	@Override
-	public boolean placeSpawner(Block block, Player player, VirtualSpawner spawner) {
+	public boolean placeSpawner(Block block, Player player, IVirtual spawner) {
 		Objects.requireNonNull(block, "Block cannot be null");
 		Objects.requireNonNull(spawner, "Virtual spawner cannot be null");
-		return SpawnerManager.placeSpawner(block, player, spawner);
+		return EventRegistry.place(block, player, spawner);
 	}
 	
 	@Override
-	public VirtualSpawner getVirtual(ItemStack item) {
+	public IVirtual getVirtual(ItemStack item) {
 		Objects.requireNonNull(item, "Item cannot be null");
-		return VirtualSpawner.of(item);
+		return IVirtual.of(item);
 	}
 	
 	@Override
-	public VirtualSpawner getVirtual(Block block) {
+	public IVirtual getVirtual(Block block) {
 		Objects.requireNonNull(block, "Block cannot be null");
-		return VirtualSpawner.of(block);
+		return IVirtual.of(block);
 	}
 	
 	@Override
-	public Spawner getSpawner(Block block) {
+	public ISpawner getSpawner(Block block) {
 		Objects.requireNonNull(block, "Block cannot be null");
-		return Spawner.of(block);
+		return ISpawner.of(block);
+	}
+	
+	@Override
+	public IGenerator getGenerator(Block block) {
+		Objects.requireNonNull(block, "Block cannot be null");
+		return GeneratorRegistry.get(block);
 	}
 	
 	@Override

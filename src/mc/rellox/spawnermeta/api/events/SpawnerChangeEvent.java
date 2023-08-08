@@ -4,7 +4,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import mc.rellox.spawnermeta.prices.Price;
-import mc.rellox.spawnermeta.spawner.SpawnerType;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 
 public class SpawnerChangeEvent extends SpawnerInteractEvent {
 	

@@ -2,23 +2,27 @@ package mc.rellox.spawnermeta.api.events;
 
 import java.util.List;
 
-import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
-import mc.rellox.spawnermeta.api.spawner.Spawner;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
 
 public class SpawnerPostSpawnEvent implements IEvent {
 	
-	private final Block block;
+	private final IGenerator intance;
 	public final List<Entity> entities;
 	
-	public SpawnerPostSpawnEvent(Block block, List<Entity> entities) {
-		this.block = block;
+	public SpawnerPostSpawnEvent(IGenerator intance, List<Entity> entities) {
+		this.intance = intance;
 		this.entities = entities;
 	}
 	
-	public Spawner getSpawner() {
-		return Spawner.of(block);
+	public IGenerator getInstance() {
+		return intance;	
+	}
+	
+	public ISpawner getSpawner() {
+		return intance.spawner();
 	}
 
 }
