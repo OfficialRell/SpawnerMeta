@@ -8,7 +8,7 @@ This plugin implements customizable and upgradeable spawners.
 <dependency>
     <groupId>mc.rellox</groupId>
     <artifactId>SpawnerMeta</artifactId>
-    <version>20.2</version>
+    <version>21.0</version>
     <scope>provided</scope>
 </dependency>
 ```
