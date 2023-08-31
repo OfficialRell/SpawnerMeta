@@ -3,6 +3,7 @@ package mc.rellox.spawnermeta.commands;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,11 +21,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
+import mc.rellox.spawnermeta.api.configuration.ILocations;
 import mc.rellox.spawnermeta.configuration.Configuration;
 import mc.rellox.spawnermeta.configuration.Configuration.CF;
 import mc.rellox.spawnermeta.configuration.Language;
-import mc.rellox.spawnermeta.configuration.LocationFile.LF;
 import mc.rellox.spawnermeta.configuration.Settings;
+import mc.rellox.spawnermeta.configuration.location.LocationFile;
+import mc.rellox.spawnermeta.configuration.location.LocationFile.FinalPos;
+import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.events.EventListeners;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.shop.ShopRegistry;
@@ -44,15 +48,19 @@ public final class CommandManager {
 	private static final Command SPAWNERMETA = Bukkit.getPluginCommand("spawnermeta");
 	
 	public static void initialize() {
-		String name = Settings.settings.command_view;
 		CommandMap cm;
+		String name = Settings.settings.command_view;
+		List<String> aliases = Settings.settings.aliases_view;
 		try {
 			cm = RF.fetch(Bukkit.getServer(), "commandMap", CommandMap.class);
 		} catch (Exception e) {
 			return;
 		}
 		try {
-			cm.register(name, new CommandSpawners(name));
+			CommandSpawners c = new CommandSpawners(name);
+			if(aliases.isEmpty() == false) c.setAliases(aliases);
+			c.setPermission("spawnermeta.command.view");
+			cm.register(name, c);
 		} catch(Exception e) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
 					+ ChatColor.DARK_RED + "An error accured while registering spawner view command (" + name + ")! "
@@ -60,8 +68,12 @@ public final class CommandManager {
 			return;
 		}
 		name = Settings.settings.command_shop;
+		aliases = Settings.settings.aliases_shop;
 		try {
-			cm.register(name, new CommandShop(name));
+			CommandShop c = new CommandShop(name);
+			if(aliases.isEmpty() == false) c.setAliases(aliases);
+			c.setPermission("spawnermeta.command.shop");
+			cm.register(name, c);
 		} catch(Exception e) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
 					+ ChatColor.DARK_RED + "An error accured while registering spawner shop command (" + name + ")! "
@@ -69,11 +81,41 @@ public final class CommandManager {
 			return;
 		}
 		name = Settings.settings.command_drops;
+		aliases = Settings.settings.aliases_drops;
 		try {
-			cm.register(name, new CommandDrops(name));
+			CommandDrops c = new CommandDrops(name);
+			if(aliases.isEmpty() == false) c.setAliases(aliases);
+			c.setPermission("spawnermeta.command.drops");
+			cm.register(name, c);
 		} catch(Exception e) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
 					+ ChatColor.DARK_RED + "An error accured while registering spawner drops command (" + name + ")! "
+					+ "Try changing it, and restart your server!");
+			return;
+		}
+		name = Settings.settings.command_locations;
+		aliases = Settings.settings.aliases_locations;
+		try {
+			CommandLocations c = new CommandLocations(name);
+			if(aliases.isEmpty() == false) c.setAliases(aliases);
+			c.setPermission("spawnermeta.command.locations");
+			cm.register(name, c);
+		} catch(Exception e) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
+					+ ChatColor.DARK_RED + "An error accured while registering spawner locations command (" + name + ")! "
+					+ "Try changing it, and restart your server!");
+			return;
+		}
+		name = Settings.settings.command_trust;
+		aliases = Settings.settings.aliases_trust;
+		try {
+			CommandTrust c = new CommandTrust(name);
+			if(aliases.isEmpty() == false) c.setAliases(aliases);
+			c.setPermission("spawnermeta.command.trust");
+			cm.register(name, c);
+		} catch(Exception e) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
+					+ ChatColor.DARK_RED + "An error accured while registering spawner trust command (" + name + ")! "
 					+ "Try changing it, and restart your server!");
 			return;
 		}
@@ -82,7 +124,7 @@ public final class CommandManager {
 	public static boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		Player player = (sender instanceof Player) ? (Player) sender : null;
 		if(command.equals(CommandManager.SPAWNERMETA) == true) {
-			String help = help(command, null, "update", "give", "edit", "modify", "location", "disable");
+			String help = help(command, null, "update", "give", "edit", "modify", "location", "disable", "version");
 			if(args.length < 1) sender.sendMessage(help);
 			else if(args[0].equalsIgnoreCase("update") == true) {
 				update0(sender, command, args, player);
@@ -96,6 +138,8 @@ public final class CommandManager {
 				location0(sender, command, args, player);
 			} else if(args[0].equalsIgnoreCase("disable") == true) {
 				disable0(sender, command, args);
+			} else if(args[0].equalsIgnoreCase("version") == true) {
+				success(sender, "You are running SpawnerMeta v#0", SpawnerMeta.PLUGIN_VERSION);
 			} else sender.sendMessage(help);
 		}
 		return false;
@@ -119,7 +163,7 @@ public final class CommandManager {
 			String help1 = help(command, "location view", "player^") + extra("world^?");
 			if(args.length < 3) sender.sendMessage(help1);
 			else {
-				String other = args[2];
+				String name = args[2];
 				List<World> worlds;
 				if(args.length > 3) {
 					String w = args[3];
@@ -130,23 +174,29 @@ public final class CommandManager {
 					}
 					worlds = List.of(world);
 				} else worlds = Bukkit.getWorlds();
+				ILocations il = LocationRegistry.find(name);
+				if(il == null) {
+					warn(sender, "This player does not have any placed spawners!");
+					return;
+				}
 				List<World> has = new LinkedList<>();
-				List<List<Location>> locations = new LinkedList<>();
+				List<Set<Location>> locations = new LinkedList<>();
+				
 				worlds.stream().forEach(world -> {
-					List<Location> list = LF.get(world, other);
-					if(list.isEmpty() == true) return;
+					Set<Location> set = il.get(world);
+					if(set.isEmpty() == true) return;
 					has.add(world);
-					locations.add(list);
+					locations.add(set);
 				});
-				if(has.isEmpty() == true) warn(sender, "This player does not have any placed spawners!");
+				if(has.isEmpty() == true) warn(sender, "This player does not have any placed spawners in this world!");
 				else {
 					sender.sendMessage(Text.color(Colors.aqua) + "Spawner locations for "
-							+ Text.color(Colors.orange) + other + Text.color(Colors.aqua) + ":");
+							+ Text.color(Colors.orange) + name + Text.color(Colors.aqua) + ":");
 					for(int i = 0, j = 0; i < has.size(); i++, j = 0) {
 						sender.sendMessage(Text.color(Colors.gray_75) + "  (" + has.get(i).getName() + ")");
 						for(Location l : locations.get(i)) {
 							sender.sendMessage(Text.color(Colors.lime) + ++j + ": "
-									+ Text.color(Colors.gray_75) + LF.parse(l));
+									+ Text.color(Colors.gray_75) + LocationFile.parse(FinalPos.of(l)));
 						}
 					}
 				}
@@ -155,7 +205,7 @@ public final class CommandManager {
 			String help1 = help(command, "location clear", "player^") + extra("world^?");
 			if(args.length < 3) sender.sendMessage(help1);
 			else {
-				String other = args[2];
+				String name = args[2];
 				List<World> worlds;
 				if(args.length > 3) {
 					String w = args[3];
@@ -166,18 +216,23 @@ public final class CommandManager {
 					}
 					worlds = List.of(world);
 				} else worlds = Bukkit.getWorlds();
+				ILocations il = LocationRegistry.find(name);
+				if(il == null) {
+					warn(sender, "This player does not have any placed spawners!");
+					return;
+				}
 				int r = worlds.stream()
-						.mapToInt(world -> LF.clear(world, other, false))
+						.mapToInt(il::clear)
 						.sum();
 				if(r <= 0) sender.sendMessage(Text.color(Colors.orange) + "No spawners where cleared!");
 				else sender.sendMessage(Text.color(Colors.orange) + "Cleared " + Text.color(Colors.aqua)
 						+ r + Text.color(Colors.orange) + " spawner" + (r > 1 ? "s!" : "!"));
 			}
 		} else if(args[1].equalsIgnoreCase("validate") == true) {
-			String help1 = help(command, "location clear", "player^") + extra("world^?");
+			String help1 = help(command, "location validate", "player^") + extra("world^?");
 			if(args.length < 3) sender.sendMessage(help1);
 			else {
-				String other = args[2];
+				String name = args[2];
 				List<World> worlds;
 				if(args.length > 3) {
 					String w = args[3];
@@ -188,8 +243,13 @@ public final class CommandManager {
 					}
 					worlds = List.of(world);
 				} else worlds = Bukkit.getWorlds();
+				ILocations il = LocationRegistry.find(name);
+				if(il == null) {
+					warn(sender, "This player does not have any placed spawners!");
+					return;
+				}
 				int r = worlds.stream()
-						.mapToInt(world -> LF.clear(world, other, true))
+						.mapToInt(il::validate)
 						.sum();
 				if(r <= 0) sender.sendMessage(Text.color(Colors.lime) + "No invalid spawners were found!");
 				else sender.sendMessage(Text.color(Colors.lime) + "Removed " + Text.color(Colors.aqua)
@@ -307,9 +367,13 @@ public final class CommandManager {
 				if(Settings.settings.disabled(type) == true) warn(sender, "This spawner is disabled!");
 				else if(args.length < 3) {
 					if(player != null) {
-						success(sender, "Added #0 to your inventory!", type.formated() + " Spawner");
-						player.getInventory().addItem(DataManager.getSpawners(type, 1, empty, true).get(0));
-						player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 2f);
+						List<ItemStack> items = DataManager.getSpawners(type, 1, empty, true);
+						if(items.isEmpty() == true) warn(sender, "Could not create any items!");
+						else {
+							success(sender, "Added #0 to your inventory!", type.formated() + " Spawner");
+							player.getInventory().addItem(items.get(0));
+							player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 2f);
+						}
 					}
 				} else if(Utils.isInteger(args[2]) == false) warn(sender, "Invalid amount!");
 				else {
@@ -389,7 +453,7 @@ public final class CommandManager {
 	}
 	
 	private static final String c0 = Text.color(Colors.aqua),
-			c1 = Text.color(Colors.aqua_50),
+			c1 = Text.color(Colors.green),
 			c2 = Text.color(Colors.purple_50),
 			c3 = Text.color(Colors.purple),
 			c4 = Text.color(Colors.yellow),
@@ -480,6 +544,7 @@ public final class CommandManager {
 		l.add("modify");
 		l.add("location");
 		l.add("disable");
+		l.add("version");
 		return reduce(l, s);
 	}
 
@@ -521,7 +586,7 @@ public final class CommandManager {
 	}
 
 	private static List<String> oo(String s) {
-		return reduce(LF.names(), s);
+		return reduce(LocationRegistry.names(), s);
 	}
 
 	private static List<String> ww(String s) {
@@ -554,7 +619,7 @@ public final class CommandManager {
 				.collect(Collectors.toList()), s);
 	}
 
-	private static List<String> reduce(List<String> l, String s) {
+	public static List<String> reduce(List<String> l, String s) {
 		if(s.isEmpty() == true) return l;
 		return l.stream()
 				.filter(a -> a.toLowerCase().contains(s.toLowerCase()))
