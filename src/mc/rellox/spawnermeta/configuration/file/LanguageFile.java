@@ -67,7 +67,7 @@ public class LanguageFile extends AbstractFile {
 		put("Upgrade-GUI.items.stats.stacking.infinite", "<#bfbfbf>Stacked: <#bfff00>%stack% Spawner");
 		put("Upgrade-GUI.items.stats.stacking.finite", "<#bfbfbf>Stacked: <#bfff00>%stack%/%limit% Spawners");
 		put("Upgrade-GUI.items.stats.spawnable", "<#bfbfbf>Spawnable Entities: <#ffff00-#ffbf00>%spawnable%");
-		put("Upgrade-GUI.items.stats.warnings.header", "<#ff0000><!underline>Spawer has %count% warning(s):");
+		put("Upgrade-GUI.items.stats.warnings.header", "<#ff0000><!underline>Spawner has %count% warning(s):");
 		put("Upgrade-GUI.items.stats.warnings.light", "  <#ff8000><!italic>insufficient light level");
 		put("Upgrade-GUI.items.stats.warnings.environment", "  <#ff8000><!italic>insufficient spawn space");
 		put("Upgrade-GUI.items.stats.warnings.ground", "  <#ff8000><!italic>missing correct ground type");
@@ -193,6 +193,27 @@ public class LanguageFile extends AbstractFile {
 		put("Spawners.view.empty", "<#800000>(!) <#008080>Nothing to view!");
 		put("Spawners.view.disabled", "<#800000>(!) <#008080>Spawner viewing is disabled!");
 		put("Spawners.give.success", "<#008000>(!) <#008080>Added <#00ffff>%amount% <#008080>× <#00ffff>%type% Spawner <#008080>to your inventory!");
+		put("Locations.header", "<#00ffff>You have placed %count% spawner(s) at:");
+		put("Locations.world", "  <#808080>(%world%)");
+		put("Locations.position", "<#ff0080>%index%. <#c4c4c4>%x%, %y%, %z%");
+		put("Locations.none-owned", "<#ff8000>You do not own any spawners!");
+		put("Trusted.help.primary",
+				List.of("<#00ff80>Usage: <#80ffff>/spawnertrust",
+						"  <#80ffff>add [player] <#cccccc>- add trusted player",
+						"  <#80ffff>remove [player] <#cccccc>- remove trusted player",
+						"  <#80ffff>clear <#cccccc>- remove all trusted players",
+						"  <#80ffff>view <#cccccc>- view all trusted players"));
+		put("Trusted.help.add", "<#00ff80>Usage: <#80ffff>/spawnertrust add [player]");
+		put("Trusted.help.remove", "<#00ff80>Usage: <#80ffff>/spawnertrust remove [player]");
+		put("Trusted.info.unknow-player", "<#ff0000>Unknown player!");
+		put("Trusted.info.already-trusted", "<#ff8000>You already trust this player!");
+		put("Trusted.info.not-trusted", "<#ff8000>You already do not trust this player!");
+		put("Trusted.info.empty", "<#ff8000>You do not trust any players!");
+		put("Trusted.info.added", "<#00ffff>Added this player to your trust list!");
+		put("Trusted.info.removed", "<#00ffff>Removed this player from your trust list!");
+		put("Trusted.info.cleared", "<#00ffff>Removed %count% player(s) from your trust list!");
+		put("Trusted.header", "<#00ffff>You have %count% player(s) in your trust list:");
+		put("Trusted.player", "<#ff0080>%index%. <#c4c4c4>%player%");
 		
 		Stream.of(SpawnerType.values())
 			.filter(SpawnerType::regular)
@@ -204,7 +225,7 @@ public class LanguageFile extends AbstractFile {
 				
 				Language file has been updated!
 				
-				Legacy colors (&a&1&b...) are no longer available.
+				(!!!) Legacy colors (&a&1&b...) are NO longer available.
 				
 				New text formatting:
 				

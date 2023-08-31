@@ -16,7 +16,7 @@ import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 
 public class SettingsFile extends AbstractFile {
 	
-	private static final int version = 3;
+	private static final int version = 4;
 
 	public SettingsFile() {
 		super("configuration");
@@ -34,6 +34,19 @@ public class SettingsFile extends AbstractFile {
 			copy("Modifiers.holograms.enabled", "Modifiers.holograms.regular.enabled");
 			copy("Modifiers.holograms.show-natural", "Modifiers.holograms.regular.show-natural");
 			copy("Spawners.nearby-entity-limit", "Spawners.nearby-entities.limit");
+		}
+		if(CF.version < 4) {
+			copy("Modifiers.breaking.permissions", "Modifiers.breaking.chance-permissions");
+			int limit = getInteger("Modifiers.stacking.spawner-limit");
+			copy("Modifiers.stacking.spawner-limit", "Modifiers.stacking.spawner-limit.natural");
+			if(limit <= 0) limit = 16;
+			hold("Modifiers.stacking.spawner-limit.owned", limit);
+			hold("Modifiers.stacking.spawner-limit.not-owned", limit);
+			copy("Commands.spawner-view", "Commands.spawner-view.label");
+			copy("Commands.spawner-shop", "Commands.spawner-shop.label");
+			copy("Commands.spawner-drops", "Commands.spawner-drops.label");
+			copy("Commands.spawner-locations", "Commands.spawner-locations.label");
+			delete("Spawner-version");
 		}
 
 		file.addDefault("Debug-errors", true);
@@ -159,11 +172,16 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Modifiers.stacking.use-price", false);
 		file.addDefault("Modifiers.stacking.ticks-per", 5);
 		file.addDefault("Modifiers.stacking.prices.DEFAULT", 100);
-		file.addDefault("Modifiers.stacking.spawner-limit", 16);
+		file.addDefault("Modifiers.stacking.spawner-limit.natural", 16);
+		file.addDefault("Modifiers.stacking.spawner-limit.owned", 16);
 		file.addDefault("Modifiers.stacking.ignore-limit", true);
 		file.addDefault("Modifiers.stacking.when-nearby.enabled", false);
 		file.addDefault("Modifiers.stacking.when-nearby.radius", 8);
 		file.addDefault("Modifiers.stacking.when-nearby.particles", true);
+		file.addDefault("Modifiers.stacking.limit-permissions.example", 32);
+		file.addDefault("Modifiers.stacking.affected-by-permissions.natural", true);
+		file.addDefault("Modifiers.stacking.affected-by-permissions.owned", true);
+		file.addDefault("Modifiers.stacking.affected-by-permissions.not-owned", false);
 
 		file.addDefault("Modifiers.breaking.unbreakable", false);
 		file.addDefault("Modifiers.breaking.ignore-permission", false);
@@ -181,9 +199,9 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Modifiers.breaking.silk-requirement.destroy-on-fail", true);
 		file.addDefault("Modifiers.breaking.enable-durability", false);
 		file.addDefault("Modifiers.breaking.durability-to-remove", 1);
+		file.addDefault("Modifiers.breaking.chance-permissions.example", 100);
 		
 		file.addDefault("Modifiers.breaking.xp-on-failure", isNew() ? 20 : 0);
-		file.addDefault("Modifiers.breaking.permissions", List.of());
 		file.addDefault("Modifiers.breaking.show-owner", false);
 
 		file.addDefault("Modifiers.silent-entities",
@@ -209,11 +227,17 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Modifiers.players.owned.can-change", true);
 		file.addDefault("Modifiers.players.owned.can-open", true);
 		file.addDefault("Modifiers.players.owned.can-upgrade", true);
+		file.addDefault("Modifiers.players.owned.limit-permissions.example", 32);
 		file.addDefault("Modifiers.players.natural.can-break", true);
 		file.addDefault("Modifiers.players.natural.can-stack", true);
 		file.addDefault("Modifiers.players.natural.can-change", true);
 		file.addDefault("Modifiers.players.natural.can-open", true);
 		file.addDefault("Modifiers.players.natural.can-upgrade", true);
+		file.addDefault("Modifiers.players.trusted.can-break", true);
+		file.addDefault("Modifiers.players.trusted.can-stack", true);
+		file.addDefault("Modifiers.players.trusted.can-change", true);
+		file.addDefault("Modifiers.players.trusted.can-open", true);
+		file.addDefault("Modifiers.players.trusted.can-upgrade", true);
 
 		file.addDefault("Modifiers.spawnable.enabled", false);
 		file.addDefault("Modifiers.spawnable.entity-amount.DEFAULT", 5000);
@@ -235,9 +259,16 @@ public class SettingsFile extends AbstractFile {
 				.map(SpawnerType::name)
 				.toList());
 		
-		file.addDefault("Commands.spawner-view", "spawnerview");
-		file.addDefault("Commands.spawner-shop", "spawnershop");
-		file.addDefault("Commands.spawner-drops", "spawnerdrops");
+		file.addDefault("Commands.spawner-view.label", "spawnerview");
+		file.addDefault("Commands.spawner-view.aliases", List.of());
+		file.addDefault("Commands.spawner-shop.label", "spawnershop");
+		file.addDefault("Commands.spawner-shop.aliases", List.of());
+		file.addDefault("Commands.spawner-drops.label", "spawnerdrops");
+		file.addDefault("Commands.spawner-drops.aliases", List.of());
+		file.addDefault("Commands.spawner-locations.label", "spawnerlocations");
+		file.addDefault("Commands.spawner-locations.aliases", List.of());
+		file.addDefault("Commands.spawner-trust.label", "spawnertrust");
+		file.addDefault("Commands.spawner-trust.aliases", List.of());
 		
 		PriceType type = PriceType.EXPERIENCE;
 		file.addDefault("Prices.upgrades.price-type", type.name());
@@ -254,9 +285,12 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Prices.breaking.item.material", Material.GOLD_INGOT.name());
 		file.addDefault("Prices.changing.price-type", type.name());
 		file.addDefault("Prices.changing.item.material", Material.GOLD_INGOT.name());
+		file.addDefault("Prices.format.use-delimiter", false);
+		file.addDefault("Prices.format.delimiter", ",");
+		file.addDefault("Prices.format.use-abbreviations", false);
+		file.addDefault("Prices.format.abbreviations", List.of("k", "m", "b", "t"));
 		
 		file.set("Configuration-version", version);
-		file.addDefault("Spawner-version", 0);
 
 		file.options().copyDefaults(true);
 		
@@ -265,7 +299,7 @@ public class SettingsFile extends AbstractFile {
 		
 		if(isNew() == true) {
 			save();
-			reload();
+			create();
 		}
 		
 		Commenter c = commenter();
@@ -502,7 +536,8 @@ public class SettingsFile extends AbstractFile {
 					"For specific entities:",
 					"  <entity>: <price>",
 					"Replace <entity> with the specific entity name.");
-			c.comment("Modifiers.stacking.spawner-limit", "Maximum stack size a spawner can have.");
+			c.comment("Modifiers.stacking.spawner-limit.natural", "Stacking limit for natural spawners.");
+			c.comment("Modifiers.stacking.spawner-limit.owned", "Stacking limit for owned spawners.");
 			c.comment("Modifiers.stacking.ignore-limit", "Is stacking limit ignored.");
 			c.comment("Modifiers.stacking.when-nearby.enabled",
 					"Player will be able to place same-type",
@@ -513,6 +548,28 @@ public class SettingsFile extends AbstractFile {
 					"Radius in which the nearest same-type spawner",
 					"  will be searched.",
 					"Radius interval: [1; 16]");
+			c.comment("Modifiers.stacking.when-nearby.particles",
+					"If a particle beam to the stacked spawner",
+					"  will be shown.");
+			c.comment("Modifiers.stacking.limit-permissions",
+					"Permissions with specific stacking limits can be created.",
+					"Permission layout:",
+					"  limit-permissions:",
+					"    <name>: <limit>",
+					"Replace <name> with the specific permission name.",
+					"  [ spawnermeta.stacking.permission.<name> ]");
+			c.comment("Modifiers.stacking.limit-permissions.example",
+					"This is an example permission, does not work in game.",
+					"Player with permission (spawnermeta.stacking.permission.example)",
+					"  will be able to stack spawners to 32.");
+			c.comment("Modifiers.stacking.affected-by-permissions",
+					"These options are only used if limit-permissions are used.");
+			c.comment("Modifiers.stacking.affected-by-permissions.natural",
+					"Does stacking limit bypass natural spawners.");
+			c.comment("Modifiers.stacking.affected-by-permissions.owned",
+					"Does stacking limit bypass owned spawners.");
+			c.comment("Modifiers.stacking.affected-by-permissions.not-owned",
+					"Does stacking limit bypass other player owned spawners.");
 			c.comment("Modifiers.breaking.unbreakable",
 					"Is this spawner unbreakable.",
 					"Players only with permission will",
@@ -554,13 +611,17 @@ public class SettingsFile extends AbstractFile {
 					"If set to true then when a player fails",
 					"  to break another player's owned spawner",
 					"  their name will be shown in the chat.");
-			c.comment("Modifiers.breaking.permissions",
+			c.comment("Modifiers.breaking.chance-permissions",
 					"Permissions with specific dropping chance can be created.",
 					"Permission layout:",
-					"  permissions:",
+					"  chance-permissions:",
 					"    <name>: <chance>",
 					"Replace <name> with the specific permission name.",
 					"  [ spawnermeta.breaking.permission.<name> ]");
+			c.comment("Modifiers.breaking.chance-permissions.example",
+					"This is an example permission, does not work in game.",
+					"Player with permission (spawnermeta.breaking.permission.example)",
+					"  will be able to break spawners with a 100% chance.");
 			c.comment("Modifiers.breaking.silk-requirement.enabled",
 					"Is silk touch enchantment required",
 					"  to break spawners.");
@@ -636,11 +697,27 @@ public class SettingsFile extends AbstractFile {
 			c.comment("Modifiers.players.owned.can-change", "Can players change other player owned spawners.");
 			c.comment("Modifiers.players.owned.can-open", "Can players open other player owned spawners.");
 			c.comment("Modifiers.players.owned.can-upgrade", "Can players upgrade other player owned spawners.");
+			c.comment("Modifiers.players.owned.limit-permissions",
+					"Permissions with specific ownership limits can be created.",
+					"Permission layout:",
+					"  limit-permissions:",
+					"    <name>: <limit>",
+					"Replace <name> with the specific permission name.",
+					"  [ spawnermeta.ownership.permission.<name> ]");
+			c.comment("Modifiers.players.owned.limit-permissions.example",
+					"This is an example permission, does not work in game.",
+					"Player with permission (spawnermeta.ownership.permission.example)",
+					"  will be able to place 32 spawners.");
 			c.comment("Modifiers.players.natural.can-break", "Can players break natural spawners.");
 			c.comment("Modifiers.players.natural.can-stack", "Can players stack natural spawners.");
 			c.comment("Modifiers.players.natural.can-change", "Can players change natural spawners.");
 			c.comment("Modifiers.players.natural.can-open", "Can players open natural spawners.");
 			c.comment("Modifiers.players.natural.can-upgrade", "Can players upgrade natural spawners.");
+			c.comment("Modifiers.players.trusted.can-break", "Can trusted players break trustee's spawners.");
+			c.comment("Modifiers.players.trusted.can-stack", "Can trusted players stack trustee's spawners.");
+			c.comment("Modifiers.players.trusted.can-change", "Can trusted players change trustee's spawners.");
+			c.comment("Modifiers.players.trusted.can-open", "Can trusted players open trustee's spawners.");
+			c.comment("Modifiers.players.trusted.can-upgrade", "Can trusted players upgrade trustee's spawners.");
 			c.comment("Modifiers.spawnable.enabled",
 					"Is spawnable entity amount enabled.",
 					"If true, each spawner will have an amount of how many",
@@ -660,9 +737,16 @@ public class SettingsFile extends AbstractFile {
 					"Spawner view can be accessed by all players",
 					"  using /spawnerview");
 			c.comment("Spawner-view.ignore-entities", "Entities that are excluded from spawner view.");
-			c.comment("Commands.spawner-view", "Command label for spawner view.");
-			c.comment("Commands.spawner-shop", "Command label for spawner shop.");
-			c.comment("Commands.spawner-drops", "Command label for spawner drops.");
+			c.comment("Commands.spawner-view.label", "Command label for spawner view.");
+			c.comment("Commands.spawner-view.aliases", "Command aliases for spawner view.");
+			c.comment("Commands.spawner-shop.label", "Command label for spawner shop.");
+			c.comment("Commands.spawner-shop.aliases", "Command aliases for spawner shop.");
+			c.comment("Commands.spawner-drops.label", "Command label for spawner drops.");
+			c.comment("Commands.spawner-drops.aliases", "Command aliases for spawner drops.");
+			c.comment("Commands.spawner-locations.label", "Command label for spawner locations.");
+			c.comment("Commands.spawner-locations.aliases", "Command aliases for spawner locations.");
+			c.comment("Commands.spawner-trust.label", "Command label for spawner trust.");
+			c.comment("Commands.spawner-trust.aliases", "Command aliases for spawner trust.");
 			c.comment("Prices",
 					"Price types:",
 					"  EXPERIENCE - experience points",
@@ -681,6 +765,33 @@ public class SettingsFile extends AbstractFile {
 			c.comment("Prices.stacking", "Price type for stacking.");
 			c.comment("Prices.breaking", "Price type for breaking.");
 			c.comment("Prices.changing", "Price type for changing.");
+			
+			c.comment("Prices.format.use-delimiter",
+					"If true numbers will use",
+					"  a delimiter.",
+					"1000 -> 1,000");
+			c.comment("Prices.format.delimiter",
+					"Delimiter will be used for every",
+					"  thousand in a number.",
+					"Delimiter can be anything, even an empty space.");
+			c.comment("Prices.format.use-abbreviations",
+					"If true numbers will be abbreviated.",
+					"Only the first 2 numbers will be shown,",
+					"  meaning 1234 will show as 1.2k, and",
+					"  all numbers will be rounded up.",
+					"1 000 -> 1k",
+					"2 500 000 -> 2.5m",
+					"...");
+			c.comment("Prices.format.abbreviations",
+					"Abbreviations for each number thousand.",
+					"List:",
+					"- thousands",
+					"- millions",
+					"- billions",
+					"- trillions",
+					"- ...",
+					"You can change and extend this list.",
+					"Note, that the list order matters.");
 			
 			c.comment("Items.layout",
 					"In this section you can change",
@@ -707,15 +818,13 @@ public class SettingsFile extends AbstractFile {
 			
 			c.comment("Configuration-version", "Version of this configuration file.",
 					"Should not be changed.");
-			c.comment("Spawner-version", "Version of spawners in the server.",
-					"By incrementing this value all spawners in the server",
-					"  will be updated. Can also be done",
-					"  using /sm update spawners.");
 		}
 		
 		save();
 		
 		Settings.reload();
+		
+		free();
 	}
 
 }

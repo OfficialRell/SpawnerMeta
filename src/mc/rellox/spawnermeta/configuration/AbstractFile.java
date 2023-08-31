@@ -12,6 +12,7 @@ import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public abstract class AbstractFile implements IFile {
 	
+	private final File parent;
 	private final String name;
 	
 	private File f;
@@ -20,12 +21,17 @@ public abstract class AbstractFile implements IFile {
 	private boolean first;
 	
 	public AbstractFile(String name) {
+		this(SpawnerMeta.instance().getDataFolder(), name);
+	}
+	
+	public AbstractFile(File parent, String name) {
+		this.parent = parent;
 		this.name = name;
 	}
 	
 	@Override
-	public void reload() {
-		f = new File(SpawnerMeta.instance().getDataFolder(), name + ".yml");
+	public final void create() {
+		f = new File(parent, name + ".yml");
 		if(f.getParentFile().exists() == false) f.getParentFile().mkdirs();
 		if(f.exists() == false) {
 			try {
@@ -38,8 +44,8 @@ public abstract class AbstractFile implements IFile {
 		file = YamlConfiguration.loadConfiguration(f);
 	}
 	
-	public final void load() {
-		reload();
+	public void load() {
+		create();
 		initialize();
 	}
 	

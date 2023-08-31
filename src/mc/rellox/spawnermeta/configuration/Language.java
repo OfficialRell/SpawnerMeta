@@ -29,7 +29,7 @@ public interface Language {
 
 	public static List<Content> list(String key) {
 		List<Content> list = CF.l.get(key);
-		return list == null ? empty() : list;
+		return list == null ? empty() : new ArrayList<>(list);
 	}
 
 	public static List<Content> list(String key, String k, Object o) {
