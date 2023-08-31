@@ -24,6 +24,7 @@ import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 public final class GeneratorRegistry implements Listener {
 	
 	private static final Map<World, SpawnerWorld> SPAWNERS = new HashMap<>();
+	private static boolean refresh = false;
 	
 	public static void initialize() {
 		Bukkit.getPluginManager().registerEvents(new GeneratorRegistry(), SpawnerMeta.instance());
@@ -32,20 +33,18 @@ public final class GeneratorRegistry implements Listener {
 	}
 	
 	private static void run() {
-		// ticking timer
 		new BukkitRunnable() {
+			int t = 0;
 			@Override
 			public void run() {
 				SPAWNERS.values().forEach(SpawnerWorld::tick);
+				if(++t > 600) {
+					t = 0;
+					SPAWNERS.values().forEach(SpawnerWorld::reduce);
+				}
+				if(refresh == true) SPAWNERS.values().forEach(SpawnerWorld::refresh);
 			}
 		}.runTaskTimer(SpawnerMeta.instance(), 20, 1);
-		// validation timer
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				SPAWNERS.values().forEach(SpawnerWorld::reduce);
-			}
-		}.runTaskTimer(SpawnerMeta.instance(), 30 * 20, 30 * 20);
 	}
 	
 	public static void load() {
@@ -129,17 +128,12 @@ public final class GeneratorRegistry implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGH)
 	private void onJoin(PlayerJoinEvent event) {
-		SPAWNERS.values().forEach(SpawnerWorld::refresh);
+		refresh = true;
 	}
 
 	@EventHandler(priority = EventPriority.HIGH)
 	private void onQuit(PlayerQuitEvent event) {
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				SPAWNERS.values().forEach(SpawnerWorld::refresh);
-			}
-		}.runTaskLater(SpawnerMeta.instance(), 1);
+		refresh = true;
 	}
 	
 }

@@ -343,7 +343,7 @@ public final class CommandManager {
 	}
 
 	private static void edit0(CommandSender sender, Command command, String[] args, Player player) {
-		String help0 = help(command, "update", "edit", "open", "reset");
+		String help0 = help(command, "edit", "open", "reset");
 		if(args.length < 2) sender.sendMessage(help0);
 		else if(args[1].equalsIgnoreCase("open") == true) {
 			if(player == null) warn(sender, "Cannot use this command in console!");

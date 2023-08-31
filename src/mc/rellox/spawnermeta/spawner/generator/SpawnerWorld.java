@@ -2,6 +2,8 @@ package mc.rellox.spawnermeta.spawner.generator;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -21,10 +23,12 @@ public class SpawnerWorld {
 	
 	public final World world;
 	private final Map<Pos, IGenerator> spawners;
+	private final List<IGenerator> queue;
 	
 	public SpawnerWorld(World world) {
 		this.world = world;
 		this.spawners = new HashMap<>();
+		this.queue = new LinkedList<>();
 	}
 	
 	public void load() {
@@ -37,7 +41,7 @@ public class SpawnerWorld {
 		.map(BlockState::getBlock)
 		.map(ISpawner::of)
 		.map(ActiveGenerator::new)
-		.forEach(o -> spawners.put(o.position(), o));
+		.forEach(queue::add);
 	}
 	
 	public void unload(Chunk chunk) {
@@ -45,7 +49,9 @@ public class SpawnerWorld {
 		.filter(CreatureSpawner.class::isInstance)
 		.map(BlockState::getBlock)
 		.map(Pos::of)
-		.forEach(spawners::remove);
+		.map(spawners::get)
+		.filter(g -> g != null)
+		.forEach(g -> g.remove(false));
 	}
 	
 	public void clear() {
@@ -62,6 +68,10 @@ public class SpawnerWorld {
 	}
 	
 	public void tick() {
+		if(queue.isEmpty() == false) {
+			queue.forEach(g -> spawners.put(g.position(), g));
+			queue.clear();
+		}
 		spawners.values().forEach(IGenerator::tick);
 	}
 	
@@ -77,7 +87,8 @@ public class SpawnerWorld {
 	}
 	
 	public void put(Block block) {
-		spawners.put(Pos.of(block), new ActiveGenerator(ISpawner.of(block)));
+		IGenerator g = new ActiveGenerator(ISpawner.of(block));
+		spawners.put(g.position(), g);
 	}
 	
 	public IGenerator get(Block block) {

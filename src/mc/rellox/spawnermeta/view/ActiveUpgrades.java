@@ -530,14 +530,8 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	}
 	
 	private String time(double t) {
-		String time = "";
-		if(t >= 60) {
-			time += "" + ((int) t / 60) + ":";
-			t %= 60;
-		}
-		if(time.isEmpty() == false && t < 10) time += "0";
-		if(t - (int) t == 0) return time + "" + (int) t;
-		return time + String.format("%.1f", t);
+		if(t == (int) t) return "" + (int) t;
+		return String.format("%.1f", t);
 	}
 	
 	private boolean allowed(int i) {
