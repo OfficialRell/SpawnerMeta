@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="mc/rellox/spawnermeta/utility/Reflections.java|mc/rellox/spawnermeta/configuration/LanguageLegacy.java|mc/rellox/spawnermeta/configuration/ConfigurationFile.java|mc/rellox/spawnermeta/spawner/SpawnerSpawning.java|mc/rellox/spawnermeta/holograms/HologramMap.java|mc/rellox/spawnermeta/holograms/HologramRegistry.java|mc/rellox/spawnermeta/hook/HookHeadDatabase.java" including="**/*.java" kind="src" output="target/classes" path="src">
+	<classpathentry excluding="mc/rellox/spawnermeta/utility/Reflections.java|mc/rellox/spawnermeta/configuration/LanguageLegacy.java|mc/rellox/spawnermeta/configuration/ConfigurationFile.java|mc/rellox/spawnermeta/spawner/SpawnerSpawning.java|mc/rellox/spawnermeta/holograms/HologramMap.java|mc/rellox/spawnermeta/holograms/HologramRegistry.java|mc/rellox/spawnermeta/hook/HookHeadDatabase.java|mc/rellox/spawnermeta/configuration/LocationFile.java" including="**/*.java" kind="src" output="target/classes" path="src">
 		<attributes>
 			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>

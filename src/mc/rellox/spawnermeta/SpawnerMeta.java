@@ -12,7 +12,7 @@ import mc.rellox.spawnermeta.api.APIInstance;
 import mc.rellox.spawnermeta.api.APIRegistry;
 import mc.rellox.spawnermeta.commands.CommandManager;
 import mc.rellox.spawnermeta.configuration.Configuration;
-import mc.rellox.spawnermeta.configuration.LocationFile;
+import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.events.EventListeners;
 import mc.rellox.spawnermeta.hook.HookEconomy;
 import mc.rellox.spawnermeta.hook.HookShopGUI;
@@ -29,7 +29,7 @@ import mc.rellox.spawnermeta.view.SpawnerViewLayout;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 21.0;
+	public static final double PLUGIN_VERSION = 21.1;
 	
 	private static SpawnerMeta plugin;
 	
@@ -80,9 +80,9 @@ public final class SpawnerMeta extends JavaPlugin {
 			SpawnerViewLayout.initialize();
 			ShopRegistry.initialize();
 			EventListeners.initialize();
-			LocationFile.initialize();
 			GeneratorRegistry.initialize();
 			SpawningManager.initialize();
+			LocationRegistry.initialize();
 			
 			this.api = new APIRegistry();
 		} else {

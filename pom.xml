@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>mc.rellox</groupId>
   <artifactId>SpawnerMeta</artifactId>
-  <version>21.0</version>
+  <version>21.1</version>
   <name>SpawnerMeta</name>
   <description>Implements spawner customization and upgrading</description>
   

@@ -2,7 +2,7 @@ name: SpawnerMeta
 main: mc.rellox.spawnermeta.SpawnerMeta
 softdepend: [Vault, WildStacker, WildTools, ShopGUIPlus]
 api-version: 1.14
-version: 21.0
+version: 21.1
 author: Rellox
 commands:
   spawnermeta:
@@ -13,8 +13,20 @@ permissions:
   spawnermeta.sm:
      description: Allow players to manipulate with this plugin
      default: op
-  spawnermeta.spawners:
-     description: Views all spawners
+  spawnermeta.command.view:
+     description: Allow to open spawner view
+     default: true
+  spawnermeta.command.shop:
+     description: Allow to open spawners shop
+     default: true
+  spawnermeta.command.drops:
+     description: Allow to get spawner drops
+     default: true
+  spawnermeta.command.locations:
+     description: Allow to view spawner locations
+     default: true
+  spawnermeta.command.trust:
+     description: Allow to manipulate with spawner trusted players
      default: true
   spawnermeta.eggs:
      description: Allow players to use eggs to change spawner type
