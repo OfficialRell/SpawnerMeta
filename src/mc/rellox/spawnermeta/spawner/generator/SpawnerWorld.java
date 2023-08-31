@@ -1,6 +1,7 @@
 package mc.rellox.spawnermeta.spawner.generator;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -11,11 +12,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 
-import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.location.Pos;
 import mc.rellox.spawnermeta.spawner.ActiveGenerator;
-import mc.rellox.spawnermeta.utility.DataManager;
 
 public class SpawnerWorld {
 	
@@ -65,18 +65,31 @@ public class SpawnerWorld {
 		spawners.values().forEach(IGenerator::tick);
 	}
 	
+	public void reduce() {
+		Iterator<IGenerator> it = spawners.values().iterator();
+		while(it.hasNext() == true) {
+			IGenerator next = it.next();
+			if(next.active() == false || next.present() == false) {
+				next.clear();
+				it.remove();
+			}
+		}
+	}
+	
+	public void put(Block block) {
+		spawners.put(Pos.of(block), new ActiveGenerator(ISpawner.of(block)));
+	}
+	
 	public IGenerator get(Block block) {
 		IGenerator generator = spawners.get(Pos.of(block));
-		if(generator == null && block.getType() == Material.SPAWNER) {
-			DataManager.setNewSpawner(null, block, false);
-			spawners.put(Pos.of(block),
-					generator = new ActiveGenerator(ISpawner.of(block)));
-		}
+		if(generator == null) {
+			if(block.getType() == Material.SPAWNER) put(block);
+		} else if(generator.active() == false) return null;
 		return generator;
 	}
-
-	public IGenerator remove(Block block) {
-		return spawners.remove(Pos.of(block));
+	
+	public IGenerator raw(Block block) {
+		return spawners.get(Pos.of(block));
 	}
 
 }

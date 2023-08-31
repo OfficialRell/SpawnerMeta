@@ -118,7 +118,7 @@ public record ActiveSpawner(Block block) implements ISpawner {
 	
 	@Override
 	public boolean isOwned() {
-		return DataManager.isPlaced(block());
+		return DataManager.isOwned(block());
 	}
 	
 	@Override
@@ -171,11 +171,6 @@ public record ActiveSpawner(Block block) implements ISpawner {
 	@Override
 	public int getUpgradeAttribute(UpgradeType type) {
 		return DataManager.getUpgradeAttributes(block())[type.ordinal()];
-	}
-	
-	@Override
-	public void setUpgradeAttributes(int[] as) {
-		DataManager.setUpgradeAttributes(block(), as);
 	}
 	
 	@Override

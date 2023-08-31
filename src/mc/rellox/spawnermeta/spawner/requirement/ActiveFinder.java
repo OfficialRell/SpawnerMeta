@@ -17,19 +17,19 @@ import mc.rellox.spawnermeta.utility.region.EntityBox;
 
 public class ActiveFinder implements IFinder {
 	
-	private final IGenerator instance;
+	private final IGenerator generator;
 	private IRequirements requirements;
 	
 	private ErrorCounter errors;
 	
-	public ActiveFinder(IGenerator instance) {
-		this.instance = instance;
+	public ActiveFinder(IGenerator generator) {
+		this.generator = generator;
 		update();
 	}
 	
 	@Override
 	public void update() {
-		this.requirements = CF.r.get(instance.cache().type());
+		this.requirements = CF.r.get(generator.cache().type());
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class ActiveFinder implements IFinder {
 		int radius = Settings.settings.radius;
 		int r = radius * 2 + 1;
 		errors = new ErrorCounter(r * r * r);
-		ISpawner spawner = instance.spawner();
+		ISpawner spawner = generator.spawner();
 		EntityBox box = spawner.getType().box();
 		List<Location> list = new ArrayList<>();
 		Block block = spawner.block();
@@ -65,7 +65,9 @@ public class ActiveFinder implements IFinder {
 	@Override
 	public ErrorCounter errors() throws IllegalStateException {
 		if(errors == null) throw new IllegalStateException("Method find() must be ran first");
-		return errors;
+		var last = errors;
+		errors = null;
+		return last;
 	}
 	
 }

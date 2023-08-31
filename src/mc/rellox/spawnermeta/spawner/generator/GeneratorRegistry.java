@@ -19,6 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public final class GeneratorRegistry implements Listener {
 	
@@ -31,21 +32,37 @@ public final class GeneratorRegistry implements Listener {
 	}
 	
 	private static void run() {
+		// ticking timer
 		new BukkitRunnable() {
 			@Override
 			public void run() {
 				SPAWNERS.values().forEach(SpawnerWorld::tick);
 			}
 		}.runTaskTimer(SpawnerMeta.instance(), 20, 1);
+		// validation timer
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				SPAWNERS.values().forEach(SpawnerWorld::reduce);
+			}
+		}.runTaskTimer(SpawnerMeta.instance(), 30 * 20, 30 * 20);
 	}
 	
 	public static void load() {
-		Bukkit.getWorlds().forEach(world -> get(world).load());
+		try {
+			Bukkit.getWorlds().forEach(world -> get(world).load());
+		} catch (Exception e) {
+			RF.debug(e);
+		}
 	}
 	
 	public static void reload() {
-		clear();
-		load();
+		try {
+			clear();
+			load();
+		} catch (Exception e) {
+			RF.debug(e);
+		}
 	}
 	
 	private static SpawnerWorld get(World world) {
@@ -54,16 +71,20 @@ public final class GeneratorRegistry implements Listener {
 		return sw;
 	}
 	
+	public static void put(Block block) {
+		get(block.getWorld()).put(block);
+	}
+	
 	public static IGenerator get(Block block) {
 		return get(block.getWorld()).get(block);
 	}
 	
 	public static void update(Block block) {
-		IGenerator instance = get(block.getWorld()).get(block);
-		if(instance != null) {
-			instance.update();
-			instance.valid();
-			instance.rewrite();
+		IGenerator generator = get(block.getWorld()).get(block);
+		if(generator != null) {
+			generator.update();
+			generator.valid();
+			generator.rewrite();
 		}
 		SpawningManager.unlink(block);
 	}
@@ -73,12 +94,8 @@ public final class GeneratorRegistry implements Listener {
 	}
 	
 	public static void remove(Block block) {
-		IGenerator instance = get(block.getWorld()).remove(block);
-		if(instance != null) instance.clear();
-	}
-	
-	public static void put(Block block) {
-		get(block.getWorld()).get(block);
+		IGenerator generator = get(block.getWorld()).raw(block);
+		if(generator != null) generator.remove(false);
 	}
 	
 	public static void clear() {

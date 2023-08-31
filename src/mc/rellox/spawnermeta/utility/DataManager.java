@@ -40,10 +40,8 @@ public final class DataManager {
 	private static NamespacedKey key_default;
 	private static NamespacedKey key_type;
 	private static NamespacedKey key_stack;
-	private static NamespacedKey key_attributes;
 	private static NamespacedKey key_levels;
 	private static NamespacedKey key_spawnable;
-	private static NamespacedKey key_placed;
 	private static NamespacedKey key_enabled;
 	
 	private static NamespacedKey key_owner;
@@ -59,10 +57,8 @@ public final class DataManager {
 		key_default = new NamespacedKey(SpawnerMeta.instance(), "default");
 		key_type = new NamespacedKey(SpawnerMeta.instance(), "type");
 		key_stack = new NamespacedKey(SpawnerMeta.instance(), "stack");
-		key_attributes = new NamespacedKey(SpawnerMeta.instance(), "attributes");
 		key_levels = new NamespacedKey(SpawnerMeta.instance(), "levels");
 		key_spawnable = new NamespacedKey(SpawnerMeta.instance(), "maximum");
-		key_placed = new NamespacedKey(SpawnerMeta.instance(), "placed");
 		key_enabled = new NamespacedKey(SpawnerMeta.instance(), "enabled");
 		key_owner = new NamespacedKey(SpawnerMeta.instance(), "owner");
 		key_spawned = new NamespacedKey(SpawnerMeta.instance(), "spawned");
@@ -90,6 +86,17 @@ public final class DataManager {
 		return getSpawners(type, i(), 0, Settings.settings.spawnable_amount.get(type), amount, empty, ignore);
 	}
 
+	/**
+	 * @param type - spawner type
+	 * @param levels - range, delay and amount
+	 * @param charges - charges
+	 * @param spawnable - spawnable amount
+	 * @param amount - amount
+	 * @param empty - is empty
+	 * @param ignore - ignore spawnable amount splitting
+	 * @return List of items, can be empty
+	 */
+	
 	public static List<ItemStack> getSpawners(SpawnerType type, int[] levels, int charges, int spawnable, int amount,
 			boolean empty, boolean ignore) {
 		List<ItemStack> list = new ArrayList<>();
@@ -125,7 +132,7 @@ public final class DataManager {
 				name = Language.list("Spawner-item.empty-stored.name", "type", type);
 			else name = Language.list("Spawner-item.empty.name");
 		} else name = Language.list("Spawner-item.regular.name", "type", type);
-		
+
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 		
 		IOrder order = Settings.settings.order_spawner.oderer();
@@ -188,15 +195,22 @@ public final class DataManager {
 	}
 
 	public static void setNewSpawner(Player player, Block block, boolean empty) {
-		if(getNew(block) == 1) return;
-		CreatureSpawner cs = (CreatureSpawner) block.getState();
+		if(getNew(block) == 1) {
+			int[] r = getUpgradeAttributes(block);
+			setDelayConstant(block, r[1]);
+			return;
+		}
+		CreatureSpawner cs = cast(block);
+		if(cs == null) return;
 		EntityType entity = cs.getSpawnedType();
 		SpawnerType type;
 		if(empty == true) type = SpawnerType.EMPTY;
 		else {
 			if(entity == null) {
-				if(Settings.settings.empty_enabled == true) type = SpawnerType.EMPTY;
-				else type = SpawnerType.PIG;
+				if(Settings.settings.empty_enabled == true) {
+					type = SpawnerType.EMPTY;
+					empty = true;
+				} else type = SpawnerType.PIG;
 			} else type = SpawnerType.of(entity);
 			if(type == null) type = SpawnerType.PIG;
 		}
@@ -209,7 +223,6 @@ public final class DataManager {
 		setNew(block);
 		setStack(block, 1);
 		int[] r = attributes(type, levels);
-		setUpgradeAttributes(block, r);
 		setUpgradeLevels(block, levels);
 		setDelayConstant(block, r[1]);
 		setSpawnable(block, spawnable);
@@ -224,16 +237,11 @@ public final class DataManager {
 	public static void updateValues(Block block) {
 		SpawnerType type = getType(block);
 		int[] l = getUpgradeLevels(block), r = attributes(type, l);
-		setUpgradeAttributes(block, r);
 		setUpgradeLevels(block, l);
 		setDelay(block, r[1]);
 		setDefault(block);
 		setOneCount(block);
-	}
-
-	public static void recalculate(Block block) {
-		if(getDefault(block) == Settings.settings.spawner_version) return;
-		updateValues(block);
+		setDelayConstant(block, r[1]);
 	}
 	
 	public static boolean cancelledByOwner(Block block, Player player) {
@@ -282,12 +290,19 @@ public final class DataManager {
 				type = SpawnerType.of(cs.getSpawnedType());
 			} else type = SpawnerType.PIG;
 		} else type = SpawnerType.PIG;
-		if(type == null) type = SpawnerType.PIG;
 		int[] levels = p.getOrDefault(key_upgrades, PersistentDataType.INTEGER_ARRAY, i());
 		if(levels.length > 3) levels = Arrays.copyOf(levels, 3);
 		int charges = p.getOrDefault(key_charges, PersistentDataType.INTEGER, 0);
-		int spawnable = p.getOrDefault(key_spawnable, PersistentDataType.INTEGER, 0);
 		boolean empty = p.getOrDefault(key_empty, PersistentDataType.INTEGER, 0) >= 1;
+		if(type == null) {
+			if(Settings.settings.empty_enabled == true) {
+				type = SpawnerType.EMPTY;
+				empty = true;
+			} else type = SpawnerType.PIG;
+		}
+		int spawnable = p.getOrDefault(key_spawnable, PersistentDataType.INTEGER,
+				Settings.settings.spawnable_enabled
+				? Settings.settings.spawnable_amount.get(type) : 0);
 		return new ActiveVirtual(type, levels, charges, spawnable, empty);
 	}
 
@@ -408,6 +423,13 @@ public final class DataManager {
 		cs.update();
 	}
 
+	public static boolean isOwned(Block block) {
+		CreatureSpawner cs = cast(block);
+		if(cs == null) return false;
+		String id = cs.getPersistentDataContainer().get(key_owner, PersistentDataType.STRING);
+		return id != null;
+	}
+
 	public static UUID getOwner(Block block) {
 		CreatureSpawner cs = cast(block);
 		if(cs == null) return null;
@@ -422,8 +444,14 @@ public final class DataManager {
 
 	public static int getSpawnable(Block block) {
 		CreatureSpawner cs = cast(block);
-		if(cs == null) return 0;
-		return cs.getPersistentDataContainer().getOrDefault(key_spawnable, PersistentDataType.INTEGER, 0);
+		if(cs == null) return -1;
+		PersistentDataContainer p = cs.getPersistentDataContainer();
+		int s = p.getOrDefault(key_spawnable, PersistentDataType.INTEGER, -1);
+		if(s < 0) {
+			s = Settings.settings.spawnable_amount.get(getType(block));
+			p.set(key_spawnable, PersistentDataType.INTEGER, s);
+		}
+		return s;
 	}
 
 	public static void setSpawnable(Block block, int s) {
@@ -433,27 +461,19 @@ public final class DataManager {
 		cs.update();
 	}
 
-	public static void setUpgradeAttributes(Block block, int[] s) {
-		CreatureSpawner cs = cast(block);
-		if(cs == null) return;
-		cs.getPersistentDataContainer().set(key_attributes, PersistentDataType.INTEGER_ARRAY, s);
-		if(isEnabled(block) == true) cs.setRequiredPlayerRange(s[0]);
-		cs.update();
-		setDelayConstant(block, s[1] < 1 ? 1 : s[1]);
-	}
-
 	public static int[] getUpgradeAttributes(Block block) {
-		CreatureSpawner cs = cast(block);
 		SpawnerType type = getType(block);
-		if(cs == null) return Settings.settings.spawner_values.get(type);
-		return cs.getPersistentDataContainer().getOrDefault(key_attributes, PersistentDataType.INTEGER_ARRAY,
-				Settings.settings.spawner_values.get(type));
+		var vs = Settings.settings.spawner_values.get(type);
+		var is = Settings.settings.spawner_value_increase.get(type);
+		var ls = getUpgradeLevels(block);
+		for(int i = 0; i < 3; i++)
+			for(int j = 1; j < ls[i]; j++) vs[i] += is[i];
+		return vs;
 	}
 	
 	public static boolean isRotating(Block block) {
 		CreatureSpawner cs = cast(block);
-		if(cs == null) return false;
-		return cs.getRequiredPlayerRange() > 0;
+		return cs == null ? false : cs.getRequiredPlayerRange() > 0;
 	}
 	
 	public static void setRotating(Block block, boolean b) {
@@ -490,19 +510,6 @@ public final class DataManager {
 		return r - 3;
 	}
 
-	public static void setPlaced(Block block) {
-		CreatureSpawner cs = cast(block);
-		if(cs == null) return;
-		cs.getPersistentDataContainer().set(key_placed, PersistentDataType.INTEGER, 1);
-		cs.update();
-	}
-
-	public static boolean isPlaced(Block block) {
-		CreatureSpawner cs = cast(block);
-		if(cs == null) return false;
-		return cs.getPersistentDataContainer().getOrDefault(key_placed, PersistentDataType.INTEGER, 0) != 0;
-	}
-
 	public static void resetDelay(Block block) {
 		setDelay(block, getDelay(block));
 	}
@@ -526,8 +533,7 @@ public final class DataManager {
 
 	public static int getDelay(Block block) {
 		CreatureSpawner cs = cast(block);
-		if(cs == null) return 0;
-		return cs.getMaxSpawnDelay();
+		return cs == null ? 0 : cs.getMaxSpawnDelay();
 	}
 
 	public static void setDelay(Block block, int s) {
@@ -546,7 +552,7 @@ public final class DataManager {
 	public static void setDefault(Block block) {
 		CreatureSpawner cs = cast(block);
 		if(cs == null) return;
-		cs.getPersistentDataContainer().set(key_default, PersistentDataType.INTEGER, Settings.settings.spawner_version);
+		cs.getPersistentDataContainer().set(key_default, PersistentDataType.INTEGER, 1);
 		cs.update();
 	}
 	
@@ -561,7 +567,6 @@ public final class DataManager {
 
 	public static int getCharges(Block block) {
 		CreatureSpawner cs = cast(block);
-		if(cs == null) return 0;
 		return cs == null ? 0 : cs.getPersistentDataContainer()
 				.getOrDefault(key_charges, PersistentDataType.INTEGER, 0);
 	}

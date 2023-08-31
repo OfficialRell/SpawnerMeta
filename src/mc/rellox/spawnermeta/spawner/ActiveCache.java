@@ -15,6 +15,7 @@ public class ActiveCache implements ICache {
 	private boolean empty;
 	private boolean enabled;
 	private boolean natural;
+	private int[] attributes;
 	
 	public ActiveCache(ISpawner spawner) {
 		this.spawner = spawner;
@@ -29,6 +30,7 @@ public class ActiveCache implements ICache {
 		empty = spawner.isEmpty();
 		enabled = spawner.isEnabled();
 		natural = spawner.isNatural();
+		attributes = spawner.getUpgradeAttributes();
 	}
 
 	@Override
@@ -69,6 +71,21 @@ public class ActiveCache implements ICache {
 	@Override
 	public boolean owned() {
 		return natural == false;
+	}
+
+	@Override
+	public int range() {
+		return attributes[0];
+	}
+
+	@Override
+	public int delay() {
+		return attributes[1];
+	}
+
+	@Override
+	public int amount() {
+		return attributes[2];
 	}
 
 }

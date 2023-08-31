@@ -15,9 +15,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
-import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.events.SpawnerPostSpawnEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerPreSpawnEvent;
 import mc.rellox.spawnermeta.api.hologram.IHologram;
@@ -31,12 +29,11 @@ import mc.rellox.spawnermeta.api.spawner.location.ISelector;
 import mc.rellox.spawnermeta.api.spawner.requirement.ErrorCounter;
 import mc.rellox.spawnermeta.api.view.IUpgrades;
 import mc.rellox.spawnermeta.configuration.Settings;
+import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.events.EventRegistry;
-import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
 import mc.rellox.spawnermeta.spawner.generator.SpawningManager;
 import mc.rellox.spawnermeta.spawner.requirement.ActiveFinder;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
-import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Utils;
 import mc.rellox.spawnermeta.view.ActiveUpgrades;
@@ -59,6 +56,8 @@ public class ActiveGenerator implements IGenerator {
 	private IHologram warning;
 	
 	private int time = 1;
+	
+	private boolean active = true;
 	
 	public ActiveGenerator(ISpawner spawner) {
 		this.spawner = spawner;
@@ -89,14 +88,42 @@ public class ActiveGenerator implements IGenerator {
 	}
 	
 	@Override
+	public Block block() {
+		return spawner.block();
+	}
+	
+	@Override
+	public boolean active() {
+		return active;
+	}
+	
+	@Override
+	public boolean present() {
+		return block().getType() == Material.SPAWNER
+				&& block().getChunk().isLoaded() == true;
+	}
+	
+	@Override
+	public void remove(boolean fully) {
+		active = false;
+		clear();
+		if(fully == true) {
+			Block block = block();
+			LocationRegistry.remove(block);
+			block.setType(Material.AIR);
+		}
+	}
+	
+	@Override
 	public void update() {
+		if(active == false) return;
 		cache.cache();
 		
-		delay = spawner.getUpgradeAttribute(UpgradeType.DELAY);
+		delay = cache.delay();
 		if(ticks <= 0 || ticks > delay) ticks = delay;
 		spawner.setDelay(ticks);
 		finder.update();
-		int r = spawner.getUpgradeAttribute(UpgradeType.RANGE);
+		int r = cache.range();
 		if(box == null || box.radius() != r) box = IBox.sphere(spawner.block(), r);
 
 		boolean emptied = cache.type() == SpawnerType.EMPTY;
@@ -108,12 +135,17 @@ public class ActiveGenerator implements IGenerator {
 	
 	@Override
 	public void rewrite() {
+		if(active == false) return;
 		if(hologram != null) hologram.rewrite();
 		if(warning != null) warning.rewrite();
 	}
 	
 	@Override
 	public void refresh() {
+		if(active == false) return;
+		update();
+		valid();
+		rewrite();
 		if(Settings.settings.owned_if_online == true) {
 			if(cache.natural() == true) online = true;
 			else {
@@ -141,14 +173,14 @@ public class ActiveGenerator implements IGenerator {
 	}
 	
 	private void holograms() {
-		if(time != 0 || rotating == false) return;
+		if(time != 0 || active == false) return;
 		if(hologram != null) hologram.update();
 		if(warning != null) warning.update();
 	}
 	
 	private boolean check() {
 		if(online == false || cache.enabled() == false
-				|| cache.type() == SpawnerType.EMPTY) return false;
+				|| cache.type() == SpawnerType.EMPTY || active == false) return false;
 		if(box.any(spawner.world().getPlayers()) == true) {
 			if(rotating == false) spawner.setRotating(rotating = true);
 			return true;
@@ -159,12 +191,12 @@ public class ActiveGenerator implements IGenerator {
 	@Override
 	public boolean spawn() {
 		Settings s = Settings.settings;
-		if(s.spawning == false) return false;
+		if(s.spawning == false || active == false) return false;
 		List<Location> list = finder.find();
 		validation(finder.errors());
 		if(warnings.isEmpty() == false) return false;
 		
-		int count = cache.stack() * spawner.getUpgradeAttribute(UpgradeType.AMOUNT);
+		int count = cache.stack() * cache.amount();
 		if(count > s.safety_limit) count = s.safety_limit;
 		
 		int limit = s.nearby_limit;
@@ -264,25 +296,17 @@ public class ActiveGenerator implements IGenerator {
 				&& cache.charges() < 1_000_000_000) spawner.setCharges(cache.charges() - 1);
 
 		if(clear == true) {
-			new BukkitRunnable() {
-				@Override
-				public void run() {
-					GeneratorRegistry.remove(block);
-					block.setType(Material.AIR);
-					block.getWorld().spawnParticle(Particle.LAVA, Utils.center(block),
-							25, 0.1, 0.1, 0.1, 0);
-				}
-			}.runTaskLater(SpawnerMeta.instance(), 1);
+			remove(true);
+			block.getWorld().spawnParticle(Particle.LAVA, Utils.center(block),
+					25, 0.1, 0.1, 0.1, 0);
 		}
 		return true;
 	}
 	
 	private void kill(LivingEntity entity, Entity killer) {
-		if(killer == null) {
-			entity.getPassengers().forEach(e -> damage(e, killer));
-			damage(entity.getVehicle(), killer);
-			damage(entity, killer);
-		}
+		entity.getPassengers().forEach(e -> damage(e, killer));
+		damage(entity.getVehicle(), killer);
+		damage(entity, killer);
 	}
 	
 	private void damage(Entity entity, Entity killer) {
@@ -294,6 +318,7 @@ public class ActiveGenerator implements IGenerator {
 
 	@Override
 	public void warn(SpawnerWarning warn) {
+		if(active == false) return;
 		warnings.add(warn);
 		if(warning == null
 				&& Settings.settings.holograms_warning_enabled == true) {
@@ -314,7 +339,7 @@ public class ActiveGenerator implements IGenerator {
 	}
 	
 	private boolean validate() {
-		if(warnings.isEmpty() == true || rotating == false) return true;
+		if(warnings.isEmpty() == true || rotating == false || active == false) return true;
 		Block block = spawner.block();
 		block.getWorld().spawnParticle(Particle.REDSTONE, Utils.center(block),
 				1, 0.5, 0.5, 0.5, 0, new DustOptions(Color.MAROON, 1.5f));
@@ -324,10 +349,17 @@ public class ActiveGenerator implements IGenerator {
 	
 	@Override
 	public boolean valid() {
+		if(cache.type() == SpawnerType.EMPTY) {
+			warnings.clear();
+			if(warning != null) warning.clear();
+			warning = null;
+			if(upgrades != null) upgrades.update();
+			return false;
+		}
 		finder.find();
 		validation(finder.errors());
 		boolean empty = warnings.isEmpty() == true;
-		if((empty == true || cache.type() == SpawnerType.EMPTY) && warning != null) {
+		if(empty == true && warning != null) {
 			warnings.clear();
 			warning.clear();
 			warning = null;
