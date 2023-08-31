@@ -3,16 +3,19 @@ package mc.rellox.spawnermeta.api;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import mc.rellox.spawnermeta.api.configuration.ILocations;
 import mc.rellox.spawnermeta.api.events.EventExecutor;
 import mc.rellox.spawnermeta.api.events.IEvent;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.SpawnerBuilder;
+import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.api.spawner.IVirtual;
 import mc.rellox.spawnermeta.events.EventRegistry;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
@@ -84,6 +87,11 @@ public final class APIRegistry implements APIInstance {
 	public IGenerator getGenerator(Block block) {
 		Objects.requireNonNull(block, "Block cannot be null");
 		return GeneratorRegistry.get(block);
+	}
+	
+	@Override
+	public ILocations getLocations(UUID id) throws IllegalArgumentException {
+		return LocationRegistry.get(id);
 	}
 	
 	@Override

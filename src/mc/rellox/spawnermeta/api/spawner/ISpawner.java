@@ -236,12 +236,6 @@ public interface ISpawner {
 	int getUpgradeAttribute(UpgradeType type);
 	
 	/**
-	 * @param attributes - array of attributes
-	 */
-	
-	void setUpgradeAttributes(int[] attributes);
-	
-	/**
 	 * Equation: (range + delay + amount - 3) = level
 	 * 
 	 * @return Total spawner level

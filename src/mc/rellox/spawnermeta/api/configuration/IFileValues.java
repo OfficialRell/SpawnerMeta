@@ -41,6 +41,16 @@ public interface IFileValues {
 	
 	/**
 	 * @param path - path
+	 * @param def - default value
+	 * @return String value
+	 */
+	
+	default String getString(String path, String def) {
+		return file().getString(path, def);
+	}
+	
+	/**
+	 * @param path - path
 	 * @return Boolean value
 	 */
 	

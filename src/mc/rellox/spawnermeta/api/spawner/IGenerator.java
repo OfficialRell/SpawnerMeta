@@ -1,5 +1,6 @@
 package mc.rellox.spawnermeta.api.spawner;
 
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import mc.rellox.spawnermeta.api.spawner.location.Pos;
@@ -14,10 +15,37 @@ public interface IGenerator {
 	ISpawner spawner();
 	
 	/**
+	 * @return Spawner block
+	 */
+	
+	Block block();
+	
+	/**
 	 * @return Spawner cache
 	 */
 	
 	ICache cache();
+	
+	/**
+	 * @return {@code true} if this generator is active, otherwise {@code false}
+	 */
+	
+	boolean active();
+	
+	/**
+	 * @return {@code true} if this generator has spawner block, otherwise {@code false}
+	 */
+	
+	boolean present();
+	
+	/**
+	 * Removes this generator. If fully is {@code true} then this generator will be
+	 *  fully removed including the block and location.
+	 * 
+	 * @param fully - should this generator be removed fully
+	 */
+	
+	void remove(boolean fully);
 	
 	/**
 	 * Ticks this spawner.
@@ -38,7 +66,7 @@ public interface IGenerator {
 	void rewrite();
 	
 	/**
-	 * Updates spawner constants.
+	 * Does all spawner updates and checks.
 	 */
 	
 	void refresh();

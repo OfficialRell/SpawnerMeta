@@ -26,5 +26,11 @@ public interface ICache {
 	boolean natural();
 	
 	boolean owned();
+	
+	int range();
+	
+	int delay();
+	
+	int amount();
 
 }

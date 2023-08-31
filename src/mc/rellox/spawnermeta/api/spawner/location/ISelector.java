@@ -19,12 +19,12 @@ public interface ISelector extends Supplier<Location> {
 			@Override
 			public ISelector get(List<Location> list) {
 				Location location = Utils.random(list);
-				return () -> location;
+				return () -> location.clone();
 			}
 		}, SPREAD {
 			@Override
 			public ISelector get(List<Location> list) {
-				return () -> Utils.random(list);
+				return () -> Utils.random(list).clone();
 			}
 		};
 		

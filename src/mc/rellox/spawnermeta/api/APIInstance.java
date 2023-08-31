@@ -1,16 +1,19 @@
 package mc.rellox.spawnermeta.api;
 
+import java.util.UUID;
+
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import mc.rellox.spawnermeta.api.configuration.ILocations;
 import mc.rellox.spawnermeta.api.events.EventExecutor;
 import mc.rellox.spawnermeta.api.events.IEvent;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.api.spawner.IVirtual;
 import mc.rellox.spawnermeta.api.spawner.SpawnerBuilder;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
-import mc.rellox.spawnermeta.api.spawner.IVirtual;
 
 @SuppressWarnings("removal")
 public interface APIInstance {
@@ -137,6 +140,29 @@ public interface APIInstance {
 	 */
 	
 	IGenerator getGenerator(Block block);
+	
+	/**
+	 * Returns spawner location file of the specified player.
+	 * 
+	 * @param player - player
+	 * @return Spawner location file
+	 */
+	
+	default ILocations getLocations(Player player) {
+		return getLocations(player.getUniqueId());
+	}
+	
+	/**
+	 * Returns spawner location file of the specified player.
+	 * 
+	 * @param id - player's ID
+	 * @return Spawner location file
+	 *
+	 * @throws IllegalArgumentException thrown if the player with
+	 *  the specified ID has never player before
+	 */
+	
+	ILocations getLocations(UUID id) throws IllegalArgumentException;
 
 	/**
 	 * Returns a spawner builder with the specified spawner type.

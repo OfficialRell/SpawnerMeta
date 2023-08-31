@@ -2,21 +2,21 @@ package mc.rellox.spawnermeta.api.events;
 
 import org.bukkit.entity.Player;
 
-import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
 
-public class SpawnerModifyEvent extends SpawnerPlayerEvent {
+public class SpawnerModifyEvent extends SpawnerPlayerEvent implements IGeneratorEvent {
 	
 	public final ModifyType type;
-	private final ISpawner spawner;
+	private final IGenerator generator;
 	
-	public SpawnerModifyEvent(Player player, ModifyType type, ISpawner spawner) {
+	public SpawnerModifyEvent(Player player, ModifyType type, IGenerator generator) {
 		super(player);
 		this.type = type;
-		this.spawner = spawner;
+		this.generator = generator;
 	}
 	
-	public final ISpawner getSpawner() {
-		return spawner;
+	public final IGenerator getGenerator() {
+		return generator;
 	}
 	
 	public static enum ModifyType {

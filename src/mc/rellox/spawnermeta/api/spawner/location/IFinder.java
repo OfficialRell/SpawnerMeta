@@ -28,8 +28,11 @@ public interface IFinder {
 	List<Location> find();
 	
 	/**
+	 * This method can be called only once after method {@code find()}.
+	 * 
 	 * @return Finder error counter 
 	 * @throws IllegalStateException if method {@code find()} has not been ran
+	 *  or this method is ran twice
 	 */
 	
 	ErrorCounter errors() throws IllegalStateException;

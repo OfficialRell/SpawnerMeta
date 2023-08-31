@@ -1,23 +1,21 @@
 package mc.rellox.spawnermeta.api.events;
 
-import org.bukkit.block.Block;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
 
-import mc.rellox.spawnermeta.api.spawner.ISpawner;
-
-public class SpawnerExplodeEvent extends SpawnerEvent {
+public class SpawnerExplodeEvent extends SpawnerEvent implements IGeneratorEvent {
 	
-	private final Block block;
+	private final IGenerator generator;
 	public final ExplosionType explosion;
 	private final boolean[] bs;
 	
-	public SpawnerExplodeEvent(Block block, ExplosionType explosion, boolean[] bs) {
-		this.block = block;
+	public SpawnerExplodeEvent(IGenerator generator, ExplosionType explosion, boolean[] bs) {
+		this.generator = generator;
 		this.explosion = explosion;
 		this.bs = bs;
 	}
 	
-	public ISpawner getSpawner() {
-		return ISpawner.of(block);
+	public final IGenerator getGenerator() {
+		return generator;
 	}
 	
 	public boolean canBreakOwned() {

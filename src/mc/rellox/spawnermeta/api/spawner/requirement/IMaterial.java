@@ -12,8 +12,14 @@ import org.bukkit.block.Block;
 public interface IMaterial {
 	
 	static IMaterial empty = block -> true;
+	static IMaterial air = block -> {
+		Material type = block.getType();
+		return type.getHardness() <= 0
+				|| type.isAir() == true;
+	};
+	static IMaterial solid = block -> block.getType().isSolid() == true;
 	
-	static IMaterial of(Material m) {
+	static IMaterial is(Material m) {
 		return new IMaterial() {
 			final Material material = m;
 			@Override
@@ -23,9 +29,10 @@ public interface IMaterial {
 		};
 	}
 	
-	static IMaterial of(Collection<Material> collection) {
+	static IMaterial is(Collection<Material> is) {
+		if(is.size() == 1) return is(is.toArray(Material[]::new)[0]);
 		return new IMaterial() {
-			final Set<Material> set = new HashSet<>(collection);
+			final Set<Material> set = new HashSet<>(is);
 			@Override
 			public boolean is(Block block) {
 				return set.contains(block.getType()) == true;
@@ -33,21 +40,20 @@ public interface IMaterial {
 		};
 	}
 	
-	static IMaterial air() {
-		return block -> {
-			Material type = block.getType();
-			return type.isAir() == true
-					|| type.getHardness() <= 0;
+	static IMaterial not(Material m) {
+		return new IMaterial() {
+			final Material material = m;
+			@Override
+			public boolean is(Block block) {
+				return block.getType() != material;
+			}
 		};
 	}
 	
-	static IMaterial solid() {
-		return block -> block.getType().isSolid() == true;
-	}
-	
-	static IMaterial not(Collection<Material> ignore) {
+	static IMaterial not(Collection<Material> not) {
+		if(not.size() == 1) return not(not.toArray(Material[]::new)[0]);
 		return new IMaterial() {
-			final Set<Material> set = new HashSet<>(ignore);
+			final Set<Material> set = new HashSet<>(not);
 			@Override
 			public boolean is(Block block) {
 				return set.contains(block.getType()) == false;
@@ -59,6 +65,11 @@ public interface IMaterial {
 		if(list.size() == 1) return list.get(0);
 		return block -> list.stream().allMatch(i -> i.is(block));
 	}
+	
+	/**
+	 * @param block - block at
+	 * @return {@code true} if this block matches
+	 */
 	
 	boolean is(Block block);
 

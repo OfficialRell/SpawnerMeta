@@ -17,10 +17,10 @@ import mc.rellox.spawnermeta.version.Version.VersionType;
 public interface IFile extends IFileValues {
 	
 	/**
-	 * Loads or reloads this file.
+	 * Creates or initializes this file.
 	 */
 	
-	void reload();
+	void create();
 	
 	/**
 	 * @return The configuration file

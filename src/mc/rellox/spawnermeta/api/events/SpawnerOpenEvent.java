@@ -1,21 +1,20 @@
 package mc.rellox.spawnermeta.api.events;
 
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
 
-public class SpawnerOpenEvent extends SpawnerPlayerEvent {
+public class SpawnerOpenEvent extends SpawnerPlayerEvent implements IGeneratorEvent {
 	
-	private final Block block;
+	private final IGenerator generator;
 
-	public SpawnerOpenEvent(Player player, Block block) {
+	public SpawnerOpenEvent(Player player, IGenerator generator) {
 		super(player);
-		this.block = block;
+		this.generator = generator;
 	}
 	
-	public ISpawner getSpawner() {
-		return ISpawner.of(block);
+	public IGenerator getGenerator() {
+		return generator;
 	}
 
 
