@@ -5,20 +5,32 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 
-import mc.rellox.spawnermeta.commands.CommandManager;
 import mc.rellox.spawnermeta.text.content.Content;
 
 public final class Text {
 	
 	public static final String infinity = "" + '\u221E';
 	
+//	public static void success(String success, Object... os) {
+//		CommandManager.success(Bukkit.getConsoleSender(), success, os);
+//	}
+//	
+//	public static void failure(String error, Object... os) {
+//		CommandManager.warn(Bukkit.getConsoleSender(), error, os);
+//	}
+	
 	public static void success(String success, Object... os) {
-		CommandManager.success(Bukkit.getConsoleSender(), success, os);
+		String w = ChatColor.DARK_GREEN + "(!) " + ChatColor.GREEN + success;
+		if(os != null) for(int i = 0; i < os.length; i++) w = w.replace("#" + i, ChatColor.AQUA + os[i].toString() + ChatColor.GREEN);
+		Bukkit.getConsoleSender().sendMessage(w);
 	}
 	
-	public static void failure(String error, Object... os) {
-		CommandManager.warn(Bukkit.getConsoleSender(), error, os);
+	public static void failure(String warning, Object... os) {
+		String w = ChatColor.DARK_RED + "(!) " + ChatColor.GOLD + warning;
+		if(os != null) for(int i = 0; i < os.length; i++) w = w.replace("#" + i, ChatColor.YELLOW + os[i].toString() + ChatColor.GOLD);
+		Bukkit.getConsoleSender().sendMessage(w);
 	}
 	
 	public static List<String> toText(List<Content> list) {

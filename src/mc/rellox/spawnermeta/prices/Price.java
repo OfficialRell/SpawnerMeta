@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.configuration.Language;
+import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.utility.Utils;
@@ -64,7 +65,7 @@ public abstract class Price {
 		
 		@Override
 		public Content text() {
-			return Language.get("Prices.type.experience.amount", "amount", value);
+			return Language.get("Prices.type.experience.amount", "amount", Settings.settings.price(value));
 		}
 		
 		@Override
@@ -109,7 +110,7 @@ public abstract class Price {
 		
 		@Override
 		public Content text() {
-			return Language.get("Prices.type.levels.amount", "amount", value);
+			return Language.get("Prices.type.levels.amount", "amount", Settings.settings.price(value));
 		}
 		
 		@Override
@@ -209,7 +210,7 @@ public abstract class Price {
 		
 		public PriceEconomy(int value) {
 			super(PriceType.ECONOMY, value);
-			if(SpawnerMeta.ECONOMY.get() == null)
+			if(SpawnerMeta.ECONOMY.exists() == false)
 				throw new IllegalStateException("Cannot construct price of type ECONOMY,"
 						+ " due to economy not being enabled");
 		}
@@ -232,13 +233,13 @@ public abstract class Price {
 		
 		@Override
 		public Content text() {
-			return Language.get("Prices.type.economy.amount", "amount", String.format("%.2f", (double) value));
+			return Language.get("Prices.type.economy.amount", "amount", Settings.settings.price(value));
 		}
 		
 		@Override
 		public Content requires(Player player) {
 			double require = value - balance(player);
-			return Language.get("Prices.type.economy.amount", "amount", String.format("%.2f", require));
+			return Language.get("Prices.type.economy.amount", "amount", require);
 		}
 
 		@Override

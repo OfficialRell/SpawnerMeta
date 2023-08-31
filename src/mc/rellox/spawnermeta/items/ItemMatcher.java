@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Item;
@@ -13,6 +14,9 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
+import mc.rellox.spawnermeta.text.Text;
+import mc.rellox.spawnermeta.text.content.Content;
+import mc.rellox.spawnermeta.text.content.ContentParser;
 import mc.rellox.spawnermeta.utility.Utils;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
@@ -76,12 +80,12 @@ public final class ItemMatcher {
 		if(file.isString(path + ".name") == true) {
 			String name = file.getString(path + ".name");
 			if(name == null || name.isEmpty() == true) return DEFAULT;
-			matcher.name(name);
+			matcher.name(ContentParser.parse(name));
 		}
 		if(file.isList(path + ".lore") == true) {
 			List<String> lore = file.getStringList(path + ".lore");
 			if(lore == null || lore.isEmpty() == true) return DEFAULT;
-			
+			matcher.lore(ContentParser.parse(lore));
 		}
 		if(file.isInt(path + ".model") == true) {
 			int model = file.getInt(path + ".model");
@@ -117,33 +121,39 @@ public final class ItemMatcher {
 		return this;
 	}
 	
-	protected ItemMatcher name(String name) {
+	protected ItemMatcher name(Content name) {
 		match(new MatchData() {
+			String s = ChatColor.stripColor(name.text());
 			@Override
 			public boolean match(ItemMeta meta) {
-				return meta.getDisplayName().equals(name);
+				String in = meta.getDisplayName();
+				return ChatColor.stripColor(in).equals(s);
 			}
 			@Override
 			public void modify(ItemMeta meta) {
-				meta.setDisplayName(name);
+				meta.setDisplayName(name.text());
 			}
 		});
 		return this;
 	}
 	
-	protected ItemMatcher lore(List<String> lore) {
+	protected ItemMatcher lore(List<Content> lore) {
 		match(new MatchData() {
+			List<String> ss = lore.stream()
+					.map(Content::text)
+					.map(ChatColor::stripColor)
+					.toList();
 			@Override
 			public boolean match(ItemMeta meta) {
 				List<String> list = meta.getLore();
 				if(list == null || list.isEmpty() == true) return false;
 				if(list.size() != lore.size()) return false;
-				return IntStream.range(0, lore.size())
-						.allMatch(i -> list.get(i).equals(lore.get(i)));
+				return IntStream.range(0, ss.size())
+						.allMatch(i -> ChatColor.stripColor(list.get(i)).equals(ss.get(i)));
 			}
 			@Override
 			public void modify(ItemMeta meta) {
-				meta.setLore(lore);
+				meta.setLore(Text.toText(lore));
 			}
 		});
 		return this;

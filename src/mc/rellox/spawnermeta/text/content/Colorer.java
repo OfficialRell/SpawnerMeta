@@ -83,10 +83,14 @@ public interface Colorer {
 		public String color(String text) {
 			var sb = new StringBuilder();
 			int l = text.length();
-			double v = 1.0 / (l - 1);
-			for(int i = 0; i < l; i++)
-				sb.append(Text.color(merge(v * i, rgb)))
-				.append(text.charAt(i));
+			if(l <= 1) sb.append(Text.color(rgb[0]))
+				.append(text);
+			else {
+				double v = 1.0 / (l - 1);
+				for(int i = 0; i < l; i++)
+					sb.append(Text.color(merge(v * i, rgb)))
+					.append(text.charAt(i));
+			}
 			return sb.toString();
 		}
 		
@@ -120,10 +124,15 @@ public interface Colorer {
 		public String color(String text) {
 			var sb = new StringBuilder();
 			int l = text.length();
-			double v = 1.0 / (l - 1);
-			for(int i = 0; i < l; i++)
-				sb.append(Text.color(merge(v * i, rgb)))
-				.append(format.toString()).append(text.charAt(i));
+			if(l <= 1) sb.append(Text.color(rgb[0]))
+				.append(format.toString())
+				.append(text);
+			else {
+				double v = 1.0 / (l - 1);
+				for(int i = 0; i < l; i++)
+					sb.append(Text.color(merge(v * i, rgb)))
+					.append(format.toString()).append(text.charAt(i));
+			}
 			return sb.toString();
 		}
 		
