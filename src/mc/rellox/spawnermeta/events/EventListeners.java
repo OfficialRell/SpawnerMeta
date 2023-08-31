@@ -29,8 +29,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.configuration.Settings;
+import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
+import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Messagable;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
@@ -69,9 +71,16 @@ public class EventListeners implements Listener {
 			EventRegistry.stack_nearby(event, player, m, block);
 			return;
 		}
-		ISpawner spawner = ISpawner.of(block);
+		if(DataManager.isItemSpawner(block) == true) return;
+		IGenerator generator = GeneratorRegistry.get(block);
+		if(generator == null) {
+			Text.failure("Unable to get spawner generator at #0, this should never happen,"
+					+ " contact plugin developer.", "[world: " + block.getWorld() + ", x: " + block.getX()
+					+ ", y: " + block.getY() + ", z: " + block.getZ() + "]");
+			return;
+		}
 		try {
-			EventRegistry.interact(event, player, m, block, spawner);
+			EventRegistry.interact(event, player, m, generator);
 		} catch (Exception e) {
 			RF.debug(e);
 		}
@@ -82,7 +91,9 @@ public class EventListeners implements Listener {
 		try {
 			Block block = event.getBlock();
 			if(block.getType() != Material.SPAWNER) return;
-			EventRegistry.breaking(event, block);
+			IGenerator generator = fetch(block);
+			if(generator == null) return;
+			EventRegistry.breaking(event, generator);
 		} catch (Exception e) {
 			RF.debug(e);
 		}
@@ -132,6 +143,17 @@ public class EventListeners implements Listener {
 		}
 	}
 	
+	protected static IGenerator fetch(Block block) {
+		IGenerator generator = GeneratorRegistry.get(block);
+		if(generator == null) {
+			Text.failure("Unable to get spawner generator at #0, this should never happen,"
+					+ " contact plugin developer.", "[world: " + block.getWorld() + ", x: " + block.getX()
+					+ ", y: " + block.getY() + ", z: " + block.getZ() + "]");
+			return null;
+		}
+		return generator;
+	}
+	
 	private static abstract class RegistryAbstract implements Listener {
 		
 		private boolean registered;
@@ -166,21 +188,6 @@ public class EventListeners implements Listener {
 		}
 		
 	}
-	
-//	private static final class RegistryWorldLoad extends RegistryAbstract {
-//		
-//		@Override
-//		public void update() {
-//			if(HologramRegistry.loaded() == false) unregister();
-//			else register();
-//		}
-//
-//		@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-//		private void onWorldLoad(WorldLoadEvent event) {
-//			HologramRegistry.load(event.getWorld());
-//		}
-//		
-//	}
 	
 	private static final class RegistryLinking extends RegistryAbstract {
 
