@@ -42,7 +42,10 @@ public final class GeneratorRegistry implements Listener {
 					t = 0;
 					SPAWNERS.values().forEach(SpawnerWorld::reduce);
 				}
-				if(refresh == true) SPAWNERS.values().forEach(SpawnerWorld::refresh);
+				if(refresh == true) {
+					SPAWNERS.values().forEach(SpawnerWorld::refresh);
+					refresh = false;
+				}
 			}
 		}.runTaskTimer(SpawnerMeta.instance(), 20, 1);
 	}
