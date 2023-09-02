@@ -19,6 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
+import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public final class GeneratorRegistry implements Listener {
@@ -26,19 +27,23 @@ public final class GeneratorRegistry implements Listener {
 	private static final Map<World, SpawnerWorld> SPAWNERS = new HashMap<>();
 	private static boolean refresh = false;
 	
+	private static BukkitRunnable active;
+	
 	public static void initialize() {
 		Bukkit.getPluginManager().registerEvents(new GeneratorRegistry(), SpawnerMeta.instance());
 		load();
-		run();
+		retime(true);
 	}
 	
-	private static void run() {
-		new BukkitRunnable() {
+	public static void retime(boolean first) {
+		if(active != null) active.cancel();
+		(active = new BukkitRunnable() {
 			int t = 0;
+			final int f = Math.max(10, 600 / Settings.settings.ticking_interval);
 			@Override
 			public void run() {
 				SPAWNERS.values().forEach(SpawnerWorld::tick);
-				if(++t > 600) {
+				if(++t > f) {
 					t = 0;
 					SPAWNERS.values().forEach(SpawnerWorld::reduce);
 				}
@@ -47,7 +52,7 @@ public final class GeneratorRegistry implements Listener {
 					refresh = false;
 				}
 			}
-		}.runTaskTimer(SpawnerMeta.instance(), 20, 1);
+		}).runTaskTimer(SpawnerMeta.instance(), first ? 20 : 5, Settings.settings.ticking_interval);
 	}
 	
 	public static void load() {
@@ -65,6 +70,14 @@ public final class GeneratorRegistry implements Listener {
 		} catch (Exception e) {
 			RF.debug(e);
 		}
+	}
+	
+	public static int active(World world) {
+		if(world == null) return SPAWNERS.values()
+				.stream()
+				.mapToInt(SpawnerWorld::active)
+				.sum();
+		return get(world).active();
 	}
 	
 	private static SpawnerWorld get(World world) {

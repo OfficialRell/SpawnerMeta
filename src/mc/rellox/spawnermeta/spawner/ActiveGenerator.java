@@ -40,11 +40,13 @@ import mc.rellox.spawnermeta.view.ActiveUpgrades;
 
 public class ActiveGenerator implements IGenerator {
 	
+	private static final DustOptions dust = new DustOptions(Color.MAROON, 1.5f);
+	
 	private final ISpawner spawner;
 	private final IFinder finder;
 	private final ICache cache;
 	
-	private IBox box;
+	private IBox box = IBox.empty;
 	
 	private int delay, ticks;
 	private boolean online, rotating;
@@ -55,7 +57,8 @@ public class ActiveGenerator implements IGenerator {
 	private final IHologram hologram;
 	private IHologram warning;
 	
-	private int time = 1;
+	private int validation = 1;
+	private int checking = 1;
 	
 	private boolean active = true;
 	
@@ -119,12 +122,12 @@ public class ActiveGenerator implements IGenerator {
 		if(active == false) return;
 		cache.cache();
 		
-		delay = cache.delay();
+		delay = cache.delay() / Settings.settings.ticking_interval;
 		if(ticks <= 0 || ticks > delay) ticks = delay;
 		spawner.setDelay(ticks);
 		finder.update();
 		int r = cache.range();
-		if(box == null || box.radius() != r) box = IBox.sphere(spawner.block(), r);
+		if(box.radius() != r) box = IBox.sphere(spawner.block(), r);
 
 		boolean emptied = cache.type() == SpawnerType.EMPTY;
 		if(online == false || cache.enabled() == false
@@ -159,13 +162,15 @@ public class ActiveGenerator implements IGenerator {
 
 	@Override
 	public void tick() {
-		if(--time < 0) time = Settings.settings.check_ticks;
+		if(--validation < 0) validation = Settings.settings.validation_interval - 1;
+		if(active == false) return;
 		holograms();
-		if(online == false || cache.enabled() == false || validate() == false) {
-			if(time == 0) spawner.setDelay(delay);
+		if(check() == false) return;
+		if(cache.type() == SpawnerType.EMPTY) return;
+		if(online == false || validate() == false) {
+			if(validation == 0) spawner.setDelay(delay);
 			return;
 		}
-		if(check() == false) return;
 		if(--ticks <= 0) {
 			spawn();
 			update();
@@ -173,18 +178,21 @@ public class ActiveGenerator implements IGenerator {
 	}
 	
 	private void holograms() {
-		if(time != 0 || active == false) return;
+		if(validation != 0 || active == false) return;
 		if(hologram != null) hologram.update();
 		if(warning != null) warning.update();
 	}
 	
 	private boolean check() {
-		if(online == false || cache.enabled() == false
-				|| cache.type() == SpawnerType.EMPTY || active == false) return false;
+		if(--checking < 0) checking = Settings.settings.checking_interval - 1;
+		if(cache.enabled() == false) return false;
+		if(checking != 0) return rotating;
 		if(box.any(spawner.world().getPlayers()) == true) {
 			if(rotating == false) spawner.setRotating(rotating = true);
 			return true;
-		} else if(rotating == true) spawner.setRotating(rotating = false);
+		} else {
+			if(rotating == true) spawner.setRotating(rotating = false);
+		}
 		return false;
 	}
 
@@ -340,10 +348,12 @@ public class ActiveGenerator implements IGenerator {
 	
 	private boolean validate() {
 		if(warnings.isEmpty() == true || rotating == false || active == false) return true;
-		Block block = spawner.block();
-		block.getWorld().spawnParticle(Particle.REDSTONE, Utils.center(block),
-				1, 0.5, 0.5, 0.5, 0, new DustOptions(Color.MAROON, 1.5f));
-		if(time == 0) valid();
+		if(rotating == true) {
+			Block block = spawner.block();
+			block.getWorld().spawnParticle(Particle.REDSTONE, Utils.center(block),
+					1, 0.5, 0.5, 0.5, 0, dust);
+		}
+		if(validation == 0 && cache.enabled() == true) valid();
 		return false;
 	}
 	

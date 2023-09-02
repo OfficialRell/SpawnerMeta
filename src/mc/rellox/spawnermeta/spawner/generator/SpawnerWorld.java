@@ -59,6 +59,10 @@ public class SpawnerWorld {
 		spawners.clear();
 	}
 	
+	public int active() {
+		return spawners.size();
+	}
+	
 	public void update() {
 		spawners.values().forEach(IGenerator::update);
 	}
