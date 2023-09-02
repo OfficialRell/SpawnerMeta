@@ -52,8 +52,10 @@ public final class Settings {
 	
 	public final TripleIntegerMap spawner_values;
 	public final TripleIntegerMap spawner_value_increase;
-	
-	public int check_ticks;
+
+	public int ticking_interval;
+	public int checking_interval;
+	public int validation_interval;
 	
 	public int radius;
 	public Selection selection;
@@ -253,7 +255,9 @@ public final class Settings {
 
 		spawning = true;
 		
-		check_ticks = CF.s.getInteger("Spawners.checking-ticks", 20, 1000);
+		ticking_interval = CF.s.getInteger("Spawners.ticking-interval", 1, 20);
+		checking_interval = CF.s.getInteger("Spawners.checking-interval", 1, 1000);
+		validation_interval = CF.s.getInteger("Spawners.validation-interval", 1, 1000);
 		
 		spawner_values.load();
 		spawner_value_increase.load();

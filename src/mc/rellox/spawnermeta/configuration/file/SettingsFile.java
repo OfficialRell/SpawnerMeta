@@ -16,7 +16,7 @@ import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 
 public class SettingsFile extends AbstractFile {
 	
-	private static final int version = 4;
+	private static final int version = 5;
 
 	public SettingsFile() {
 		super("configuration");
@@ -48,6 +48,9 @@ public class SettingsFile extends AbstractFile {
 			copy("Commands.spawner-locations", "Commands.spawner-locations.label");
 			delete("Spawner-version");
 		}
+		if(CF.version < 5) {
+			copy("Spawners.checking-ticks", "Spawners.validation-interval");
+		}
 
 		file.addDefault("Debug-errors", true);
 		
@@ -61,7 +64,9 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Spawners.spawning-type", "SPREAD");
 		file.addDefault("Spawners.spawning-radius", 3);
 		
-		file.addDefault("Spawners.checking-ticks", 100);
+		file.addDefault("Spawners.ticking-interval", 1);
+		file.addDefault("Spawners.validation-interval", 100);
+		file.addDefault("Spawners.checking-interval", 1);
 		
 		file.addDefault("Spawners.switching", false);
 		
@@ -338,12 +343,36 @@ public class SettingsFile extends AbstractFile {
 					"  SINGLE - spawn entities in a single spot.",
 					"  SPREAD - spread entities around spawner.");
 			c.comment("Spawners.spawning-radius", "Entity spawning radius.");
-			c.comment("Spawners.checking-ticks",
-					"Amount of ticks between each spawner condition",
+			c.comment("Spawners.ticking-interval",
+					"Amount of ticks between each spawner tick.",
+					"Note! This is the main interval, meaning",
+					"  other intervals as 'checking-interval'",
+					"  and 'validation-interval' depend on this",
+					"  interval.",
+					"Suggested interval: [1-5]");
+			c.comment("Spawners.validation-interval",
+					"Interval between each spawner condition",
 					"  check and hologram updates.",
 					"The smaller the value, the more impact on",
 					"  server performance.",
-					"Change on your own risk!");
+					"Note! This interval will only increase every",
+					"  spawner ticking interval, meaning total",
+					"  interval ticks are:",
+					"    'ticking-interval' * 'validation-interval'",
+					"Suggested interval: [20-200]",
+					"  (but do not use large values if",
+					"  'ticking-interval' is large)");
+			c.comment("Spawners.checking-interval",
+					"Interval between each spawner validation,",
+					"Higher value will increase server performance",
+					"  but spawners will be validated less often.",
+					"Note! This interval will only increase every",
+					"  spawner ticking interval, meaning total",
+					"  interval ticks are:",
+					"    'ticking-interval' * 'checking-interval'",
+					"Suggested interval: [1-20]",
+					"  (but do not use large values if",
+					"  'ticking-interval' is large)");
 			c.comment("Spawners.switching",
 					"Is spawner switching enabled.",
 					"To switch a spawner on or off players must click",

@@ -193,6 +193,7 @@ public class LanguageFile extends AbstractFile {
 		put("Spawners.view.empty", "<#800000>(!) <#008080>Nothing to view!");
 		put("Spawners.view.disabled", "<#800000>(!) <#008080>Spawner viewing is disabled!");
 		put("Spawners.give.success", "<#008000>(!) <#008080>Added <#00ffff>%amount% <#008080>× <#00ffff>%type% Spawner <#008080>to your inventory!");
+		put("Spawners.give.success-single", "<#008000>(!) <#008080>Added <#00ffff>%type% Spawner <#008080>to your inventory!");
 		put("Locations.header", "<#00ffff>You have placed %count% spawner(s) at:");
 		put("Locations.world", "  <#808080>(%world%)");
 		put("Locations.position", "<#ff0080>%index%. <#c4c4c4>%x%, %y%, %z%");

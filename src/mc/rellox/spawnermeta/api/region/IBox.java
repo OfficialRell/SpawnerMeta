@@ -10,6 +10,19 @@ import mc.rellox.spawnermeta.utility.region.SphereBox;
 
 public interface IBox {
 	
+	static IBox empty = new IBox() {
+		@Override
+		public int z() {return 0;}
+		@Override
+		public int y() {return 0;}
+		@Override
+		public int x() {return 0;}
+		@Override
+		public int radius() {return 0;}
+		@Override
+		public boolean in(int x, int y, int z) {return false;}
+	};
+	
 	public static IBox cube(Block block, int r) {
 		return cube(block.getX(), block.getY(), block.getZ(), r);
 	}

@@ -124,7 +124,7 @@ public final class CommandManager {
 	public static boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		Player player = (sender instanceof Player) ? (Player) sender : null;
 		if(command.equals(CommandManager.SPAWNERMETA) == true) {
-			String help = help(command, null, "update", "give", "edit", "modify", "location", "disable", "version");
+			String help = help(command, null, "update", "give", "edit", "modify", "location", "active", "disable", "version");
 			if(args.length < 1) sender.sendMessage(help);
 			else if(args[0].equalsIgnoreCase("update") == true) {
 				update0(sender, command, args, player);
@@ -138,11 +138,34 @@ public final class CommandManager {
 				location0(sender, command, args, player);
 			} else if(args[0].equalsIgnoreCase("disable") == true) {
 				disable0(sender, command, args);
+			} else if(args[0].equalsIgnoreCase("active") == true) {
+				active0(sender, command, args);
 			} else if(args[0].equalsIgnoreCase("version") == true) {
 				success(sender, "You are running SpawnerMeta v#0", SpawnerMeta.PLUGIN_VERSION);
 			} else sender.sendMessage(help);
 		}
 		return false;
+	}
+
+	private static void active0(CommandSender sender, Command command, String[] args) {
+		String help0 = help(command, "active", "world^");
+		if(args.length < 2) sender.sendMessage(help0);
+		else {
+			String w = args[1];
+			if(w.equalsIgnoreCase("#all") == true) {
+				int a = GeneratorRegistry.active(null);
+				success(sender, "There are #0 active spawner" + (a > 1 ? "s" : ""), a);
+			} else {
+				World world = Bukkit.getWorld(w);
+				if(world == null) warn(sender, "This world (#0) does not exist!", w);
+				else {
+					int a = GeneratorRegistry.active(world);
+					success(sender, "There are #0 active spawner in world (#1)" + (a > 1 ? "s" : ""),
+							a, world.getName());
+					
+				}
+			}
+		}
 	}
 
 	private static void disable0(CommandSender sender, Command command, String[] args) {
@@ -363,6 +386,7 @@ public final class CommandManager {
 			SpawnerType type = SpawnerType.of(a);
 			if(type == null) warn(sender, "Invalid entity type!");
 			else {
+				Messagable m = new Messagable(player);
 				boolean empty = type == SpawnerType.EMPTY;
 				if(Settings.settings.disabled(type) == true) warn(sender, "This spawner is disabled!");
 				else if(args.length < 3) {
@@ -370,7 +394,7 @@ public final class CommandManager {
 						List<ItemStack> items = DataManager.getSpawners(type, 1, empty, true);
 						if(items.isEmpty() == true) warn(sender, "Could not create any items!");
 						else {
-							success(sender, "Added #0 to your inventory!", type.formated() + " Spawner");
+							m.send(Language.list("Spawners.give.success-single", "type", type.formated()));
 							player.getInventory().addItem(items.get(0));
 							player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 2f);
 						}
@@ -381,7 +405,7 @@ public final class CommandManager {
 					if(amount < 1) warn(sender, "Amount must be greater then 0!");
 					else if(args.length < 4) {
 						if(player != null) {
-							new Messagable(player).send(Language.list("Spawners.give.success",
+							m.send(Language.list("Spawners.give.success",
 									"amount", amount, "type", type.formated()));
 							player.getInventory().addItem(DataManager.getSpawners(type, amount, empty, true).get(0));
 						} else warn(sender, "You must define a player to use this command in console!");
@@ -430,6 +454,7 @@ public final class CommandManager {
 			Configuration.initialize();
 			EventListeners.update();
 			SpawnerViewLayout.initialize();
+			GeneratorRegistry.retime(false);
 		}
 		if(is(i, 1) == true) {
 			sender.sendMessage(c6 + "(!) " + c0 + "Updating language...");
@@ -531,6 +556,9 @@ public final class CommandManager {
 			} else if(args[0].equalsIgnoreCase("disable") == true) {
 				if(args.length < 3) return tf(args[1]);
 				else return l;
+			} else if(args[0].equalsIgnoreCase("active") == true) {
+				if(args.length < 3) return wa(args[1]);
+				else return l;
 			} else return l;
 		}
 		return null;
@@ -544,6 +572,7 @@ public final class CommandManager {
 		l.add("modify");
 		l.add("location");
 		l.add("disable");
+		l.add("active");
 		l.add("version");
 		return reduce(l, s);
 	}
@@ -594,6 +623,15 @@ public final class CommandManager {
 				.stream()
 				.map(World::getName)
 				.toList(), s);
+	}
+
+	private static List<String> wa(String s) {
+		List<String> list = Bukkit.getWorlds()
+				.stream()
+				.map(World::getName)
+				.collect(Collectors.toList());
+		list.add("#all");
+		return reduce(list, s);
 	}
 
 	private static List<String> up(String s) {

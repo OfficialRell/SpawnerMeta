@@ -16,9 +16,6 @@ public class SphereBox implements IBox {
 
 	@Override
 	public boolean in(int a, int b, int c) {
-//		return x >= mx && x <= xx
-//				&& y >= my && y <= xy
-//				&& z >= mz && z <= xz;
 		int v;
 		int r = (v = x - a) * v
 				+ (v = y - b) * v
