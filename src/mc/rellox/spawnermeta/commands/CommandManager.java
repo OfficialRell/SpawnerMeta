@@ -30,6 +30,7 @@ import mc.rellox.spawnermeta.configuration.location.LocationFile;
 import mc.rellox.spawnermeta.configuration.location.LocationFile.FinalPos;
 import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.events.EventListeners;
+import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.shop.ShopRegistry;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
@@ -160,7 +161,7 @@ public final class CommandManager {
 				if(world == null) warn(sender, "This world (#0) does not exist!", w);
 				else {
 					int a = GeneratorRegistry.active(world);
-					success(sender, "There are #0 active spawner in world (#1)" + (a > 1 ? "s" : ""),
+					success(sender, "There are #0 active spawner in world (#1)",
 							a, world.getName());
 					
 				}
@@ -450,7 +451,7 @@ public final class CommandManager {
 		if(is(i, 0) == true) {
 			sender.sendMessage(c6 + "(!) " + c0 + "Updating configuration...");
 			if(player != null) player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
-			SpawnerMeta.ECONOMY.load();
+			HookRegistry.ECONOMY.load();
 			Configuration.initialize();
 			EventListeners.update();
 			SpawnerViewLayout.initialize();
