@@ -12,7 +12,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/vault"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/wild stacker"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
@@ -21,5 +20,6 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Head Database"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/wild tools"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/FlareTokens"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
