@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>mc.rellox</groupId>
   <artifactId>SpawnerMeta</artifactId>
-  <version>21.4</version>
+  <version>21.5</version>
   <name>SpawnerMeta</name>
   <description>Implements spawner customization and upgrading</description>
   
@@ -12,13 +12,17 @@
 	  <id>jitpack.io</id>
 	  <url>https://jitpack.io</url>
     </repository>
+    <repository>
+      <id>spigot-repo</id>
+      <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+    </repository>
   </repositories>
 	
   <dependencies>
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
-      <version>1.19.4-R0.1-SNAPSHOT</version>
+      <version>1.20.1-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -26,6 +30,12 @@
 	    <artifactId>shopgui-api</artifactId>
 	    <version>3.0.0</version>
 	    <scope>provided</scope>
+	</dependency>
+    <dependency>
+      <groupId>com.github.MilkBowl</groupId>
+      <artifactId>VaultAPI</artifactId>
+      <version>1.7.1</version>
+      <scope>provided</scope>
 	</dependency>
   </dependencies>
   
