@@ -83,6 +83,8 @@ public final class Settings {
 	public boolean kill_entities_on_spawn;
 	public boolean entities_drop_xp;
 	
+	public int required_redstone_power;
+	
 	public int nearby_limit;
 	public boolean nearby_reduce;
 	
@@ -255,15 +257,15 @@ public final class Settings {
 
 		spawning = true;
 		
-		ticking_interval = CF.s.getInteger("Spawners.ticking-interval", 1, 20);
-		checking_interval = CF.s.getInteger("Spawners.checking-interval", 1, 1000);
-		validation_interval = CF.s.getInteger("Spawners.validation-interval", 1, 1000);
+		ticking_interval = file.getInteger("Spawners.ticking-interval", 1, 20);
+		checking_interval = file.getInteger("Spawners.checking-interval", 1, 1000);
+		validation_interval = file.getInteger("Spawners.validation-interval", 1, 1000);
 		
 		spawner_values.load();
 		spawner_value_increase.load();
 		selection = RF.enumerate(Selection.class, file.getString("Spawners.spawning-type"),
 				Selection.SINGLE);
-		radius = CF.s.getInteger("Spawners.spawning-radius", 1, 8);
+		radius = file.getInteger("Spawners.spawning-radius", 1, 8);
 		spawner_switching = file.getBoolean("Spawners.switching");
 		
 		empty_enabled = file.getBoolean("Spawners.empty.enabled");
@@ -289,6 +291,8 @@ public final class Settings {
 		
 		kill_entities_on_spawn = file.getBoolean("Spawners.kill-entities-on-spawn");
 		entities_drop_xp = file.getBoolean("Spawners.drop-xp-when-instant-kill");
+		
+		required_redstone_power = file.getInteger("Spawners.required-redstone-power", 0, 15);
 		
 		allow_renaming = file.getBoolean("Spawners.allow-renaming");
 		
@@ -377,7 +381,7 @@ public final class Settings {
 		breaking_durability_to_remove = file.getInteger("Modifiers.breaking.durability-to-remove");
 		breaking_xp_on_failure = file.getInteger("Modifiers.breaking.xp-on-failure");
 		chance_permissions.clear();
-		CF.s.keys("Modifiers.breaking.permissions")
+		CF.s.keys("Modifiers.breaking.chance-permissions")
 		.forEach(key -> {
 			if(key.equals("example") == true) return;
 			String perm = "spawnermeta.breaking.permission." + key;
@@ -545,9 +549,8 @@ public final class Settings {
 			String s = abbreviations.get(0);
 			for(String a : abbreviations) {
 				i *= 1_000;
-				if(f >= i) {
-					s = a;
-				} else break;
+				if(f >= i) s = a;
+				else break;
 			}
 			double r = f / (i * 0.001);
 			if(r == (int) r) return (int) r + s;
@@ -593,7 +596,7 @@ public final class Settings {
 	}
 	
 	public int charges_price(SpawnerType type, ISpawner spawner) {
-		return charges_price.get(type) *spawner.getStack() * (spawner.getSpawnerLevel() + 1);
+		return charges_price.get(type) * spawner.getStack() * (spawner.getSpawnerLevel() + 1);
 	}
 	
 	public static class TripleIntegerMap {
