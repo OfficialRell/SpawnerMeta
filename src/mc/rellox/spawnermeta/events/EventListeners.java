@@ -31,6 +31,7 @@ import org.bukkit.inventory.ItemStack;
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.configuration.Settings;
+import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
 import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.utility.DataManager;
@@ -72,13 +73,8 @@ public class EventListeners implements Listener {
 			return;
 		}
 		if(DataManager.isItemSpawner(block) == true) return;
-		IGenerator generator = GeneratorRegistry.get(block);
-		if(generator == null) {
-			Text.failure("Unable to get spawner generator at #0, this should never happen,"
-					+ " contact plugin developer.", "[world: " + block.getWorld() + ", x: " + block.getX()
-					+ ", y: " + block.getY() + ", z: " + block.getZ() + "]");
-			return;
-		}
+		IGenerator generator = fetch(block);
+		if(generator == null) return;
 		try {
 			EventRegistry.interact(event, player, m, generator);
 		} catch (Exception e) {
@@ -193,7 +189,7 @@ public class EventListeners implements Listener {
 
 		@Override
 		public void update() {
-			if(SpawnerMeta.WILD_STACKER.exists() == false) unregister();
+			if(HookRegistry.WILD_STACKER.exists() == false) unregister();
 			else register();
 		}
 
@@ -202,7 +198,7 @@ public class EventListeners implements Listener {
 			Stream.of(event.getChunk().getTileEntities())
 				.filter(CreatureSpawner.class::isInstance)
 				.map(BlockState::getBlock)
-				.forEach(SpawnerMeta.WILD_STACKER::unlink);
+				.forEach(HookRegistry.WILD_STACKER::unlink);
 		}
 		
 	}

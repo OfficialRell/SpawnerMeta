@@ -23,10 +23,10 @@ import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.util.Consumer;
 
-import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.location.ISelector;
 import mc.rellox.spawnermeta.configuration.Settings;
+import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.utility.reflect.type.Invoker;
@@ -59,10 +59,10 @@ public final class SpawningManager {
 
 			Class<?> clazz = type.entity().getEntityClass();
 			if(LivingEntity.class.isAssignableFrom(clazz) == true
-					&& SpawnerMeta.WILD_STACKER.exists() == true
-					&& SpawnerMeta.WILD_STACKER.enabled() == true) {
+					&& HookRegistry.WILD_STACKER.exists() == true
+					&& HookRegistry.WILD_STACKER.enabled() == true) {
 //				Bukkit.getLogger().info("Spawning through WS");
-				entities = SpawnerMeta.WILD_STACKER.combine(spawner, type, selector, count);
+				entities = HookRegistry.WILD_STACKER.combine(spawner, type, selector, count);
 			} else {
 //				Bukkit.getLogger().info("Spawning as regular");
 				entities = new ArrayList<>(count);
@@ -191,8 +191,8 @@ public final class SpawningManager {
  	}
 	
 	public static void unlink(Block block) {
-		if(SpawnerMeta.WILD_STACKER.exists() == false) return;
-		SpawnerMeta.WILD_STACKER.unlink(block);
+		if(HookRegistry.WILD_STACKER.exists() == false) return;
+		HookRegistry.WILD_STACKER.unlink(block);
 	}
 
 }
