@@ -8,9 +8,14 @@ This plugin implements fully customizable and upgradeable spawners.
 <dependency>
     <groupId>mc.rellox</groupId>
     <artifactId>SpawnerMeta</artifactId>
-    <version>21.5</version>
+    <version>21.6</version>
     <scope>provided</scope>
 </dependency>
+
+<repository>
+  <id>jitpack.io</id>
+  <url>https://jitpack.io</url>
+</repository>
 ```
 
 ## API usage
