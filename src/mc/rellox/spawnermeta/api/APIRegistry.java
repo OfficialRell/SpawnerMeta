@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -14,9 +15,10 @@ import mc.rellox.spawnermeta.api.events.EventExecutor;
 import mc.rellox.spawnermeta.api.events.IEvent;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
-import mc.rellox.spawnermeta.api.spawner.SpawnerBuilder;
-import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.api.spawner.IVirtual;
+import mc.rellox.spawnermeta.api.spawner.SpawnerBuilder;
+import mc.rellox.spawnermeta.configuration.Settings;
+import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.events.EventRegistry;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
@@ -28,8 +30,11 @@ public final class APIRegistry implements APIInstance {
 	
 	private final List<WrappedExecutor<?>> executors;
 	
+	private Function<Player, Boolean> silk_touch_provider;
+	
 	public APIRegistry() {
 		this.executors = new ArrayList<>();
+		this.silk_touch_provider = Settings.settings::has_silk;
 	}
 
 	public boolean registered() {
@@ -50,6 +55,16 @@ public final class APIRegistry implements APIInstance {
 		}
 		executors.add(j, wrapper);
 		registered = true;
+	}
+	
+	@Override
+	public void setSilkTouchProvider(Function<Player, Boolean> provider) {
+		silk_touch_provider = provider;
+	}
+	
+	@Override
+	public boolean hasSilkTouch(Player player) {
+		return silk_touch_provider.apply(player);
 	}
 	
 	@Override

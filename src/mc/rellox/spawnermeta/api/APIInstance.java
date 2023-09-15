@@ -1,6 +1,7 @@
 package mc.rellox.spawnermeta.api;
 
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -29,6 +30,22 @@ public interface APIInstance {
 	 */
 	
 	<E extends IEvent> void register(Class<E> c, EventExecutor<E> executor);
+	
+	/**
+	 * Sets a new silk touch provider.
+	 * Function takes player who broke the spawner.
+	 * 
+	 * @param provider - provider
+	 */
+	
+	void setSilkTouchProvider(Function<Player, Boolean> provider);
+	
+	/**
+	 * @param player - player
+	 * @return {@code true} if this player is holding a tool with silk touch
+	 */
+	
+	boolean hasSilkTouch(Player player);
 	
 	/**
 	 * Tries to breaks the spawner at the specified block.

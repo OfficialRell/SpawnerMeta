@@ -400,6 +400,9 @@ public class ActiveGenerator implements IGenerator {
 		}
 		if(Settings.settings.charges_enabled == true && cache.charges() <= 0)
 			warn(SpawnerWarning.CHARGES);
+		int power = Settings.settings.required_redstone_power;
+		if(power > 0 && spawner.block().getBlockPower() < power)
+			warn(SpawnerWarning.POWER);
 	}
 	
 	@Override

@@ -7,19 +7,39 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
+import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.text.content.Content;
 
 public final class Text {
 	
 	public static final String infinity = "" + '\u221E';
 	
-//	public static void success(String success, Object... os) {
-//		CommandManager.success(Bukkit.getConsoleSender(), success, os);
-//	}
-//	
-//	public static void failure(String error, Object... os) {
-//		CommandManager.warn(Bukkit.getConsoleSender(), error, os);
-//	}
+	public static void logLoad() {
+		Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta " + ChatColor.AQUA + "v"
+				+ SpawnerMeta.PLUGIN_VERSION + ChatColor.DARK_PURPLE + "]" + ChatColor.GREEN + " enabled!");
+	}
+	
+	public static void logUnload() {
+		Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta " + ChatColor.AQUA + "v"
+				+ SpawnerMeta.PLUGIN_VERSION + ChatColor.DARK_PURPLE + "]" + ChatColor.RED + " disabled!");
+	}
+	
+	public static void logOutdated(double v) {
+		Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "Spawner Meta "
+				+ ChatColor.AQUA + "v" + SpawnerMeta.PLUGIN_VERSION + ChatColor.DARK_PURPLE + "] "
+				+ ChatColor.YELLOW + "New version is available: v" + v + "! " + ChatColor.GOLD + "To download visit: "
+				+ "https://www.spigotmc.org/resources/spawnermeta.74188/");
+	}
+	
+	public static void logInfo(String info) {
+		Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta"
+				+ ChatColor.DARK_PURPLE + "] " + ChatColor.GRAY + info);
+	}
+	
+	public static void logFail(String fail) {
+		Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta " + ChatColor.AQUA + "v"
+				+ SpawnerMeta.PLUGIN_VERSION + ChatColor.DARK_PURPLE + "] " + ChatColor.DARK_RED + fail);
+	}
 	
 	public static void success(String success, Object... os) {
 		String w = ChatColor.DARK_GREEN + "(!) " + ChatColor.GREEN + success;
