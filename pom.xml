@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>mc.rellox</groupId>
   <artifactId>SpawnerMeta</artifactId>
-  <version>21.5</version>
+  <version>21.6</version>
   <name>SpawnerMeta</name>
   <description>Implements spawner customization and upgrading</description>
   
@@ -37,6 +37,27 @@
       <version>1.7.1</version>
       <scope>provided</scope>
 	</dependency>
+    <dependency>
+      <groupId>com.bgsoftware</groupId>
+      <artifactId>WildStacker</artifactId>
+      <version>2022.5</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/WildStacker-2022.5.jar</systemPath>
+	</dependency>
+    <dependency>
+      <groupId>com.bgsoftware</groupId>
+      <artifactId>WildTools</artifactId>
+      <version>2023.1</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/WildTools-2023.1.jar</systemPath>
+	</dependency>
+    <dependency>
+      <groupId>co.technove</groupId>
+      <artifactId>FlareTokens</artifactId>
+      <version>3.1.1</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/FlareTokens-3.1.1.jar</systemPath>
+	</dependency>
   </dependencies>
   
   <build>
@@ -48,7 +69,6 @@
        <configuration>
 		   <source>16</source>
 		   <target>16</target>
-           <!-- <release>16</release> -->
         </configuration>
       </plugin>
     </plugins>
