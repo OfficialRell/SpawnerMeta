@@ -26,7 +26,7 @@ import mc.rellox.spawnermeta.view.SpawnerViewLayout;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 21.6;
+	public static final double PLUGIN_VERSION = 21.7;
 	
 	private static SpawnerMeta plugin;
     
