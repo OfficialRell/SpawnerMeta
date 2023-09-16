@@ -2,17 +2,17 @@ package mc.rellox.spawnermeta.hook;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
-import net.flares.flaretokens.TMMobCoinsPlugin;
-import net.flares.flaretokens.API.TokensPlayer;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
-public final class HookFlareTokens implements HookInstance<TMMobCoinsPlugin> {
+public final class HookFlareTokens implements HookInstance<JavaPlugin> {
 	
-	private TMMobCoinsPlugin plugin;
+	private JavaPlugin plugin;
 	private ICurrency currency;
 
 	@Override
-	public TMMobCoinsPlugin get() {
+	public JavaPlugin get() {
 		return this.plugin;
 	}
 	
@@ -31,7 +31,8 @@ public final class HookFlareTokens implements HookInstance<TMMobCoinsPlugin> {
 		this.currency = new ICurrency() {
 			@Override
 			public void remove(Player player, int a) {
-				TokensPlayer.warpPlayer(player).removeTokens(a);
+				RF.order(t(player), "removeTokens", int.class).invoke(a);
+//				TokensPlayer.warpPlayer(player).removeTokens(a);
 			}
 			@Override
 			public boolean has(Player player, int a) {
@@ -39,18 +40,26 @@ public final class HookFlareTokens implements HookInstance<TMMobCoinsPlugin> {
 			}
 			@Override
 			public int get(Player player) {
-				return TokensPlayer.warpPlayer(player).getTokens();
+				return RF.order(t(player), "getTokens")
+						.as(int.class)
+						.invoke(0);
+//				return TokensPlayer.warpPlayer(player).getTokens();
 			}
 			@Override
 			public void add(Player player, int a) {
-				TokensPlayer.warpPlayer(player).giveTokens(a);
+				RF.order(t(player), "giveTokens", int.class).invoke(a);
+//				TokensPlayer.warpPlayer(player).giveTokens(a);
+			}
+			private Object t(Player player) {
+				Class<?> c = RF.get("net.flares.flaretokens.API.TokensPlayer");
+				return RF.order(c, "warpPlayer", Player.class).invoke(player);
 			}
 		};
 		
 	}
 	
-	private static TMMobCoinsPlugin fetch() {
-		return (TMMobCoinsPlugin) Bukkit.getServer().getPluginManager().getPlugin("FlareTokens");
+	private static JavaPlugin fetch() {
+		return (JavaPlugin) Bukkit.getServer().getPluginManager().getPlugin("FlareTokens");
 	}
 
 }

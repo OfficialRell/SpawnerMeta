@@ -8,10 +8,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.bgsoftware.wildtools.api.hooks.DropsProvider;
-import com.bgsoftware.wildtools.handlers.ProvidersHandler;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class SetupWildTools {
@@ -20,7 +20,7 @@ public class SetupWildTools {
 		new BukkitRunnable() {
 			@Override
 			public void run() {
-				ProvidersHandler providers = SpawnerMeta.WILD_TOOLS.get().getProviders();
+				var providers = HookRegistry.WILD_TOOLS.get().getProviders();
 				try {
 					RF.fetch(providers, "dropsProviders", List.class).clear();
 				} catch (Exception x) {

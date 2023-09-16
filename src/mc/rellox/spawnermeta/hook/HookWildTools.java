@@ -2,16 +2,17 @@ package mc.rellox.spawnermeta.hook;
 
 import org.bukkit.Bukkit;
 
-import com.bgsoftware.wildtools.WildToolsPlugin;
+import com.bgsoftware.wildtools.api.WildTools;
+import com.bgsoftware.wildtools.api.WildToolsAPI;
 
 import mc.rellox.spawnermeta.hook.setup.SetupWildTools;
 
-public class HookWildTools implements HookInstance<WildToolsPlugin> {
+public class HookWildTools implements HookInstance<WildTools> {
 	
-	private WildToolsPlugin plugin;
+	private WildTools plugin;
 
 	@Override
-	public WildToolsPlugin get() {
+	public WildTools get() {
 		return plugin;
 	}
 
@@ -22,7 +23,8 @@ public class HookWildTools implements HookInstance<WildToolsPlugin> {
 
 	@Override
 	public void load() {
-		plugin = (WildToolsPlugin) Bukkit.getPluginManager().getPlugin("WildTools");
+		if(Bukkit.getPluginManager().getPlugin("WildTools") == null) return;
+		plugin = WildToolsAPI.getWildTools();
 		if(plugin == null) return;
 		SetupWildTools.load();
 	}

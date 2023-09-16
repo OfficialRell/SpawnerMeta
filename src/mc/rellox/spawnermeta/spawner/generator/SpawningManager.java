@@ -59,8 +59,7 @@ public final class SpawningManager {
 
 			Class<?> clazz = type.entity().getEntityClass();
 			if(LivingEntity.class.isAssignableFrom(clazz) == true
-					&& HookRegistry.WILD_STACKER.exists() == true
-					&& HookRegistry.WILD_STACKER.enabled() == true) {
+					&& HookRegistry.WILD_STACKER.exists() == true) {
 //				Bukkit.getLogger().info("Spawning through WS");
 				entities = HookRegistry.WILD_STACKER.combine(spawner, type, selector, count);
 			} else {
