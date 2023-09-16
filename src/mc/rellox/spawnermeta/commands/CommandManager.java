@@ -510,12 +510,14 @@ public final class CommandManager {
 	public static void warn(CommandSender sender, String warning, Object... os) {
 		String w = c7 + "(!) " + c5 + warning;
 		if(os != null) for(int i = 0; i < os.length; i++) w = w.replace("#" + i, c4 + os[i].toString() + c5);
+		if(sender instanceof Player == false) w = ChatColor.stripColor(w);
 		sender.sendMessage(w);
 	}
 	
 	public static void success(CommandSender sender, String success, Object... os) {
 		String w = c6 + "(!) " + c1 + success;
 		if(os != null) for(int i = 0; i < os.length; i++) w = w.replace("#" + i, c0 + os[i].toString() + c1);
+		if(sender instanceof Player == false) w = ChatColor.stripColor(w);
 		sender.sendMessage(w);
 	}
 	
