@@ -2,24 +2,19 @@ package mc.rellox.spawnermeta.prices;
 
 public enum PriceType {
 	
-	EXPERIENCE("Experience"),
-	LEVELS("Levels"),
-	MATERIAL("Material"),
-	ECONOMY("Economy");
+	EXPERIENCE(),
+	LEVELS(),
+	MATERIAL(),
+	ECONOMY(),
+	FLARE_TOKENS();
 	
-	private final String name;
-	
-	private PriceType(String name) {
-		this.name = name;
-	}
-	
-	public String getName() {
-		return this.name;
+	public String key() {
+		return name().replace('_', '-').toLowerCase();
 	}
 	
 	@Override
 	public String toString() {
-		return getName();
+		return name();
 	}
 	
 	public static PriceType of(String name) {

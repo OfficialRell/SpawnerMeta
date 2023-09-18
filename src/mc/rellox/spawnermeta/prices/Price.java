@@ -6,9 +6,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
+import mc.rellox.spawnermeta.hook.ICurrency;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.utility.Utils;
@@ -206,51 +206,101 @@ public abstract class Price {
 		
 	}
 	
-	public static class PriceEconomy extends Price {
+//	public static class PriceEconomy extends Price {
+//		
+//		public PriceEconomy(int value) {
+//			super(PriceType.ECONOMY, value);
+//			if(SpawnerMeta.ECONOMY.exists() == false)
+//				throw new IllegalStateException("Cannot construct price of type ECONOMY,"
+//						+ " due to economy not being enabled");
+//		}
+//
+//		@Override
+//		public boolean has(Player player) {
+//			return Utils.op(player) == true || SpawnerMeta.ECONOMY.get().has(player, value) == true;
+//		}
+//		
+//		@Override
+//		public void remove(Player player) {
+//			if(Utils.op(player) == true) return;
+//			SpawnerMeta.ECONOMY.get().withdrawPlayer(player, value);
+//		}
+//		
+//		@Override
+//		public Content insufficient() {
+//			return Language.get("Prices.type.economy.insufficient");
+//		}
+//		
+//		@Override
+//		public Content text() {
+//			return Language.get("Prices.type.economy.amount", "amount", Settings.settings.price(value));
+//		}
+//		
+//		@Override
+//		public Content requires(Player player) {
+//			double require = value - balance(player);
+//			return Language.get("Prices.type.economy.amount", "amount", require);
+//		}
+//
+//		@Override
+//		public int balance(Player player) {
+//			return (int) (SpawnerMeta.ECONOMY.get().getBalance(player));
+//		}
+//		
+//		@Override
+//		public void refund(Player player) {
+//			SpawnerMeta.ECONOMY.get().depositPlayer(player, value);
+//			
+//		}
+//		
+//	}
+	
+	public static class PriceCurrency extends Price {
 		
-		public PriceEconomy(int value) {
-			super(PriceType.ECONOMY, value);
-			if(SpawnerMeta.ECONOMY.exists() == false)
-				throw new IllegalStateException("Cannot construct price of type ECONOMY,"
-						+ " due to economy not being enabled");
+		private final ICurrency currency;
+		
+		public PriceCurrency(PriceType type, int value, ICurrency currency) {
+			super(type, value);
+			this.currency = currency;
 		}
 
 		@Override
 		public boolean has(Player player) {
-			return Utils.op(player) == true || SpawnerMeta.ECONOMY.get().has(player, value) == true;
+			return Utils.op(player) == true || currency.has(player, value) == true;
 		}
 		
 		@Override
 		public void remove(Player player) {
 			if(Utils.op(player) == true) return;
-			SpawnerMeta.ECONOMY.get().withdrawPlayer(player, value);
+			currency.remove(player, value);
 		}
 		
 		@Override
 		public Content insufficient() {
-			return Language.get("Prices.type.economy.insufficient");
+			return Language.get("Prices.type." + type.key() + ".insufficient");
 		}
 		
 		@Override
 		public Content text() {
-			return Language.get("Prices.type.economy.amount", "amount", Settings.settings.price(value));
+			return Language.get("Prices.type." + type.key() + ".amount",
+					"amount", Settings.settings.price(value));
 		}
 		
 		@Override
 		public Content requires(Player player) {
 			double require = value - balance(player);
-			return Language.get("Prices.type.economy.amount", "amount", require);
+			return Language.get("Prices.type." + type.key() + ".amount",
+					"amount", require);
 		}
 
 		@Override
 		public int balance(Player player) {
-			return (int) (SpawnerMeta.ECONOMY.get().getBalance(player));
+			return currency.get(player);
 		}
 		
 		@Override
 		public void refund(Player player) {
-			SpawnerMeta.ECONOMY.get().depositPlayer(player, value);
-			
+			currency.add(player, value);
 		}
 		
 	}
