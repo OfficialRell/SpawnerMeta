@@ -22,11 +22,10 @@ import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Metrics;
 import mc.rellox.spawnermeta.utility.Utils;
 import mc.rellox.spawnermeta.version.Version;
-import mc.rellox.spawnermeta.view.SpawnerViewLayout;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 21.7;
+	public static final double PLUGIN_VERSION = 21.8;
 	
 	private static SpawnerMeta plugin;
     
@@ -37,7 +36,11 @@ public final class SpawnerMeta extends JavaPlugin {
     @Override
     public void onLoad() {
 		loaded = Version.version != null;
-		plugin = this;
+		
+		if(loaded == true) {
+			plugin = this;
+			this.api = new APIRegistry();
+		}
     }
 
 	@Override
@@ -59,14 +62,11 @@ public final class SpawnerMeta extends JavaPlugin {
 			Configuration.initialize();
 			CommandManager.initialize();
 			DataManager.initialize();
-			SpawnerViewLayout.initialize();
 			ShopRegistry.initialize();
 			EventListeners.initialize();
 			GeneratorRegistry.initialize();
 			SpawningManager.initialize();
 			LocationRegistry.initialize();
-			
-			this.api = new APIRegistry();
 		} else {
 			Text.logFail("failed to load, invalid server version!");
 			Bukkit.getPluginManager().disablePlugin(this);

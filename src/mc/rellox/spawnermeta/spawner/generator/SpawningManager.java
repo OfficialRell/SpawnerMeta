@@ -30,6 +30,8 @@ import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.utility.reflect.type.Invoker;
+import mc.rellox.spawnermeta.version.Version;
+import mc.rellox.spawnermeta.version.Version.VersionType;
 
 public final class SpawningManager {
 	
@@ -41,7 +43,9 @@ public final class SpawningManager {
 			Block block = spawner.block();
 
 			Invoker<Entity> invoker = RF.order(block.getWorld(), "spawn",
-					Location.class, Class.class, Consumer.class, SpawnReason.class).as(Entity.class);
+					Location.class, Class.class, Version.version.high(VersionType.v_20_2)
+					? java.util.function.Consumer.class : org.bukkit.util.Consumer.class, SpawnReason.class)
+					.as(Entity.class);
 			
 			boolean s = switch(type) {
 			case SLIME, MAGMA_CUBE -> true;

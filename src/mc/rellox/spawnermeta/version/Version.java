@@ -13,7 +13,8 @@ public final class Version {
 	static {
 		String s = Bukkit.getServer().getClass().getPackage().getName();
 		server = s.substring(s.lastIndexOf('.') + 1);
-		if(server.contains("v1_20_R1") == true) version = VersionType.v_20_1;
+		if(server.contains("v1_20_R2") == true) version = VersionType.v_20_2;
+		else if(server.contains("v1_20_R1") == true) version = VersionType.v_20_1;
 		else if(server.contains("v1_19_R3") == true) version = VersionType.v_19_3;
 		else if(server.contains("v1_19_R2") == true) version = VersionType.v_19_2;
 		else if(server.contains("v1_19_R1") == true) version = VersionType.v_19_1;
@@ -31,7 +32,7 @@ public final class Version {
 	
 	public static enum VersionType {
 		
-		v_14_1, v_15_1, v_16_1, v_16_2, v_16_3, v_17_1, v_18_1, v_18_2, v_19_1, v_19_2, v_19_3, v_20_1;
+		v_14_1, v_15_1, v_16_1, v_16_2, v_16_3, v_17_1, v_18_1, v_18_2, v_19_1, v_19_2, v_19_3, v_20_1, v_20_2;
 		
 		public boolean high(VersionType type) {
 			return ordinal() >= type.ordinal();
