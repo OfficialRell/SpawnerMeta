@@ -41,8 +41,6 @@ import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Messagable;
 import mc.rellox.spawnermeta.utility.Utils;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
-import mc.rellox.spawnermeta.view.SpawnerEditor;
-import mc.rellox.spawnermeta.view.SpawnerViewLayout;
 
 public final class CommandManager {
 
@@ -125,14 +123,12 @@ public final class CommandManager {
 	public static boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		Player player = (sender instanceof Player) ? (Player) sender : null;
 		if(command.equals(CommandManager.SPAWNERMETA) == true) {
-			String help = help(command, null, "update", "give", "edit", "modify", "location", "active", "disable", "version");
+			String help = help(command, null, "update", "modify", "location", "active", "disable", "version");
 			if(args.length < 1) sender.sendMessage(help);
 			else if(args[0].equalsIgnoreCase("update") == true) {
 				update0(sender, command, args, player);
 			} else if(args[0].equalsIgnoreCase("give") == true) {
 				give0(sender, command, args, player);
-			} else if(args[0].equalsIgnoreCase("edit") == true) {
-				edit0(sender, command, args, player);
 			} else if(args[0].equalsIgnoreCase("modify") == true) {
 				modify0(sender, command, args, player);
 			} else if(args[0].equalsIgnoreCase("location") == true) {
@@ -366,19 +362,6 @@ public final class CommandManager {
 		} else sender.sendMessage(help0);
 	}
 
-	private static void edit0(CommandSender sender, Command command, String[] args, Player player) {
-		String help0 = help(command, "edit", "open", "reset");
-		if(args.length < 2) sender.sendMessage(help0);
-		else if(args[1].equalsIgnoreCase("open") == true) {
-			if(player == null) warn(sender, "Cannot use this command in console!");
-			else SpawnerEditor.open(player);
-		} else if(args[1].equalsIgnoreCase("reset") == true) {
-			SpawnerViewLayout.resetLayout();
-			if(player != null) player.playSound(player.getEyeLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.5f, 2f);
-			success(sender, "Reseting Spawner GUI Layout!");
-		} else sender.sendMessage(help0);
-	}
-
 	private static void give0(CommandSender sender, Command command, String[] args, Player player) {
 		String help0 = help(command, "give", "type^") + extra("amount*") + extra("player?") + extra("values?");
 		if(args.length < 2) sender.sendMessage(help0);
@@ -454,7 +437,6 @@ public final class CommandManager {
 			HookRegistry.ECONOMY.load();
 			Configuration.initialize();
 			EventListeners.update();
-			SpawnerViewLayout.initialize();
 			GeneratorRegistry.retime(false);
 		}
 		if(is(i, 1) == true) {
@@ -538,9 +520,6 @@ public final class CommandManager {
 						else return l;
 					} else return l;
 				}
-			} else if(args[0].equalsIgnoreCase("edit") == true) {
-				if(args.length < 3) return or(args[1]);
-				else return l;
 			} else if(args[0].equalsIgnoreCase("modify") == true) {
 				if(args.length < 3) return mo(args[1]);
 				else if(args[1].equalsIgnoreCase("type") == true) {
@@ -570,7 +549,6 @@ public final class CommandManager {
 	private static List<String> sm(String s) {
 		List<String> l = new ArrayList<>();
 		l.add("update");
-		l.add("give");
 		l.add("edit");
 		l.add("modify");
 		l.add("location");
@@ -584,13 +562,6 @@ public final class CommandManager {
 		return reduce(Bukkit.getOnlinePlayers().stream()
 				.map(Player::getName)
 				.collect(Collectors.toList()), s);
-	}
-
-	private static List<String> or(String s) {
-		List<String> l = new ArrayList<>();
-		l.add("open");
-		l.add("reset");
-		return reduce(l, s);
 	}
 
 	private static List<String> tf(String s) {

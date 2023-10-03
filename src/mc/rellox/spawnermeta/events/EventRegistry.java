@@ -654,10 +654,10 @@ public final class EventRegistry {
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
-		boolean silk = Settings.settings.has_silk(player) == true;
+		boolean silk = Settings.settings.breaking_silk_enabled ? getAPI().hasSilkTouch(player) == true : true;
 		if(player.hasPermission("spawnermeta.breaking.bypass.silktouch") == true)
 			silk = true;
-		else if(Settings.settings.breaking_silk_enabled == true && silk == false) {
+		else if(Settings.settings.breaking_silk_destroy == false && silk == false) {
 			m.send(Language.list("Spawners.breaking.failure"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;

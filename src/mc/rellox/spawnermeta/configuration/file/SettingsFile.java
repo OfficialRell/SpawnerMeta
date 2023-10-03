@@ -88,6 +88,8 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Spawners.kill-entities-on-spawn", false);
 		file.addDefault("Spawners.drop-xp-when-instant-kill", true);
 		
+		file.addDefault("Spawners.required-redstone-power", 0);
+		
 		file.addDefault("Spawners.default-slime-size", 0);
 		
 		file.addDefault("Events.cancel-spawning-event", true);
@@ -145,6 +147,7 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Modifiers.holograms.regular.radius", 32);
 		file.addDefault("Modifiers.holograms.warning.enabled", true);
 		file.addDefault("Modifiers.holograms.warning.radius", 32);
+		file.addDefault("Modifiers.holograms.height", 0);
 		
 		file.addDefault("Modifiers.upgrade-interface.enabled", true);
 		UpgradeType.stream().forEach(type -> {
@@ -421,6 +424,10 @@ public class SettingsFile extends AbstractFile {
 					"Will entities drop xp when killed.",
 					"Only applies when kill-entities-on-spawn",
 					"  is set to true.");
+			c.comment("Spawners.required-redstone-power",
+					"The required redstone power for this spawner",
+					"  to spawn. [0-15]",
+					"Set 0 to ignore.");
 			c.comment("Spawners.default-slime-size",
 					"What size slimes and magma cubes spawners will spawn.",
 					"If the value is 0 then the size will vary (1, 2 or 4).");
@@ -525,6 +532,7 @@ public class SettingsFile extends AbstractFile {
 					"Warnings show if a spawner is unable",
 					"  to spawn any entities.");
 			c.comment("Modifiers.holograms.warning.radius", "Warning hologram radius.");
+			c.comment("Modifiers.holograms.height", "Height of the hologram.");
 			c.comment("Modifiers.changing.enabled",
 					"Is spawner changing enabled.",
 					"To change spawner type a players must shift-right-click",

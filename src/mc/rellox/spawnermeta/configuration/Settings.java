@@ -96,6 +96,7 @@ public final class Settings {
 	public int holograms_regular_radius;
 	public boolean holograms_warning_enabled;
 	public int holograms_warning_radius;
+	public double holograms_height;
 	
 	public boolean upgrade_interface_enabled;
 
@@ -307,6 +308,7 @@ public final class Settings {
 		holograms_regular_radius = file.getInteger("Modifiers.holograms.regular.radius");
 		holograms_warning_enabled = file.getBoolean("Modifiers.holograms.warning.enabled");
 		holograms_warning_radius = file.getInteger("Modifiers.holograms.warning.radius");
+		holograms_height = file.getDouble("Modifiers.holograms.height", -4, 4);
 		
 		upgrade_interface_enabled = file.getBoolean("Modifiers.upgrade-interface.enabled");
 		upgrades_upgradeable.load();

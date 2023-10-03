@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import mc.rellox.spawnermeta.api.hologram.IHologram;
 import mc.rellox.spawnermeta.api.region.IBox;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
+import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.text.content.Content;
 
 public abstract class AbstractHologram implements IHologram {
@@ -25,7 +26,8 @@ public abstract class AbstractHologram implements IHologram {
 		Block block = generator.spawner().block();
 		this.hologram = modifier
 				.create(block.getLocation()
-						.add(0.5, 1 + (above ? 0.25 : 0), 0.5), title);
+						.add(0.5, 1 + (above ? 0.25 : 0)
+								+ Settings.settings.holograms_height, 0.5), title);
 		this.box = IBox.cube(block, radius);
 		this.players = new HashSet<>();
 	}

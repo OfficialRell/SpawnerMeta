@@ -7,11 +7,9 @@ import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.Sound;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -20,7 +18,6 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -29,10 +26,13 @@ import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.events.SpawnerChargeEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerSwitchEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerUpgradeEvent;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.SpawnerWarning;
-import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.view.IUpgrades;
+import mc.rellox.spawnermeta.api.view.layout.ILayout;
+import mc.rellox.spawnermeta.api.view.layout.ISlot;
+import mc.rellox.spawnermeta.api.view.layout.SlotField;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
@@ -46,11 +46,11 @@ import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.text.order.IOrder;
 import mc.rellox.spawnermeta.utility.Messagable;
 import mc.rellox.spawnermeta.utility.Utils;
-import mc.rellox.spawnermeta.view.SpawnerViewLayout.Slot;
-import mc.rellox.spawnermeta.view.SpawnerViewLayout.SlotType;
-import mc.rellox.spawnermeta.view.SpawnerViewLayout.WL;
+import mc.rellox.spawnermeta.view.layout.LayoutRegistry;
 
 public final class ActiveUpgrades implements Listener, IUpgrades {
+	
+	private final ILayout layout;
 
 	private final IGenerator generator;
 	private final ISpawner spawner;
@@ -63,12 +63,14 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	private boolean active;
 
 	public ActiveUpgrades(IGenerator generator) {
+		this.layout = LayoutRegistry.upgrades();
+		
 		this.generator = generator;
 		this.spawner = generator.spawner();
 		
 		this.players = new ArrayList<>();
-		this.v = Bukkit.createInventory(null, WL.size(), Language.get("Upgrade-GUI.name",
-				"type", generator.cache().type().formated()).text());
+		this.v = layout.create(Language.get("Upgrade-GUI.name",
+				"type", generator.cache().type().formated()));
 		this.t = true;
 		this.enabled = generator.cache().enabled();
 		
@@ -134,7 +136,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			}.runTaskLater(SpawnerMeta.instance(), 5);
 			int o = event.getSlot();
 			UpgradeType upgrade;
-			if(WL.is(SlotType.STATS, o) == true) {
+			if(layout.is(o, SlotField.upgrade_stats) == true) {
 				if(Settings.settings.spawner_switching == false) return;
 				
 				SpawnerSwitchEvent call = EventRegistry.call(new SpawnerSwitchEvent(player, generator, !enabled));
@@ -145,11 +147,12 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 						? Sound.ENTITY_ITEM_FRAME_ADD_ITEM : Sound.ENTITY_ITEM_FRAME_REMOVE_ITEM, 2f, 1f);
 				update();
 				return;
-			} else if(WL.is(SlotType.UPGRADE_RANGE, o) == true) upgrade = UpgradeType.RANGE;
-			else if(WL.is(SlotType.UPGRADE_DELAY, o) == true) upgrade = UpgradeType.DELAY;
-			else if(WL.is(SlotType.UPGRADE_AMOUNT, o) == true) upgrade = UpgradeType.AMOUNT;
+			} else if(layout.is(o, SlotField.upgrade_range) == true) upgrade = UpgradeType.RANGE;
+			else if(layout.is(o, SlotField.upgrade_delay) == true) upgrade = UpgradeType.DELAY;
+			else if(layout.is(o, SlotField.upgrade_amount) == true) upgrade = UpgradeType.AMOUNT;
 			else {
-				if(Settings.settings.charges_enabled == true && WL.is(SlotType.CHARGES, o) == true) {
+				if(Settings.settings.charges_enabled == true
+						&& layout.is(o, SlotField.upgrade_charges) == true) {
 					ClickType ct = event.getClick();
 					SpawnerType type = spawner.getType();
 					
@@ -244,8 +247,6 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		}
 	}
 	
-	
-	
 	@EventHandler
 	private void onClose(InventoryCloseEvent event) {
 		Player player = (Player) event.getPlayer();
@@ -256,31 +257,23 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 
 	@Override
 	public void update() {
-		SpawnerType type = spawner.getType();
-		Slot s;
-		for(int i = 0; i < v.getSize(); i++) {
-			if((s = SpawnerViewLayout.LAYOUT[i]).t == SlotType.BACKGROUND) v.setItem(i, x(s));
-			else if(s.t == SlotType.STATS) v.setItem(i, stats(s));
-			else if(s.t == SlotType.UPGRADE_RANGE) v.setItem(i, allowed(0) ? upgrade(s, 0) : denied(0));
-			else if(s.t == SlotType.UPGRADE_DELAY) v.setItem(i, allowed(1) ? upgrade(s, 1) : denied(1));
-			else if(s.t == SlotType.UPGRADE_AMOUNT) v.setItem(i, allowed(2) ? upgrade(s, 2) : denied(2));
-			else if(s.t == SlotType.CHARGES) v.setItem(i, Settings.settings.charges_enabled
-					? charges(type, s) : x(SpawnerViewLayout.background_slot));
-		}
+		layout.fill(v);
+		layout.fill(v, stats(), SlotField.upgrade_stats);
+		layout.fill(v, upgrade(0, SlotField.upgrade_range), SlotField.upgrade_range);
+		layout.fill(v, upgrade(1, SlotField.upgrade_delay), SlotField.upgrade_delay);
+		layout.fill(v, upgrade(2, SlotField.upgrade_amount), SlotField.upgrade_amount);
+		if(Settings.settings.charges_enabled == true)
+			layout.fill(v, charges(), SlotField.upgrade_amount);
+		
 		generator.update();
 	}
 	
-	private ItemStack upgrade(Slot slot, int i) {
-		ItemStack item = new ItemStack(slot.m);
+	private ItemStack upgrade(ISlot slot, int i) {
+		ItemStack item = slot.toItem();
 		ItemMeta meta = item.getItemMeta();
-		if(meta == null) return item;
 		int[] levels = spawner.getUpgradeLevels();
 		int level = levels[i];
 		UpgradeType u = UpgradeType.of(i);
-		
-		meta.addItemFlags(ItemFlag.values());
-		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
-		if(slot.o > 0) meta.setCustomModelData(slot.o);
 		
 		List<Content> name = Language.list("Upgrade-GUI.items.upgrade.name." + u.lower(),
 				"level", Utils.roman(level));
@@ -326,13 +319,15 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		return item;
 	}
 	
-	private ItemStack denied(int i) {
+	private ItemStack upgrade(int i, SlotField field) {
+		ISlot slot = layout.get(field);
+		return allowed(i) == true ? upgrade(slot, i) : denied(slot, i);
+	}
+	
+	private ItemStack denied(ISlot slot, int i) {
 		UpgradeType u = UpgradeType.of(i);
-		ItemStack item = new ItemStack(Material.BARRIER);
+		ItemStack item = slot.toItem(true);
 		ItemMeta meta = item.getItemMeta();
-		
-		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-		meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		
 		List<Content> name = Language.list("Upgrade-GUI.items.disabled-upgrade.name." + u.lower());
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
@@ -361,13 +356,11 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		return item;
 	}
 	
-	private ItemStack stats(Slot slot) {
-		ItemStack item = new ItemStack(slot.m);
+	private ItemStack stats() {
+		ISlot slot = layout.get(SlotField.upgrade_stats);
+		if(slot == null) return null;
+		ItemStack item = slot.toItem();
 		ItemMeta meta = item.getItemMeta();
-		
-		meta.addItemFlags(ItemFlag.values());
-		if(slot.o > 0) meta.setCustomModelData(slot.o);
-		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
 		
 		List<Content> name = Language.list("Upgrade-GUI.items.stats.name",
 				"type", generator.cache().type());
@@ -454,23 +447,22 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		return b;
 	}
 	
-	private ItemStack charges(SpawnerType type, Slot slot) {
-		ItemStack item = new ItemStack(slot.m);
+	private ItemStack charges() {
+		ISlot slot = layout.get(SlotField.upgrade_charges);
+		if(slot == null) return null;
+		ItemStack item = slot.toItem(false);
 		ItemMeta meta = item.getItemMeta();
 		int c = spawner.getCharges();
 		boolean b = c >= 1_000_000_000;
 		String charges = b ? Text.infinity : "" + spawner.getCharges();
 		meta.setDisplayName(Language.get("Upgrade-GUI.items.charges.name",
 				"charges", charges).text());
-		meta.addItemFlags(ItemFlag.values());
-		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
-		if(slot.o > 0) meta.setCustomModelData(slot.o);
 		if(b == false) {
 			List<String> lore = new ArrayList<>();
 			lore.add("");
 			int f0 = Settings.settings.charges_buy_first;
 			int f1 = Settings.settings.charges_buy_second;
-			int r = Settings.settings.charges_price(type, spawner);
+			int r = Settings.settings.charges_price(generator.cache().type(), spawner);
 			int c0 = r * f0;
 			int c1 = r * f1;
 			int a = lowestCharges() / r;
@@ -483,18 +475,6 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 					"price", Price.of(Group.charges, c2), "charges", a)));
 			meta.setLore(lore);
 		}
-		item.setItemMeta(meta);
-		return item;
-	}
-
-	private ItemStack x(Slot slot) {
-		if(slot.m == null || slot.m == Material.AIR) return null;
-		ItemStack item = new ItemStack(slot.m);
-		ItemMeta meta = item.getItemMeta();
-		if(slot.o > 0) meta.setCustomModelData(slot.o);
-		meta.addItemFlags(ItemFlag.values());
-		if(slot.g == true) meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
-		meta.setDisplayName(" ");
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -535,7 +515,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	}
 	
 	private boolean allowed(int i) {
-		SpawnerType type = spawner.getType();
+		SpawnerType type = generator.cache().type();
 		return Settings.settings.upgrades_upgradeable.get(type)[i];
 	}
 

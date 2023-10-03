@@ -398,9 +398,12 @@ public class ActiveGenerator implements IGenerator {
 			// safety check
 			if(warnings.isEmpty() == true) warn(SpawnerWarning.UNKNOWN);
 		}
-		if(Settings.settings.charges_enabled == true && cache.charges() <= 0)
-			warn(SpawnerWarning.CHARGES);
-		int power = Settings.settings.required_redstone_power;
+		var s = Settings.settings;
+		if(s.charges_enabled == true && cache.charges() <= 0) {
+			boolean ignore = s.charges_ignore_natural == true && cache.natural() == true;
+			if(ignore == false) warn(SpawnerWarning.CHARGES);
+		}
+		int power = s.required_redstone_power;
 		if(power > 0 && spawner.block().getBlockPower() < power)
 			warn(SpawnerWarning.POWER);
 	}
