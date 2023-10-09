@@ -16,7 +16,7 @@ import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 
 public class SettingsFile extends AbstractFile {
 	
-	private static final int version = 5;
+	private static final int version = 6;
 
 	public SettingsFile() {
 		super("configuration");
@@ -51,6 +51,12 @@ public class SettingsFile extends AbstractFile {
 		if(CF.version < 5) {
 			copy("Spawners.checking-ticks", "Spawners.validation-interval");
 		}
+		if(CF.version < 6) {
+			int r = getInteger("Spawners.spawning-radius");
+			if(r <= 0) r = 3;
+			hold("Spawners.spawning-radius.horizontal", r);
+			hold("Spawners.spawning-radius.vertical", r);
+		}
 
 		file.addDefault("Debug-errors", true);
 		
@@ -62,7 +68,8 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Spawners.value-increase.DEFAULT.amount", 1);
 		
 		file.addDefault("Spawners.spawning-type", "SPREAD");
-		file.addDefault("Spawners.spawning-radius", 3);
+		file.addDefault("Spawners.spawning-radius.horizontal", 3);
+		file.addDefault("Spawners.spawning-radius.vertical", 3);
 		
 		file.addDefault("Spawners.ticking-interval", 1);
 		file.addDefault("Spawners.validation-interval", 100);
@@ -345,7 +352,8 @@ public class SettingsFile extends AbstractFile {
 					"Spawner spawning type.",
 					"  SINGLE - spawn entities in a single spot.",
 					"  SPREAD - spread entities around spawner.");
-			c.comment("Spawners.spawning-radius", "Entity spawning radius.");
+			c.comment("Spawners.spawning-radius.horizontal", "Horizontal (x and z) entity spawning radius.");
+			c.comment("Spawners.spawning-radius.vertical", "Vertical (y) entity spawning radius.");
 			c.comment("Spawners.ticking-interval",
 					"Amount of ticks between each spawner tick.",
 					"Note! This is the main interval, meaning",

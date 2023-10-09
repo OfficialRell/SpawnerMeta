@@ -57,7 +57,8 @@ public final class Settings {
 	public int checking_interval;
 	public int validation_interval;
 	
-	public int radius;
+	public int radius_horizontal;
+	public int radius_vertical;
 	public Selection selection;
 	public boolean spawner_switching;
 	
@@ -266,7 +267,8 @@ public final class Settings {
 		spawner_value_increase.load();
 		selection = RF.enumerate(Selection.class, file.getString("Spawners.spawning-type"),
 				Selection.SINGLE);
-		radius = file.getInteger("Spawners.spawning-radius", 1, 8);
+		radius_horizontal = file.getInteger("Spawners.spawning-radius.horizontal", 1, 8);
+		radius_vertical = file.getInteger("Spawners.spawning-radius.vertical", 1, 8);
 		spawner_switching = file.getBoolean("Spawners.switching");
 		
 		empty_enabled = file.getBoolean("Spawners.empty.enabled");

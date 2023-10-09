@@ -39,25 +39,27 @@ public class ActiveFinder implements IFinder {
 
 	@Override
 	public List<Location> find() {
-		int radius = Settings.settings.radius;
-		int r = radius * 2 + 1;
-		errors = new ErrorCounter(r * r * r);
+		int radius_h = Settings.settings.radius_horizontal;
+		int radius_v = Settings.settings.radius_vertical;
+		int r_h = radius_h * 2 + 1;
+		int r_v = radius_v * 2 + 1;
+		errors = new ErrorCounter(r_h * r_v * r_h);
 		ISpawner spawner = generator.spawner();
 		EntityBox box = spawner.getType().box();
 		List<Location> list = new ArrayList<>();
 		Block block = spawner.block();
 		Location l;
-		int ix = -radius, iy, iz;
+		int ix = -radius_h, iy, iz;
 		do {
-			iy = -radius;
+			iy = -radius_v;
 			do {
-				iz = -radius;
+				iz = -radius_h;
 				do {
 					if((l = box.check(block.getRelative(ix, iy, iz),
 							requirements, errors.submit())) != null) list.add(l);
-				} while(++iz <= radius);
-			} while(++iy <= radius);
-		} while(++ix <= radius);
+				} while(++iz <= radius_h);
+			} while(++iy <= radius_v);
+		} while(++ix <= radius_h);
 		errors.found = list.isEmpty() == false;
 		return list;
 	}

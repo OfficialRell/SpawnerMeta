@@ -209,8 +209,8 @@ public class ActiveGenerator implements IGenerator {
 		
 		int limit = s.nearby_limit;
 		if(limit > 0) {
-			int r = s.radius;
-			int nearby = spawner.world().getNearbyEntities(spawner.center(), r, r, r,
+			int r_h = s.radius_horizontal, r_v = s.radius_vertical;
+			int nearby = spawner.world().getNearbyEntities(spawner.center(), r_h, r_v, r_h,
 					entity -> entity instanceof LivingEntity
 					&& entity instanceof Player == false)
 					.size();
