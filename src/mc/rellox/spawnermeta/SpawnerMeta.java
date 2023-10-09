@@ -25,7 +25,7 @@ import mc.rellox.spawnermeta.version.Version;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 21.8;
+	public static final double PLUGIN_VERSION = 21.9;
 	
 	private static SpawnerMeta plugin;
     
