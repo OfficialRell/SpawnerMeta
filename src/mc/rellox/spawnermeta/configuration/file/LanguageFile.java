@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import mc.rellox.spawnermeta.configuration.AbstractFile;
+import mc.rellox.spawnermeta.configuration.Configuration.CF;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.text.content.ContentParser;
@@ -25,13 +26,23 @@ public class LanguageFile extends AbstractFile {
 	protected void initialize() {
 		text.clear();
 		
-		copy("Inventory.upgrades", "Upgrade-GUI");
-		copy("Inventory.spawner-view", "Spawner-view");
-		copy("Spawners.hologram", "Holograms");
-		copy("Inventory.buy-shop", "Buy-shop");
-		copy("Inventory.sell-shop", "Sell-shop");
-		copy("Inventory.select-shop", "Shop-select");
-		copy("Spawners.item", "Spawner-item");
+		if(CF.version() < 5) {
+			copy("Inventory.upgrades", "Upgrade-GUI");
+			copy("Inventory.spawner-view", "Spawner-view");
+			copy("Spawners.hologram", "Holograms");
+			copy("Inventory.buy-shop", "Buy-shop");
+			copy("Inventory.sell-shop", "Sell-shop");
+			copy("Inventory.select-shop", "Shop-select");
+			copy("Spawners.item", "Spawner-item");
+		}
+		if(CF.version() < 6) {
+			if(getStrings("Upgrade-GUI.items.upgrade.info.range").isEmpty() == true)
+				delete("Upgrade-GUI.items.upgrade.info.range");
+			if(getStrings("Upgrade-GUI.items.upgrade.info.delay").isEmpty() == true)
+				delete("Upgrade-GUI.items.upgrade.info.delay");
+			if(getStrings("Upgrade-GUI.items.upgrade.info.amount").isEmpty() == true)
+				delete("Upgrade-GUI.items.upgrade.info.amount");
+		}
 		
 		put("Upgrade-GUI.purchase.range", "<#00ff00>(!) <#80ff00>Upgraded <#00ffff-#008080><!italic>range <#80ff00>to level %level%");
 		put("Upgrade-GUI.purchase.delay", "<#00ff00>(!) <#80ff00>Upgraded <#ffff00-#ff8000><!italic>delay <#80ff00>to level %level%");
@@ -41,9 +52,12 @@ public class LanguageFile extends AbstractFile {
 		put("Upgrade-GUI.items.upgrade.name.delay", "<#ffff00-#ff8000>-= Delay %level% =-");
 		put("Upgrade-GUI.items.upgrade.name.amount", "<#ff00ff-#800080>-= Amount %level% =-");
 		put("Upgrade-GUI.items.upgrade.help", "<#808080><!italic>Click to upgrade!");
-		put("Upgrade-GUI.items.upgrade.info.range", List.of());
-		put("Upgrade-GUI.items.upgrade.info.delay", List.of());
-		put("Upgrade-GUI.items.upgrade.info.amount", List.of());
+		put("Upgrade-GUI.items.upgrade.info.range", List.of("  <#99bfbf>Shows required player distance",
+				"<#99bfbf>from the spawner to be active"));
+		put("Upgrade-GUI.items.upgrade.info.delay", List.of("  <#bfbf99>Shows time between each spawning",
+				"<#bfbf99>if active"));
+		put("Upgrade-GUI.items.upgrade.info.amount", List.of("  <#bf99bf>Shows amount of entities that",
+				"<#bf99bf>will spawn each time"));
 		put("Upgrade-GUI.items.upgrade.current.range", "<#bfbfbf>Current range: <#80ffff-#00ffff><!italic>%value% Blocks");
 		put("Upgrade-GUI.items.upgrade.current.delay", "<#bfbfbf>Current delay: <#ffff80-#ffff00><!italic>%value% Seconds");
 		put("Upgrade-GUI.items.upgrade.current.amount", "<#bfbfbf>Current amount: <#ff80ff-#ff00ff><!italic>%value% Entities");
@@ -72,6 +86,7 @@ public class LanguageFile extends AbstractFile {
 		put("Upgrade-GUI.items.stats.warnings.environment", "  <#ff8000><!italic>insufficient spawn space");
 		put("Upgrade-GUI.items.stats.warnings.ground", "  <#ff8000><!italic>missing correct ground type");
 		put("Upgrade-GUI.items.stats.warnings.charges", "  <#ff8000><!italic>out of charges");
+		put("Upgrade-GUI.items.stats.warnings.power", "  <#ff8000><!italic>insufficient redstone power");
 		put("Upgrade-GUI.items.stats.warnings.unknown", "  <#ff8000><!italic>invalid spawn conditions");
 		put("Upgrade-GUI.items.stats.lore", List.of());
 		put("Upgrade-GUI.items.charges.name", "<#ff0080-#ff0000>Spawning Charges: <#00ffff>%charges%");
@@ -112,6 +127,8 @@ public class LanguageFile extends AbstractFile {
 		put("Prices.type.material.amount", "%amount% × %material%");
 		put("Prices.type.economy.insufficient", "Insufficient funds!");
 		put("Prices.type.economy.amount", "$%amount%");
+		put("Prices.type.flare-tokens.insufficient", "Insufficient tokens!");
+		put("Prices.type.flare-tokens.amount", "%amount% Tokens");
 		put("Prices.insufficient", "<#800000>(!) <#ff8000>%insufficient% <#bfbfbf>[Missing %price%]");
 		put("Holograms.empty.single", "<#ff8000><Empty> <#bfffff-#00ffff>Spawner");
 		put("Holograms.empty.multiple", "<#ffff00>%stack% <#bfbfbf>× <#ff8000><Empty> <#bfffff-#00ffff>Spawner");
