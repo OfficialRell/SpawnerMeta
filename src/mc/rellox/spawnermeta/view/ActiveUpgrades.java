@@ -154,7 +154,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 				if(Settings.settings.charges_enabled == true
 						&& layout.is(o, SlotField.upgrade_charges) == true) {
 					ClickType ct = event.getClick();
-					SpawnerType type = spawner.getType();
+					SpawnerType type = generator.cache().type();
 					
 					int r = Settings.settings.charges_price(type, spawner);
 					int a;
@@ -172,7 +172,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 					if(call.cancelled() == true) return;
 					if(call.withdraw(player) == false) return;
 					
-					int charges = spawner.getCharges() + call.charges;
+					int charges = generator.cache().charges() + call.charges;
 					spawner.setCharges(charges);
 					m.send(Language.list("Upgrade-GUI.charges.purchase", "charges", call.charges));
 					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
@@ -191,7 +191,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 				return;
 			}
-			if(Settings.settings.natural_can_upgrade == false && spawner.isNatural() == true) {
+			if(Settings.settings.natural_can_upgrade == false && generator.cache().natural() == true) {
 				if(player.hasPermission("spawnermeta.ownership.bypass.upgrading") == false) {
 					m.send(Language.list("Spawners.natural.upgrading.warning"));
 					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
@@ -210,7 +210,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 					}
 				}
 			}
-			SpawnerType type = spawner.getType();
+			SpawnerType type = generator.cache().type();
 			int[] ls = spawner.getUpgradeLevels();
 			int[] ms = Settings.settings.upgrades_levels.get(type);
 			if(ls[i] < ms[i]) {
@@ -263,7 +263,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		layout.fill(v, upgrade(1, SlotField.upgrade_delay), SlotField.upgrade_delay);
 		layout.fill(v, upgrade(2, SlotField.upgrade_amount), SlotField.upgrade_amount);
 		if(Settings.settings.charges_enabled == true)
-			layout.fill(v, charges(), SlotField.upgrade_amount);
+			layout.fill(v, charges(), SlotField.upgrade_charges);
 		
 		generator.update();
 	}
@@ -283,7 +283,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		
 		order.named(name);
 
-		SpawnerType type = spawner.getType();
+		SpawnerType type = generator.cache().type();
 		int[] max_levels = Settings.settings.upgrades_levels.get(type);
 		if(level < max_levels[i]) {
 			order.submit("HELP", () -> {
@@ -337,7 +337,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		order.named(name);
 		
 		int level = spawner.getUpgradeLevels()[i];
-		SpawnerType type = spawner.getType();
+		SpawnerType type = generator.cache().type();
 		
 		order.submit("HELP", () -> {
 			return Language.list("Upgrade-GUI.items.disabled-upgrade.help");
@@ -370,7 +370,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 
 		order.named(name);
 
-		if(spawner.isEmpty() == true) {
+		if(generator.cache().empty() == true) {
 			order.submit("EMPTY", () -> {
 				return Language.list("Upgrade-GUI.items.stats.empty");
 			});
@@ -452,9 +452,9 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		if(slot == null) return null;
 		ItemStack item = slot.toItem(false);
 		ItemMeta meta = item.getItemMeta();
-		int c = spawner.getCharges();
+		int c = generator.cache().charges();
 		boolean b = c >= 1_000_000_000;
-		String charges = b ? Text.infinity : "" + spawner.getCharges();
+		String charges = b ? Text.infinity : "" + generator.cache().charges();
 		meta.setDisplayName(Language.get("Upgrade-GUI.items.charges.name",
 				"charges", charges).text());
 		if(b == false) {
@@ -483,7 +483,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		int value = Settings.settings.upgrades_prices.get(type)[i],
 				increase = Settings.settings.upgrades_price_increase.get(type)[i];
 		for(int j = 1; j < level; j++) value = Settings.settings.upgrade_increase_type.price(value, increase);
-		return Price.of(Group.upgrades, value * spawner.getStack());
+		return Price.of(Group.upgrades, value * generator.cache().stack());
 	}
 	
 	private String value(SpawnerType type, int level, int i) {

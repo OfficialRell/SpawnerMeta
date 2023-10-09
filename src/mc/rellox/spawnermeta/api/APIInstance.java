@@ -159,7 +159,7 @@ public interface APIInstance {
 	IGenerator getGenerator(Block block);
 	
 	/**
-	 * Returns spawner location file of the specified player.
+	 * Returns spawner location file of the specified player. Never {@code null}.
 	 * 
 	 * @param player - player
 	 * @return Spawner location file
@@ -170,7 +170,7 @@ public interface APIInstance {
 	}
 	
 	/**
-	 * Returns spawner location file of the specified player.
+	 * Returns spawner location file of the specified player. Never {@code null}.
 	 * 
 	 * @param id - player's ID
 	 * @return Spawner location file

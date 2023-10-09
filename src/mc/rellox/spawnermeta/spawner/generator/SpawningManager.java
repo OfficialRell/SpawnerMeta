@@ -89,7 +89,8 @@ public final class SpawningManager {
 			Block block = spawner.block();
 
 			Invoker<Entity> invoker = RF.order(block.getWorld(), "spawn",
-					Location.class, Class.class, Consumer.class, SpawnReason.class).as(Entity.class);
+					Location.class, Class.class, Consumer.class, SpawnReason.class)
+					.as(Entity.class);
 			
 			int s = switch(type) {
 			case SLIME, MAGMA_CUBE -> Settings.settings.slime_size.getAsInt();
@@ -128,12 +129,12 @@ public final class SpawningManager {
 				if(at != null) at.setBaseValue(0);
 			}
 			if(s.check_spawner_nerf == true && entity instanceof Mob mob) {
-				Object w = RF.order(mob.getWorld(), "getHandle").invoke();
+				Object w = RF.direct(mob.getWorld(), "getHandle");
 				Object f = RF.fetch(w, "spigotConfig");
 				if(RF.access(f, "nerfSpawnerMobs")
 						.as(boolean.class)
 						.get(false) == true) {
-					Object a = RF.order(mob, "getHandle").invoke();
+					Object a = RF.direct(mob, "getHandle");
 					RF.access(a, "aware", boolean.class).set(false);
 				}
 			}
@@ -142,7 +143,7 @@ public final class SpawningManager {
 				EntityEquipment e = a.getEquipment();
 				e.clear();
 			}
-			Object o = RF.order(entity, "getHandle").invoke();
+			Object o = RF.direct(entity, "getHandle");
 			RF.access(o, "spawnedViaMobSpawner", boolean.class, false).set(true);
 			RF.access(o, "spawnReason", SpawnReason.class, false).set(SpawnReason.SPAWNER);
 			if(s.send_spawning_event == true) {
@@ -171,12 +172,12 @@ public final class SpawningManager {
 				if(at != null) at.setBaseValue(0);
 			}
 			if(s.check_spawner_nerf == true && entity instanceof Mob mob) {
-				Object w = RF.order(mob.getWorld(), "getHandle").invoke();
+				Object w = RF.direct(mob.getWorld(), "getHandle");
 				Object f = RF.fetch(w, "spigotConfig");
 				if(RF.access(f, "nerfSpawnerMobs")
 						.as(boolean.class)
 						.get(false) == true) {
-					Object a = RF.order(mob, "getHandle").invoke();
+					Object a = RF.direct(mob, "getHandle");
 					RF.access(a, "aware").as(boolean.class).set(false);
 				}
 			}

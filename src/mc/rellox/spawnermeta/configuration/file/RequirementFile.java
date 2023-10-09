@@ -241,28 +241,33 @@ public class RequirementFile extends AbstractFile {
 			if(not == true) s = s.substring(1);
 			else if(s.equalsIgnoreCase("SOLID") == true) return IMaterial.solid;
 			else if(s.equalsIgnoreCase("AIR") == true) return IMaterial.air;
-			Material m = RF.enumerate(Material.class, s);
+			else if(s.equalsIgnoreCase("WATER") == true) return IMaterial.water;
+			Material m = RF.enumerate(Material.class, s.toUpperCase());
 			if(m == null) error = true;
 			else return not ? IMaterial.not(m) : IMaterial.is(m);
 		} else {
 			List<String> list = file.getStringList(path);
 			Iterator<String> it = list.iterator();
-			boolean solid = false;
+			boolean solid = false, water = false;
 			while(it.hasNext() == true) {
-				if(it.next().equalsIgnoreCase("SOLID") == true) {
+				String next = it.next();
+				if(next.equalsIgnoreCase("SOLID") == true) {
 					it.remove();
 					solid = true;
+				} else if(next.equalsIgnoreCase("WATER") == true) {
+					it.remove();
+					water = true;
 				}
 			}
 			List<Material> and = new ArrayList<>(), not = new ArrayList<>();
 			if(list.isEmpty() == false) {
 				for(String v : list) {
 					if(v.charAt(0) == '~') {
-						Material m = RF.enumerate(Material.class, v.substring(1));
+						Material m = RF.enumerate(Material.class, v.substring(1).toUpperCase());
 						if(m == null) error = true;
 						else not.add(m);
 					} else {
-						Material m = RF.enumerate(Material.class, v);
+						Material m = RF.enumerate(Material.class, v.toUpperCase());
 						if(m == null) error = true;
 						else and.add(m);
 					}
@@ -270,6 +275,7 @@ public class RequirementFile extends AbstractFile {
 			}
 			List<IMaterial> ms = new ArrayList<>();
 			if(solid == true) ms.add(IMaterial.solid);
+			if(water == true) ms.add(IMaterial.water);
 			if(and.isEmpty() == false) ms.add(IMaterial.is(and));
 			if(not.isEmpty() == false) ms.add(IMaterial.not(not));
 			if(ms.isEmpty() == true) error = true;

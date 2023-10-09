@@ -59,6 +59,7 @@ public final class APIRegistry implements APIInstance {
 	
 	@Override
 	public void setSilkTouchProvider(Function<Player, Boolean> provider) {
+		Objects.requireNonNull(provider, "Silk touch provider cannot be null");
 		silk_touch_provider = provider;
 	}
 	
@@ -106,10 +107,12 @@ public final class APIRegistry implements APIInstance {
 	
 	@Override
 	public ILocations getLocations(UUID id) throws IllegalArgumentException {
+		Objects.requireNonNull(id, "ID cannot be null");
 		return LocationRegistry.get(id);
 	}
 	
 	@Override
+	@Deprecated(forRemoval = true)
 	public SpawnerBuilder buildSpawner(SpawnerType type) {
 		Objects.requireNonNull(type, "Spawner type cannot be null");
 		return new SpawnerBuilder(type);
