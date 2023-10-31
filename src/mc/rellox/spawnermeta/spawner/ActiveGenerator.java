@@ -77,7 +77,7 @@ public class ActiveGenerator implements IGenerator {
 				&& cache.natural() == true) ? IHologram.hologram(this) : null;
 		if(hologram != null) hologram.update();
 		refresh();
-		valid();
+		if(Settings.settings.tick_until_zero == true) ticks = 0;
 	}
 	
 	@Override
@@ -97,13 +97,15 @@ public class ActiveGenerator implements IGenerator {
 	
 	@Override
 	public boolean active() {
-		return active;
+		return active ;
 	}
 	
 	@Override
 	public boolean present() {
-		return block().getType() == Material.SPAWNER
-				&& block().getChunk().isLoaded() == true;
+		if(Settings.settings.check_present_enabled == false) return true;
+		boolean loaded = block().getChunk().isLoaded() == true;
+		if(loaded == false) return false;
+		return block().getType() == Material.SPAWNER;
 	}
 	
 	@Override
@@ -124,6 +126,7 @@ public class ActiveGenerator implements IGenerator {
 		
 		delay = cache.delay() / Settings.settings.ticking_interval;
 		if(ticks <= 0 || ticks > delay) ticks = delay;
+		
 		spawner.setDelay(ticks);
 		finder.update();
 		int r = cache.range();
@@ -149,6 +152,13 @@ public class ActiveGenerator implements IGenerator {
 		update();
 		valid();
 		rewrite();
+		control();
+		if(online == false) spawner.setRotating(rotating = false);
+		else check();
+	}
+	
+	@Override
+	public void control() {
 		if(Settings.settings.owned_if_online == true) {
 			if(cache.natural() == true) online = true;
 			else {
@@ -156,8 +166,6 @@ public class ActiveGenerator implements IGenerator {
 				online = owner == null ? false : owner.isOnline();
 			}
 		} else online = true;
-		if(online == false) spawner.setRotating(rotating = false);
-		else check();
 	}
 
 	@Override
@@ -165,7 +173,10 @@ public class ActiveGenerator implements IGenerator {
 		if(--validation < 0) validation = Settings.settings.validation_interval - 1;
 		if(active == false) return;
 		holograms();
-		if(check() == false) return;
+		if(check() == false) {
+			tick_untill_zero();
+			return;
+		}
 		if(cache.type() == SpawnerType.EMPTY) return;
 		if(online == false || validate() == false) {
 			if(validation == 0) spawner.setDelay(delay);
@@ -177,6 +188,11 @@ public class ActiveGenerator implements IGenerator {
 		}
 	}
 	
+	private void tick_untill_zero() {
+		if(Settings.settings.tick_until_zero == false || ticks <= 0) return;
+		ticks--;
+	}
+	
 	private void holograms() {
 		if(validation != 0 || active == false) return;
 		if(hologram != null) hologram.update();
@@ -185,7 +201,7 @@ public class ActiveGenerator implements IGenerator {
 	
 	private boolean check() {
 		if(--checking < 0) checking = Settings.settings.checking_interval - 1;
-		if(cache.enabled() == false) return false;
+		if(cache.enabled() == false || cache.type() == SpawnerType.EMPTY) return false;
 		if(checking != 0) return rotating;
 		if(box.any(spawner.world().getPlayers()) == true) {
 			if(rotating == false) spawner.setRotating(rotating = true);
@@ -348,7 +364,7 @@ public class ActiveGenerator implements IGenerator {
 	
 	private boolean validate() {
 		if(warnings.isEmpty() == true || rotating == false || active == false) return true;
-		if(rotating == true) {
+		if(rotating == true && Settings.settings.warning_particles == true) {
 			Block block = spawner.block();
 			block.getWorld().spawnParticle(Particle.REDSTONE, Utils.center(block),
 					1, 0.5, 0.5, 0.5, 0, dust);

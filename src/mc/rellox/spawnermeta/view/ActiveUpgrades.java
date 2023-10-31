@@ -257,6 +257,8 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 
 	@Override
 	public void update() {
+		generator.update();
+		
 		layout.fill(v);
 		layout.fill(v, stats(), SlotField.upgrade_stats);
 		layout.fill(v, upgrade(0, SlotField.upgrade_range), SlotField.upgrade_range);
@@ -264,8 +266,6 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		layout.fill(v, upgrade(2, SlotField.upgrade_amount), SlotField.upgrade_amount);
 		if(Settings.settings.charges_enabled == true)
 			layout.fill(v, charges(), SlotField.upgrade_charges);
-		
-		generator.update();
 	}
 	
 	private ItemStack upgrade(ISlot slot, int i) {

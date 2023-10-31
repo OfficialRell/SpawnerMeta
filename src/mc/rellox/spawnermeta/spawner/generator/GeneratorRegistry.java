@@ -25,7 +25,6 @@ import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 public final class GeneratorRegistry implements Listener {
 	
 	private static final Map<World, SpawnerWorld> SPAWNERS = new HashMap<>();
-	private static boolean refresh = false;
 	
 	private static BukkitRunnable active;
 	
@@ -37,9 +36,14 @@ public final class GeneratorRegistry implements Listener {
 	
 	public static void retime(boolean first) {
 		if(active != null) active.cancel();
-		(active = new BukkitRunnable() {
+		active = runnable(first);
+		active.runTaskTimer(SpawnerMeta.instance(), first ? 20 : 5, Settings.settings.ticking_interval);
+	}
+	
+	private static BukkitRunnable runnable(boolean first) {
+		return new BukkitRunnable() {
 			int t = 0;
-			final int f = Math.max(10, 600 / Settings.settings.ticking_interval);
+			final int f = Math.max(100, Settings.settings.check_present_interval / Settings.settings.ticking_interval);
 			@Override
 			public void run() {
 				SPAWNERS.values().forEach(SpawnerWorld::tick);
@@ -47,12 +51,19 @@ public final class GeneratorRegistry implements Listener {
 					t = 0;
 					SPAWNERS.values().forEach(SpawnerWorld::reduce);
 				}
-				if(refresh == true) {
-					SPAWNERS.values().forEach(SpawnerWorld::refresh);
-					refresh = false;
-				}
 			}
-		}).runTaskTimer(SpawnerMeta.instance(), first ? 20 : 5, Settings.settings.ticking_interval);
+		};
+	}
+	
+	private static void control() {
+		try {
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					SPAWNERS.values().forEach(SpawnerWorld::control);
+				}
+			}.runTaskLater(SpawnerMeta.instance(), 5);
+		} catch (Exception e) {}
 	}
 	
 	public static void load() {
@@ -120,36 +131,52 @@ public final class GeneratorRegistry implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGH)
 	private void onWorldLoad(WorldLoadEvent event) {
-		World world = event.getWorld();
-		SpawnerWorld sw = new SpawnerWorld(world);
-		SPAWNERS.put(world, sw);
-		sw.load();
+		try {
+			World world = event.getWorld();
+			SpawnerWorld sw = new SpawnerWorld(world);
+			SPAWNERS.put(world, sw);
+			sw.load();
+		} catch (Exception e) {
+			RF.debug(e);
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGH)
 	private void onWorldUnload(WorldUnloadEvent event) {
-		World world = event.getWorld();
-		SPAWNERS.remove(world);
+		try {
+			World world = event.getWorld();
+			SPAWNERS.remove(world);
+		} catch (Exception e) {
+			RF.debug(e);
+		}
 	}
 
-	@EventHandler(priority = EventPriority.HIGH)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	private void onChunkLoad(ChunkLoadEvent event) {
-		get(event.getWorld()).load(event.getChunk());
+		try {
+			get(event.getWorld()).load(event.getChunk());
+		} catch (Exception e) {
+			RF.debug(e);
+		}
 	}
 
-	@EventHandler(priority = EventPriority.HIGH)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	private void onChunkUnload(ChunkUnloadEvent event) {
-		get(event.getWorld()).unload(event.getChunk());
+		try {
+			get(event.getWorld()).unload(event.getChunk());
+		} catch (Exception e) {
+			RF.debug(e);
+		}
 	}
 
-	@EventHandler(priority = EventPriority.HIGH)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	private void onJoin(PlayerJoinEvent event) {
-		refresh = true;
+		control();
 	}
 
-	@EventHandler(priority = EventPriority.HIGH)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	private void onQuit(PlayerQuitEvent event) {
-		refresh = true;
+		control();
 	}
 	
 }

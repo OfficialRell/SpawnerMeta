@@ -42,10 +42,7 @@ public final class SpawningManager {
 		try {
 			Block block = spawner.block();
 
-			Invoker<Entity> invoker = RF.order(block.getWorld(), "spawn",
-					Location.class, Class.class, Version.version.high(VersionType.v_20_2)
-					? java.util.function.Consumer.class : org.bukkit.util.Consumer.class, SpawnReason.class)
-					.as(Entity.class);
+			Invoker<Entity> invoker = spawner(block);
 			
 			boolean s = switch(type) {
 			case SLIME, MAGMA_CUBE -> true;
@@ -88,9 +85,7 @@ public final class SpawningManager {
 		try {
 			Block block = spawner.block();
 
-			Invoker<Entity> invoker = RF.order(block.getWorld(), "spawn",
-					Location.class, Class.class, Consumer.class, SpawnReason.class)
-					.as(Entity.class);
+			Invoker<Entity> invoker = spawner(block);
 			
 			int s = switch(type) {
 			case SLIME, MAGMA_CUBE -> Settings.settings.slime_size.getAsInt();
@@ -117,6 +112,13 @@ public final class SpawningManager {
 			RF.debug(e);
 		}
 		return null;
+	}
+
+	private static Invoker<Entity> spawner(Block block) {
+		return RF.order(block.getWorld(), "spawn",
+				Location.class, Class.class, Version.version.high(VersionType.v_20_2)
+				? java.util.function.Consumer.class : org.bukkit.util.Consumer.class, SpawnReason.class)
+				.as(Entity.class);
 	}
 
 	private static final BiConsumer<ISpawner, Entity> modifier = (spawner, entity) -> {

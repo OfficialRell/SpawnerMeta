@@ -63,6 +63,7 @@ import mc.rellox.spawnermeta.api.spawner.IVirtual;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
+import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.items.ItemCollector;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.prices.Group;
@@ -199,8 +200,10 @@ public final class EventRegistry {
 		ItemMatcher.remove(player, item, stack);
 		
 		spawner.setType(change);
+		if(Settings.settings.changing_reset_regular == true) spawner.resetUpgradeLevels();
 		spawner.update();
-
+		
+		
 		generator.refresh();
 	}
 
@@ -261,6 +264,7 @@ public final class EventRegistry {
 		
 		ItemMatcher.remove(player, item, stack);
 		spawner.setType(change);
+		if(Settings.settings.changing_reset_empty == true) spawner.resetUpgradeLevels();
 		spawner.update();
 		
 		generator.refresh();
@@ -553,7 +557,9 @@ public final class EventRegistry {
 		
 		player.playSound(player.getEyeLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 2f, 1f);
 		player.spawnParticle(Particle.FIREWORKS_SPARK, spawner.center(), 25, 0.3, 0.3, 0.3, 0.1);
+		
 		spawner.setType(SpawnerType.EMPTY);
+		if(Settings.settings.changing_reset_empty == true) spawner.resetUpgradeLevels();
 		spawner.update();
 		
 		generator.refresh();
@@ -562,6 +568,7 @@ public final class EventRegistry {
 	}
 
 	public static void breaking(BlockBreakEvent event, IGenerator generator) {
+		if(Settings.settings.ignore_break_event == true) return;
 		ICache cache = generator.cache();
 		SpawnerType type = cache.type();
 		boolean ce = Settings.settings.cancel_break_event;
@@ -739,6 +746,8 @@ public final class EventRegistry {
 		
 		ItemCollector.execute(player);
 		event.setCancelled(ce);
+		
+		HookRegistry.SUPERIOR_SKYBLOCK_2.breaking(block);
 	}
 
 	private static void spawnXP(Block block, BlockBreakEvent event, boolean ce) {
@@ -806,6 +815,8 @@ public final class EventRegistry {
 		
 		generator.remove(true);
 		
+		HookRegistry.SUPERIOR_SKYBLOCK_2.breaking(block);
+		
 		if(particles == true) loc.getWorld().spawnParticle(Particle.CLOUD, loc, 25, 0.25, 0.25, 0.25, 0);
 		return true;
 	}
@@ -837,6 +848,8 @@ public final class EventRegistry {
 					}
 				}
 			}
+			if(Settings.settings.changing_reset_empty == true)
+				generator.spawner().resetUpgradeLevels();
 		}
 	}
 
@@ -927,7 +940,7 @@ public final class EventRegistry {
 		if(Settings.settings.owned_ignore_limit == false) {
 			if(player.hasPermission("spawnermeta.ownership.bypass.limit") == false) {
 				int p = LocationRegistry.get(player).amount();
-				if(p >= Settings.settings.owned_spawner_limit) {
+				if(p >= Settings.settings.owning_limit(player)) {
 					m.send(Language.list("Spawners.ownership.limit.reached",
 							"limit", Settings.settings.owned_spawner_limit));
 					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
@@ -984,10 +997,12 @@ public final class EventRegistry {
 			il.add(block);
 			if(Settings.settings.owned_ignore_limit == false)
 				player.sendMessage(Language.get("Spawners.ownership.limit.place",
-						"placed", il.amount(), "limit", Settings.settings.owned_spawner_limit).text());
+						"placed", il.amount(), "limit", Settings.settings.owning_limit(player)).text());
 		}
 		
 		GeneratorRegistry.put(block);
+		
+		HookRegistry.SUPERIOR_SKYBLOCK_2.placing(block);
 		
 		return true;
 	}

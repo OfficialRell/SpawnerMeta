@@ -67,8 +67,8 @@ public class SpawnerWorld {
 		spawners.values().forEach(IGenerator::update);
 	}
 	
-	public void refresh() {
-		spawners.values().forEach(IGenerator::refresh);
+	public void control() {
+		spawners.values().forEach(IGenerator::control);
 	}
 	
 	public void tick() {

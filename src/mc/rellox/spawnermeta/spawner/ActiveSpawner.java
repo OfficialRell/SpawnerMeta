@@ -2,6 +2,8 @@ package mc.rellox.spawnermeta.spawner;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -164,6 +166,11 @@ public record ActiveSpawner(Block block) implements ISpawner {
 	}
 	
 	@Override
+	public void resetUpgradeLevels() {
+		DataManager.setUpgradeLevels(block(), DataManager.i());
+	}
+	
+	@Override
 	public int[] getUpgradeAttributes() {
 		return DataManager.getUpgradeAttributes(block());
 	}
@@ -201,6 +208,20 @@ public record ActiveSpawner(Block block) implements ISpawner {
 	@Override
 	public List<ItemStack> toItems() {
 		return DataManager.getSpawners(block(), false);
+	}
+
+	@Override
+	public String toData() {
+		int[] levels = getUpgradeLevels();
+		return Stream.of(getType().name(),
+				"" + levels[0],
+				"" + levels[1],
+				"" + levels[2],
+				"" + getCharges(),
+				"" + getSpawnable(),
+				"" + getStack(),
+				"" + isEmpty())
+				.collect(Collectors.joining(";"));
 	}
 
 }
