@@ -33,7 +33,8 @@ public interface IGenerator {
 	boolean active();
 	
 	/**
-	 * @return {@code true} if this generator has spawner block, otherwise {@code false}
+	 * @return {@code true} if this generator is a spawner type block
+	 *  or is an a loaded chunk, otherwise {@code false}
 	 */
 	
 	boolean present();
@@ -70,6 +71,12 @@ public interface IGenerator {
 	 */
 	
 	void refresh();
+	
+	/**
+	 * Updates spawner options that might control it.
+	 */
+	
+	void control();
 	
 	/**
 	 * Tries to spawn entities from this spawner.

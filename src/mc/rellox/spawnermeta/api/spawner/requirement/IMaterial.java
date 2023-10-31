@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Waterlogged;
 
 @FunctionalInterface
 public interface IMaterial {
@@ -18,6 +19,15 @@ public interface IMaterial {
 				|| type.isAir() == true;
 	};
 	static IMaterial solid = block -> block.getType().isSolid() == true;
+	static IMaterial water = block -> {
+		var type = block.getType();
+		if(type == Material.WATER) return true;
+		if(type.getHardness() > 0) return false;
+		if(block.getBlockData() instanceof Waterlogged) return true;
+		if(type == Material.SEAGRASS || type == Material.TALL_SEAGRASS
+				|| type == Material.KELP_PLANT) return true;
+		return false;
+	};
 	
 	static IMaterial is(Material m) {
 		return new IMaterial() {

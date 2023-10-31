@@ -1,5 +1,6 @@
 package mc.rellox.spawnermeta.api.configuration;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -7,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public interface ILocations {
 	
@@ -205,5 +207,22 @@ public interface ILocations {
 	 */
 	
 	int validate();
+	
+	/**
+	 * Stores spawner data to this file.
+	 * 
+	 * @param data - spawner data
+	 */
+	
+	void store(String data);
+	
+	/**
+	 * This method returns all stored spawners and also clears them from the file.
+	 * So this method can be called only once.
+	 * 
+	 * @return List of stored spawner items
+	 */
+	
+	List<ItemStack> stored();
 	
 }
