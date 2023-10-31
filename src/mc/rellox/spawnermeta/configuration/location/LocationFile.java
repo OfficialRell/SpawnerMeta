@@ -1,5 +1,6 @@
 package mc.rellox.spawnermeta.configuration.location;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,8 +16,10 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.api.configuration.ILocations;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.configuration.AbstractFile;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
@@ -29,6 +32,7 @@ public class LocationFile extends AbstractFile implements ILocations {
 	
 	private final Map<World, Set<FinalPos>> locations;
 	private final Set<UUID> trust;
+	private final List<String> stored;
 	
 	private long time;
 	private boolean loaded;
@@ -38,6 +42,7 @@ public class LocationFile extends AbstractFile implements ILocations {
 		this.id = id;
 		this.locations = new HashMap<>();
 		this.trust = new HashSet<>();
+		this.stored = new ArrayList<>();
 		use();
 	}
 
@@ -62,14 +67,20 @@ public class LocationFile extends AbstractFile implements ILocations {
 		try {
 			trust.clear();
 			List<String> list = getStrings("Trusted-players");
-			if(list.isEmpty() == true) return;
-			list.stream()
-				.map(UUID::fromString)
-				.forEach(trust::add);
+			if(list.isEmpty() == false) {
+				list.stream()
+					.map(UUID::fromString)
+					.forEach(trust::add);
+			}
 		} catch (Exception e) {
 			RF.debug(e);
 		}
-		
+		try {
+			stored.clear();
+			stored.addAll(getStrings("Stored-items"));
+		} catch (Exception e) {
+			RF.debug(e);
+		}
 	}
 	
 	@Override
@@ -94,6 +105,7 @@ public class LocationFile extends AbstractFile implements ILocations {
 		hold("Trusted-players", trust.stream()
 				.map(UUID::toString)
 				.toList());
+		hold("Stored-items", stored);
 		save();
 	}
 	
@@ -316,6 +328,25 @@ public class LocationFile extends AbstractFile implements ILocations {
 		}
 		if(r > 0) update();
 		return r;
+	}
+	
+	@Override
+	public void store(String data) {
+		stored.add(data);
+		update();
+	}
+	
+	@Override
+	public List<ItemStack> stored() {
+		List<ItemStack> items = stored.stream()
+				.map(ISpawner::from)
+				.flatMap(List::stream)
+				.toList();
+		if(stored.isEmpty() == false) {
+			stored.clear();
+			update();
+		}
+		return items;
 	}
 	
 	public static String parse(FinalPos pos) {

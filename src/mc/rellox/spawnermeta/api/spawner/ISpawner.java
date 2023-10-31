@@ -15,8 +15,30 @@ import mc.rellox.spawnermeta.spawner.ActiveSpawner;
 import mc.rellox.spawnermeta.spawner.ActiveVirtual;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.spawner.type.UpgradeType;
+import mc.rellox.spawnermeta.utility.DataManager;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public interface ISpawner {
+	
+	// type;range;delay;amount;charges;spawnable;amount;empty
+	
+	static List<ItemStack> from(String data) {
+		try {
+			String[] ss = data.split(";");
+			SpawnerType type = SpawnerType.of(ss[0]);
+			int[] levels = {Integer.parseInt(ss[1]),
+					Integer.parseInt(ss[2]),
+					Integer.parseInt(ss[3])};
+			int charges = Integer.parseInt(ss[4]);
+			int spawnable = Integer.parseInt(ss[5]);
+			int amount = Integer.parseInt(ss[6]);
+			boolean empty = ss[7].equalsIgnoreCase("true");
+			return DataManager.getSpawner(type, levels, charges, spawnable, amount, empty);
+		} catch (Exception e) {
+			RF.debug(e);
+		}
+		return List.of();
+	}
 	
 	static ISpawner of(Block block) {
 		return new ActiveSpawner(block);
@@ -221,6 +243,12 @@ public interface ISpawner {
 	void setUpgradeLevels(int[] levels);
 	
 	/**
+	 * Resets all upgrade levels.
+	 */
+	
+	void resetUpgradeLevels();
+	
+	/**
 	 * Returns an array upgrade attributes: [range, delay, amount]
 	 * 
 	 * @return Array of upgrade attributes
@@ -272,6 +300,12 @@ public interface ISpawner {
 	 */
 	
 	List<ItemStack> toItems();
+	
+	/**
+	 * @return converted savable spawner data
+	 */
+	
+	String toData();
 	
 	/**
 	 * @param type - spawner type

@@ -28,6 +28,7 @@ import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.text.order.IOrder;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public final class DataManager {
 	
@@ -572,7 +573,12 @@ public final class DataManager {
 	}
 	
 	private static CreatureSpawner cast(Block block) {
-		return block.getState() instanceof CreatureSpawner cs ? cs : null;
+		try {
+			return block.getState() instanceof CreatureSpawner cs ? cs : null;
+		} catch (Exception e) {
+			RF.debug(e);
+		}
+		return null;
 	}
 
 

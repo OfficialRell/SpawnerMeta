@@ -44,7 +44,11 @@ public final class LocationRegistry {
 	}
 	
 	public static boolean exists(Player player) {
-		File file = new File(parent, player.getUniqueId().toString() + ".yml");
+		return exists(player.getUniqueId());
+	}
+	
+	public static boolean exists(UUID id) {
+		File file = new File(parent, id.toString() + ".yml");
 		return file.exists() == true;
 	}
 	
@@ -106,7 +110,10 @@ public final class LocationRegistry {
 	}
 	
 	public static ILocations raw(UUID id) {
-		return LOCATIONS.get(id);
+		ILocations il = LOCATIONS.get(id);
+		if(il != null) return il;
+		if(exists(id) == false) return null;
+		return get(id);
 	}
 	
 	public static void add(Player player, Block block) {
