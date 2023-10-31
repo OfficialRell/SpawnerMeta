@@ -56,6 +56,9 @@ public final class Settings {
 	public int ticking_interval;
 	public int checking_interval;
 	public int validation_interval;
+	public boolean check_present_enabled;
+	public int check_present_interval;
+	public boolean tick_until_zero;
 	
 	public int radius_horizontal;
 	public int radius_vertical;
@@ -69,6 +72,7 @@ public final class Settings {
 	public boolean empty_verify_removing;
 	
 	public boolean spawning_particles;
+	public boolean warning_particles;
 	public boolean disable_item_spawners;
 	public final Set<SpawnerType> spawner_disabled;
 	
@@ -80,6 +84,7 @@ public final class Settings {
 	public boolean cancel_spawning_event;
 	public boolean send_spawning_event;
 	public boolean cancel_break_event;
+	public boolean ignore_break_event;
 	
 	public boolean kill_entities_on_spawn;
 	public boolean entities_drop_xp;
@@ -119,6 +124,8 @@ public final class Settings {
 	public final Map<SpawnerType, Material> changing_materials;
 	public final Set<SpawnerType> changing_deny_from;
 	public final Set<SpawnerType> changing_deny_to;
+	public boolean changing_reset_regular;
+	public boolean changing_reset_empty;
 
 	public final SinglePriceMap placing_price;
 	public boolean placing_enabled;
@@ -262,6 +269,9 @@ public final class Settings {
 		ticking_interval = file.getInteger("Spawners.ticking-interval", 1, 20);
 		checking_interval = file.getInteger("Spawners.checking-interval", 1, 1000);
 		validation_interval = file.getInteger("Spawners.validation-interval", 1, 1000);
+		check_present_enabled = file.getBoolean("Spawners.check-if-present.enabled");
+		check_present_interval = file.getInteger("Spawners.check-if-present.interval", 100, 100000);
+		tick_until_zero = file.getBoolean("Spawners.tick-until-zero");
 		
 		spawner_values.load();
 		spawner_value_increase.load();
@@ -278,10 +288,11 @@ public final class Settings {
 		empty_verify_removing = file.getBoolean("Spawners.empty.egg-removing-verify");
 		
 		spawning_particles = file.getBoolean("Spawners.spawning-particles");
+		warning_particles = file.getBoolean("Spawners.warning-particles");
 		disable_item_spawners = file.getBoolean("Spawners.disable-item-spawners");
 		spawner_disabled.clear();
-		spawner_disabled.addAll(file.getStrings("Spawners.disabled-spawners").stream()
-				.map(SpawnerType::of).filter(s -> s != null).collect(Collectors.toList()));
+		spawner_disabled.addAll(RF.enumerates(SpawnerType.class,
+				file.getStrings("Spawners.disabled-spawners")));
 		
 		final int z = file.getInteger("Spawners.default-slime-size", 0, 8);
 		final int[] ss = {1, 2, 4};
@@ -291,6 +302,7 @@ public final class Settings {
 		cancel_spawning_event = file.getBoolean("Events.cancel-spawning-event");
 		send_spawning_event = file.getBoolean("Events.send-spawner-event");
 		cancel_break_event = file.getBoolean("Events.cancel-break-event");
+		ignore_break_event = file.getBoolean("Events.ignore-break-event");
 		
 		kill_entities_on_spawn = file.getBoolean("Spawners.kill-entities-on-spawn");
 		entities_drop_xp = file.getBoolean("Spawners.drop-xp-when-instant-kill");
@@ -338,10 +350,12 @@ public final class Settings {
 		});
 		changing_deny_from.clear();
 		changing_deny_from.addAll(RF.enumerates(SpawnerType.class,
-				file.getString("Modifiers.changing.deny.from")));
+				file.getStrings("Modifiers.changing.deny.from")));
 		changing_deny_to.clear();
 		changing_deny_to.addAll(RF.enumerates(SpawnerType.class,
-				file.getString("Modifiers.changing.deny.to")));
+				file.getStrings("Modifiers.changing.deny.to")));
+		changing_reset_regular = file.getBoolean("Modifiers.changing.reset-upgrades.regular");
+		changing_reset_empty = file.getBoolean("Modifiers.changing.reset-upgrades.empty");
 		
 		placing_enabled = file.getBoolean("Modifiers.placing.enabled");
 		placing_price.load();
@@ -396,7 +410,7 @@ public final class Settings {
 
 		silent_entities.clear();
 		silent_entities.addAll(RF.enumerates(SpawnerType.class,
-				file.getString("Modifiers.silent-entities")));
+				file.getStrings("Modifiers.silent-entities")));
 		entity_target = file.getBoolean("Modifiers.entity-target");
 		entity_movement = file.getBoolean("Modifiers.entity-movement");
 		check_spawner_nerf = file.getBoolean("Modifiers.check-spawner-nerf");

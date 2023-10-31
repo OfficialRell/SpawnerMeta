@@ -40,7 +40,7 @@ public class RequirementFile extends AbstractFile {
 		put(SpawnerType.BLAZE, "-11", air, "");
 		put(SpawnerType.CAMEL, "9+", air, List.of(sand, red));
 		put(SpawnerType.CAT, "9+", air, solid);
-		put(SpawnerType.CAVE_SPIDER, "0", air, solid, true);
+		put(SpawnerType.CAVE_SPIDER, "0", air, "", true);
 		put(SpawnerType.CHICKEN, "9+", air, grass);
 		put(SpawnerType.COD, "", water, "");
 		put(SpawnerType.COW, "9+", air, grass);

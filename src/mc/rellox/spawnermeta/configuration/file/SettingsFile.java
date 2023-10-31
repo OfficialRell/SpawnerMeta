@@ -74,6 +74,9 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Spawners.ticking-interval", 1);
 		file.addDefault("Spawners.validation-interval", 100);
 		file.addDefault("Spawners.checking-interval", 1);
+		file.addDefault("Spawners.check-if-present.enabled", true);
+		file.addDefault("Spawners.check-if-present.interval", 1200);
+		file.addDefault("Spawners.tick-until-zero", false);
 		
 		file.addDefault("Spawners.switching", false);
 		
@@ -86,6 +89,7 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Spawners.disabled-spawners", List.of());
 		file.addDefault("Spawners.spawning-particles", true);
 		file.addDefault("Spawners.disable-item-spawners", false);
+		file.addDefault("Spawners.warning-particles", true);
 		
 		file.addDefault("Spawners.allow-renaming", true);
 		
@@ -102,6 +106,7 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Events.cancel-spawning-event", true);
 		file.addDefault("Events.send-spawner-event", false);
 		file.addDefault("Events.cancel-break-event", true);
+		file.addDefault("Events.ignore-break-event", false);
 		
 		file.addDefault("Items.taking-ticks", 60 * 20);
 		file.addDefault("Items.taking-remind-ticks", 30 * 20);
@@ -178,6 +183,8 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Modifiers.changing.material-type.EXAMPLE", "IRON_INGOT");
 		file.addDefault("Modifiers.changing.deny.from", List.of());
 		file.addDefault("Modifiers.changing.deny.to", List.of());
+		file.addDefault("Modifiers.changing.reset-upgrades-regular", false);
+		file.addDefault("Modifiers.changing.reset-upgrades-empty", false);
 		
 		file.addDefault("Modifiers.placing.enabled", true);
 		file.addDefault("Modifiers.placing.use-price", false);
@@ -374,7 +381,7 @@ public class SettingsFile extends AbstractFile {
 					"  (but do not use large values if",
 					"  'ticking-interval' is large)");
 			c.comment("Spawners.checking-interval",
-					"Interval between each spawner validation,",
+					"Interval between each spawner validation.",
 					"Higher value will increase server performance",
 					"  but spawners will be validated less often.",
 					"Note! This interval will only increase every",
@@ -384,6 +391,20 @@ public class SettingsFile extends AbstractFile {
 					"Suggested interval: [1-20]",
 					"  (but do not use large values if",
 					"  'ticking-interval' is large)");
+			c.comment("Spawners.check-if-present",
+					"This checks if the spawner is in a loaded chunk",
+					" or is still a spawner type block.");
+			c.comment("Spawners.check-if-present.enabled",
+					"If spawner checking is enabled.");
+			c.comment("Spawners.check-if-present.interval",
+					"Interval between each spawner check.",
+					"Higher value will increase server performance",
+					"  but spawners will be validated less often.");
+			c.comment("Spawners.tick-until-zero",
+					"If spawner time should tick until it reaches zero.",
+					"This will cause the spawner to tick even if",
+					"  there are no nearby players, but will spawn",
+					"  entities only when a player comes nearby.");
 			c.comment("Spawners.switching",
 					"Is spawner switching enabled.",
 					"To switch a spawner on or off players must click",
@@ -413,6 +434,8 @@ public class SettingsFile extends AbstractFile {
 					"  an entity spawns.");
 			c.comment("Spawners.disable-item-spawners",
 					"Are item spawners disabled.");
+			c.comment("Spawners.warning-particles",
+					"Are warning particles shown.");
 			c.comment("Spawners.allow-renaming",
 					"If spawners can be renamed in an anvil.");
 			c.comment("Spawners.nearby-entities.limit",
@@ -447,8 +470,13 @@ public class SettingsFile extends AbstractFile {
 					"Is entity spawning event sent for each new entity.",
 					"This option might be useful for some plugins.");
 			c.comment("Events.cancel-break-event",
-					"Is spawner break event cancelled.",
+					"Should spawner break event be cancelled.",
 					"Useful for other plugins that register spawner locations.");
+			c.comment("Events.ignore-break-event",
+					"Should spawner break event be fully ignored.",
+					"This means that SpawnerMeta will not add custom spawner",
+					"  breaking and all spawners will break as in vanilla.",
+					"Useful for custom plugins that require this event.");
 			c.comment("Items.taking-ticks",
 					"Amount of ticks to get back dropped items using",
 					"  /spawnerdrops.",
@@ -557,6 +585,11 @@ public class SettingsFile extends AbstractFile {
 			c.comment("Modifiers.changing.deny.from",
 					"List of entity types that cannot be changed",
 					"  to a different one.");
+			c.comment("Modifiers.changing.reset-upgrades",
+					"Resets all upgrades back to level 1",
+					"  when changing if set to true.",
+					"Empty spawners will reset when adding",
+					"  or removing eggs.");
 			c.comment("Modifiers.changing.material-type",
 					"Default changing material type.",
 					"For specific entities:",
@@ -795,7 +828,7 @@ public class SettingsFile extends AbstractFile {
 			c.comment("Prices",
 					"Price types:",
 					"  EXPERIENCE - experience points",
-					"  LEVELS	- experience levels",
+					"  LEVELS - experience levels",
 					"  ECONOMY - vault economy",
 					"  MATERIAL - items",
 					"Item format (only for MATERIAL price type):",
