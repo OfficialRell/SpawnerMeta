@@ -121,9 +121,9 @@ public final class CommandManager {
 	}
 
 	public static boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		Player player = (sender instanceof Player) ? (Player) sender : null;
+		Player player = (sender instanceof Player p) ? p : null;
 		if(command.equals(CommandManager.SPAWNERMETA) == true) {
-			String help = help(command, null, "update", "modify", "location", "active", "disable", "version");
+			String help = help(command, null, "update", "give", "modify", "location", "active", "disable", "version");
 			if(args.length < 1) sender.sendMessage(help);
 			else if(args[0].equalsIgnoreCase("update") == true) {
 				update0(sender, command, args, player);
@@ -132,7 +132,7 @@ public final class CommandManager {
 			} else if(args[0].equalsIgnoreCase("modify") == true) {
 				modify0(sender, command, args, player);
 			} else if(args[0].equalsIgnoreCase("location") == true) {
-				location0(sender, command, args, player);
+				location0(sender, command, args);
 			} else if(args[0].equalsIgnoreCase("disable") == true) {
 				disable0(sender, command, args);
 			} else if(args[0].equalsIgnoreCase("active") == true) {
@@ -175,9 +175,8 @@ public final class CommandManager {
 		}
 	}
 
-	private static void location0(CommandSender sender, Command command, String[] args, Player player) {
+	private static void location0(CommandSender sender, Command command, String[] args) {
 		String help0 = help(command, "location", "view", "clear", "validate") + extra("player^") + extra("world^?");
-		if(player == null) warn(sender, "Cannot use this command in console!");
 		if(args.length < 2) sender.sendMessage(help0);
 		else if(args[1].equalsIgnoreCase("view") == true) {
 			String help1 = help(command, "location view", "player^") + extra("world^?");
@@ -210,12 +209,12 @@ public final class CommandManager {
 				});
 				if(has.isEmpty() == true) warn(sender, "This player does not have any placed spawners in this world!");
 				else {
-					sender.sendMessage(Text.color(Colors.aqua) + "Spawner locations for "
+					send(sender, Text.color(Colors.aqua) + "Spawner locations for "
 							+ Text.color(Colors.orange) + name + Text.color(Colors.aqua) + ":");
 					for(int i = 0, j = 0; i < has.size(); i++, j = 0) {
-						sender.sendMessage(Text.color(Colors.gray_75) + "  (" + has.get(i).getName() + ")");
+						send(sender, Text.color(Colors.gray_75) + "  (" + has.get(i).getName() + ")");
 						for(Location l : locations.get(i)) {
-							sender.sendMessage(Text.color(Colors.lime) + ++j + ": "
+							send(sender, Text.color(Colors.lime) + ++j + ": "
 									+ Text.color(Colors.gray_75) + LocationFile.parse(FinalPos.of(l)));
 						}
 					}
@@ -244,8 +243,8 @@ public final class CommandManager {
 				int r = worlds.stream()
 						.mapToInt(il::clear)
 						.sum();
-				if(r <= 0) sender.sendMessage(Text.color(Colors.orange) + "No spawners where cleared!");
-				else sender.sendMessage(Text.color(Colors.orange) + "Cleared " + Text.color(Colors.aqua)
+				if(r <= 0) send(sender, Text.color(Colors.orange) + "No spawners where cleared!");
+				else send(sender, Text.color(Colors.orange) + "Cleared " + Text.color(Colors.aqua)
 						+ r + Text.color(Colors.orange) + " spawner" + (r > 1 ? "s!" : "!"));
 			}
 		} else if(args[1].equalsIgnoreCase("validate") == true) {
@@ -271,11 +270,11 @@ public final class CommandManager {
 				int r = worlds.stream()
 						.mapToInt(il::validate)
 						.sum();
-				if(r <= 0) sender.sendMessage(Text.color(Colors.lime) + "No invalid spawners were found!");
-				else sender.sendMessage(Text.color(Colors.lime) + "Removed " + Text.color(Colors.aqua)
+				if(r <= 0) send(sender, Text.color(Colors.lime) + "No invalid spawners were found!");
+				else send(sender, Text.color(Colors.lime) + "Removed " + Text.color(Colors.aqua)
 						+ r + Text.color(Colors.lime) + " invalid spawner" + (r > 1 ? "s!" : "!"));
 			}
-		} else sender.sendMessage(help0);
+		} else send(sender, help0);
 	}
 
 	private static void modify0(CommandSender sender, Command command, String[] args, Player player) {
@@ -503,6 +502,11 @@ public final class CommandManager {
 		sender.sendMessage(w);
 	}
 	
+	public static void send(CommandSender sender, String message) {
+		if(sender instanceof Player == false) message = ChatColor.stripColor(message);
+		sender.sendMessage(message);
+	}
+	
 	public static List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		List<String> l = new ArrayList<>();
 		if(command.equals(CommandManager.SPAWNERMETA) == true) {
@@ -549,9 +553,9 @@ public final class CommandManager {
 	private static List<String> sm(String s) {
 		List<String> l = new ArrayList<>();
 		l.add("update");
-		l.add("edit");
 		l.add("modify");
 		l.add("location");
+		l.add("give");
 		l.add("disable");
 		l.add("active");
 		l.add("version");

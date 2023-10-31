@@ -113,22 +113,39 @@ public interface Invoker<T> {
 		};
 	}
 	
-	private static Method method(Class<?> c, String name, boolean warn, Class<?>...params) {
-		try {
-			return c.getDeclaredMethod(name, params);
-		} catch (Exception e) {}
-		try {
-			return c.getMethod(name, params);
-		} catch (Exception e) {}
+	private static Method method(Class<?> clazz, String name, boolean warn, Class<?>...params) {
+		Method m = method0(clazz, name, params);
+		if(m != null) return m;
 		RF.debug(new NoSuchMethodException("No method with name: " + name), warn);
 		return null;
 	}
 	
-	private static Set<Method> methods(Class<?> c) {
+	private static Method method0(Class<?> clazz, String name, Class<?>...params) {
+		if(clazz.equals(Object.class) == true
+				|| clazz.getName().equals("java.lang.Object") == true)
+			return null;
+		try {
+			return clazz.getDeclaredMethod(name, params);
+		} catch (Exception e) {}
+		try {
+			return clazz.getMethod(name, params);
+		} catch (Exception e) {}
+		return method0(clazz.getSuperclass(), name, params);
+	}
+	
+	private static Set<Method> methods(Class<?> clazz) {
 		Set<Method> set = new HashSet<>();
-		Stream.of(c.getMethods()).forEach(set::add);
-		Stream.of(c.getDeclaredMethods()).forEach(set::add);
+		methods0(set, clazz);
 		return set;
+	}
+	
+	private static void methods0(Set<Method> set, Class<?> clazz) {
+		if(clazz.equals(Object.class) == true
+				|| clazz.getName().equals("java.lang.Object") == true)
+			return;
+		Stream.of(clazz.getMethods()).forEach(set::add);
+		Stream.of(clazz.getDeclaredMethods()).forEach(set::add);
+		methods0(set, clazz.getSuperclass());
 	}
 
 }

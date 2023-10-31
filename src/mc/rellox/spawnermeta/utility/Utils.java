@@ -201,6 +201,7 @@ public final class Utils {
 
 	public static void check(final int id, final Consumer<String> action) {
 		new BukkitRunnable() {
+			@SuppressWarnings("deprecation")
 			@Override
 			public void run() {
 				try(InputStream is = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + id).openStream();
