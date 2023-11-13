@@ -13,12 +13,12 @@ public interface IHologram {
 	
 	HologramModifier modifier = new HologramModifier();
 	
-	static IHologram hologram(IGenerator instance) {
-		return new Hologram(instance);
+	static IHologram hologram(IGenerator generator) {
+		return new Hologram(generator);
 	}
 	
-	static IHologram warning(IGenerator instance, boolean above) {
-		return new Warning(instance, above);
+	static IHologram warning(IGenerator generator, boolean above) {
+		return new Warning(generator, above);
 	}
 	
 	/**

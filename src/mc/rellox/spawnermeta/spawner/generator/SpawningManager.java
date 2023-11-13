@@ -84,7 +84,7 @@ public final class SpawningManager {
 	public static Entity spawn(ISpawner spawner, SpawnerType type, ISelector selector) {
 		try {
 			Block block = spawner.block();
-
+			
 			Invoker<Entity> invoker = spawner(block);
 			
 			int s = switch(type) {

@@ -29,6 +29,7 @@ import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.text.order.IOrder;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
+import mc.rellox.spawnermeta.view.layout.LayoutRegistry;
 
 public final class DataManager {
 	
@@ -136,7 +137,7 @@ public final class DataManager {
 
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 		
-		IOrder order = Settings.settings.order_spawner.oderer();
+		IOrder order = LayoutRegistry.order_spawner.oderer();
 		
 		order.named(name);
 		order.submit("HEADER", () -> Language.list("Spawner-item.header"));
@@ -520,6 +521,7 @@ public final class DataManager {
 		if(cs == null) return;
 		int min = cs.getMinSpawnDelay();
 		int max = cs.getMaxSpawnDelay();
+		if(min == s && max == s) return;
 		if(s < 1) s = 1;
 		if((++s > min && s < max) || s < min) {
 			cs.setMinSpawnDelay(s);
@@ -570,6 +572,12 @@ public final class DataManager {
 		CreatureSpawner cs = cast(block);
 		return cs == null ? 0 : cs.getPersistentDataContainer()
 				.getOrDefault(key_charges, PersistentDataType.INTEGER, 0);
+	}
+	
+	public static EntityType getEntity(Block block) {
+		var cs = cast(block);
+		if(cs == null) return null;
+		return cs.getSpawnedType();
 	}
 	
 	private static CreatureSpawner cast(Block block) {

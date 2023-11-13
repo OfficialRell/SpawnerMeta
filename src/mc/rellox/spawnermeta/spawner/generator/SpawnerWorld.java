@@ -17,6 +17,7 @@ import org.bukkit.block.CreatureSpawner;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.location.Pos;
+import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.ActiveGenerator;
 
 public class SpawnerWorld {
@@ -39,6 +40,7 @@ public class SpawnerWorld {
 		Stream.of(chunk.getTileEntities())
 		.filter(CreatureSpawner.class::isInstance)
 		.map(BlockState::getBlock)
+		.filter(block -> Settings.settings.ignored(block) == false)
 		.map(ISpawner::of)
 		.map(ActiveGenerator::new)
 		.forEach(queue::add);
@@ -91,6 +93,7 @@ public class SpawnerWorld {
 	}
 	
 	public void put(Block block) {
+		
 		IGenerator g = new ActiveGenerator(ISpawner.of(block));
 		spawners.put(g.position(), g);
 	}
