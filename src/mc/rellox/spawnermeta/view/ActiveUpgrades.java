@@ -279,7 +279,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 				"level", Utils.roman(level));
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 
-		IOrder order = Settings.settings.order_upgrade.oderer();
+		IOrder order = LayoutRegistry.order_upgrade.oderer();
 		
 		order.named(name);
 
@@ -332,7 +332,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		List<Content> name = Language.list("Upgrade-GUI.items.disabled-upgrade.name." + u.lower());
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 
-		IOrder order = Settings.settings.order_disabled.oderer();
+		IOrder order = LayoutRegistry.order_disabled.oderer();
 
 		order.named(name);
 		
@@ -366,7 +366,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 				"type", generator.cache().type());
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 		
-		IOrder order = Settings.settings.order_stats.oderer();
+		IOrder order = LayoutRegistry.order_stats.oderer();
 
 		order.named(name);
 

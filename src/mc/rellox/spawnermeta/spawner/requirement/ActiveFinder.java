@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 
-import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.location.IFinder;
 import mc.rellox.spawnermeta.api.spawner.requirement.ErrorCounter;
@@ -39,29 +39,53 @@ public class ActiveFinder implements IFinder {
 
 	@Override
 	public List<Location> find() {
-		int radius_h = Settings.settings.radius_horizontal;
-		int radius_v = Settings.settings.radius_vertical;
-		int r_h = radius_h * 2 + 1;
-		int r_v = radius_v * 2 + 1;
-		errors = new ErrorCounter(r_h * r_v * r_h);
-		ISpawner spawner = generator.spawner();
-		EntityBox box = spawner.getType().box();
+		int rx = Settings.settings.radius_horizontal;
+		int ry = Settings.settings.radius_vertical;
+		int qx = rx * 2 + 1, qy = ry * 2 + 1;
+		errors = new ErrorCounter(qx * qy * qx);
+		EntityBox box = generator.cache().type().box();
 		List<Location> list = new ArrayList<>();
-		Block block = spawner.block();
+		Block block = generator.spawner().block();
+		if(loaded(block.getWorld(), block.getX(), block.getZ(), rx + 1) == false) {
+			errors.found = false;
+			return list;
+		}
 		Location l;
-		int ix = -radius_h, iy, iz;
+		int ix = -rx, iy, iz;
 		do {
-			iy = -radius_v;
+			iy = -ry;
 			do {
-				iz = -radius_h;
+				iz = -rx;
 				do {
 					if((l = box.check(block.getRelative(ix, iy, iz),
 							requirements, errors.submit())) != null) list.add(l);
-				} while(++iz <= radius_h);
-			} while(++iy <= radius_v);
-		} while(++ix <= radius_h);
+				} while(++iz <= rx);
+			} while(++iy <= ry);
+		} while(++ix <= rx);
 		errors.found = list.isEmpty() == false;
 		return list;
+	}
+	
+	private boolean loaded(World world, int x, int z, int r) {
+		int cx = x >> 4, cz = z >> 4;
+		if(world.isChunkLoaded(cx, cz) == false) return false;
+		int[] is = {
+				x + r, z,
+				x + r, z + r,
+				x + r, z - r,
+				x,     z + r,
+				x,     z - r,
+				x - r, z,
+				x - r, z + r,
+				x - r, z - r
+		};
+		for(int i = 0, ox, oz; i < is.length; i += 2) {
+			ox = is[i] >> 4;
+			oz = is[i + 1] >> 4;
+			if(ox == cx && oz == cz) continue;
+			if(world.isChunkLoaded(ox, oz) == false) return false;
+		}
+		return true;
 	}
 
 	@Override
