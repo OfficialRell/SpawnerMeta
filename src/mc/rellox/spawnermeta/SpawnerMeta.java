@@ -25,7 +25,7 @@ import mc.rellox.spawnermeta.version.Version;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 22.0;
+	public static final double PLUGIN_VERSION = 22.1;
 	
 	private static SpawnerMeta plugin;
     
@@ -53,12 +53,6 @@ public final class SpawnerMeta extends JavaPlugin {
 				if(v > PLUGIN_VERSION) Text.logOutdated(v);
 			});
 			HookRegistry.load();
-			if(HookRegistry.ECONOMY.exists() == true) Text.logInfo("Vault has been found, economy enabled!");
-			if(HookRegistry.FLARE_TOKENS.exists() == true) Text.logInfo("FlareTokens has been found!");
-			if(HookRegistry.WILD_STACKER.exists() == true) Text.logInfo("Wild Stacker has been found, entity stacking enabled!");
-			if(HookRegistry.WILD_TOOLS.exists() == true) Text.logInfo("Wild Tools has been found, custom drop provided!");
-			if(HookRegistry.SHOP_GUI.exists() == true) Text.logInfo("ShopGUI+ has been found, custom spawners provided!");
-			initializeMetrics();
 			Configuration.initialize();
 			CommandManager.initialize();
 			DataManager.initialize();
@@ -67,6 +61,7 @@ public final class SpawnerMeta extends JavaPlugin {
 			GeneratorRegistry.initialize();
 			SpawningManager.initialize();
 			LocationRegistry.initialize();
+			initializeMetrics();
 		} else {
 			Text.logFail("failed to load, invalid server version!");
 			Bukkit.getPluginManager().disablePlugin(this);
