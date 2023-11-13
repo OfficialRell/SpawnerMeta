@@ -8,7 +8,7 @@ This plugin implements fully customizable and upgradeable spawners.
 <dependency>
   <groupId>com.github.OfficialRell</groupId>
   <artifactId>SpawnerMeta</artifactId>
-  <version>22.0</version>
+  <version>22.1</version>
   <scope>provided</scope>
 </dependency>
 
