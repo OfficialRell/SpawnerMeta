@@ -24,6 +24,11 @@ public final class HookEconomy implements HookInstance<Economy> {
 	public boolean exists() {
 		return economy != null;
 	}
+	
+	@Override
+	public String message() {
+		return "Vault has been found, economy enabled!";
+	}
 
 	@Override
 	public void load() {

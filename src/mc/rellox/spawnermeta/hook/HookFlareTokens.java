@@ -24,6 +24,11 @@ public final class HookFlareTokens implements HookInstance<JavaPlugin> {
 	public boolean exists() {
 		return plugin != null;
 	}
+	
+	@Override
+	public String message() {
+		return "FlareTokens has been found!";
+	}
 
 	@Override
 	public void load() {
@@ -32,7 +37,6 @@ public final class HookFlareTokens implements HookInstance<JavaPlugin> {
 			@Override
 			public void remove(Player player, int a) {
 				RF.order(t(player), "removeTokens", int.class).invoke(a);
-//				TokensPlayer.warpPlayer(player).removeTokens(a);
 			}
 			@Override
 			public boolean has(Player player, int a) {
@@ -43,12 +47,10 @@ public final class HookFlareTokens implements HookInstance<JavaPlugin> {
 				return RF.order(t(player), "getTokens")
 						.as(int.class)
 						.invoke(0);
-//				return TokensPlayer.warpPlayer(player).getTokens();
 			}
 			@Override
 			public void add(Player player, int a) {
 				RF.order(t(player), "giveTokens", int.class).invoke(a);
-//				TokensPlayer.warpPlayer(player).giveTokens(a);
 			}
 			private Object t(Player player) {
 				Class<?> c = RF.get("net.flares.flaretokens.API.TokensPlayer");

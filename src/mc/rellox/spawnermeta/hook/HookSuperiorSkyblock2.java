@@ -21,6 +21,11 @@ public class HookSuperiorSkyblock2 implements HookInstance<SuperiorSkyblock> {
 	public boolean exists() {
 		return plugin != null;
 	}
+	
+	@Override
+	public String message() {
+		return "SuperiorSkyblock2 found, event support provided!";
+	}
 
 	@Override
 	public void load() {

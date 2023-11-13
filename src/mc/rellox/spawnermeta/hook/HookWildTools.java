@@ -20,6 +20,11 @@ public class HookWildTools implements HookInstance<WildTools> {
 	public boolean exists() {
 		return plugin != null;
 	}
+	
+	@Override
+	public String message() {
+		return "Wild Tools has been found, custom drop provided!";
+	}
 
 	@Override
 	public void load() {

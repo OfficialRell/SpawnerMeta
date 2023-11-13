@@ -3,6 +3,8 @@ package mc.rellox.spawnermeta.hook;
 import java.util.ArrayList;
 import java.util.List;
 
+import mc.rellox.spawnermeta.text.Text;
+
 public class HookRegistry {
 
 	private static final List<HookInstance<?>> HOOKS = new ArrayList<>();
@@ -23,6 +25,10 @@ public class HookRegistry {
 		HOOKS.add(FLARE_TOKENS);
 		HOOKS.add(SUPERIOR_SKYBLOCK_2);
 		HOOKS.forEach(HookInstance::load);
+		HOOKS.stream()
+			.filter(HookInstance::exists)
+			.map(HookInstance::message)
+			.forEach(Text::logInfo);
 	}
 
 }

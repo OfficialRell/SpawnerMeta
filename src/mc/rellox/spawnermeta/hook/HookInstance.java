@@ -7,5 +7,7 @@ public interface HookInstance<T> {
 	boolean exists();
 	
 	void load();
+	
+	String message();
 
 }

@@ -50,6 +50,11 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 		plugin = WildStackerAPI.getWildStacker();
 	}
 	
+	@Override
+	public String message() {
+		return "Wild Stacker has been found, entity stacking enabled!";
+	}
+	
 	public List<Entity> combine(ISpawner spawner, SpawnerType type, ISelector selector, int count) {
 		List<Entity> affected = new ArrayList<>(1);
 		Block block = spawner.block();

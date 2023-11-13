@@ -18,6 +18,11 @@ public class HookShopGUI implements HookInstance<ShopGuiPlugin> {
 	public boolean exists() {
 		return plugin != null;
 	}
+	
+	@Override
+	public String message() {
+		return "ShopGUI+ has been found, custom spawners provided!";
+	}
 
 	@Override
 	public void load() {
