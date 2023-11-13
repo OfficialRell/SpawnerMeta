@@ -16,7 +16,7 @@ import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 
 public class SettingsFile extends AbstractFile {
 	
-	private static final int version = 6;
+	private static final int version = 7;
 
 	public SettingsFile() {
 		super("configuration");
@@ -87,6 +87,7 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Spawners.empty.egg-removing-verify", false);
 		
 		file.addDefault("Spawners.disabled-spawners", List.of());
+		file.addDefault("Spawners.ignored-spawners", List.of());
 		file.addDefault("Spawners.spawning-particles", true);
 		file.addDefault("Spawners.disable-item-spawners", false);
 		file.addDefault("Spawners.warning-particles", true);
@@ -110,49 +111,6 @@ public class SettingsFile extends AbstractFile {
 		
 		file.addDefault("Items.taking-ticks", 60 * 20);
 		file.addDefault("Items.taking-remind-ticks", 30 * 20);
-		
-		file.addDefault("Items.layout.spawner-item", List.of(
-				"!",
-				"HEADER",
-				"RANGE",
-				"DELAY",
-				"AMOUNT",
-				"!",
-				"CHARGES",
-				"SPAWNABLE",
-				"!",
-				"INFO"
-				));
-		file.addDefault("Items.layout.upgrades.stat-item", List.of(
-				"EMPTY",
-				"SWITCHING",
-				"!",
-				"LOCATION",
-				"STACK",
-				"SPAWNABLE",
-				"!",
-				"WARNING",
-				"!",
-				"INFO"
-				));
-		file.addDefault("Items.layout.upgrades.upgrade-item", List.of(
-				"HELP",
-				"!",
-				"INFO",
-				"!",
-				"CURRENT",
-				"!",
-				"NEXT",
-				"!",
-				"PRICE"
-				));
-		file.addDefault("Items.layout.upgrades.disabled-upgrade-item", List.of(
-				"HELP",
-				"!",
-				"INFO",
-				"!",
-				"CURRENT"
-				));
 		
 		file.addDefault("Modifiers.holograms.regular.enabled", false);
 		file.addDefault("Modifiers.holograms.regular.show-natural", false);
@@ -332,6 +290,10 @@ public class SettingsFile extends AbstractFile {
 					"  interact or do any other modifications",
 					"  to disabled spawners.",
 					"Disabled spawners do not spawn any entities.");
+			c.comment("Spawners.ignored-spawners",
+					"List of ignored spawners.",
+					"Ignored spawner will stay, work and spawn the same",
+					"  as in vanilla Minecraft.");
 			c.comment("Spawners.values",
 					"Spawner values define spawner upgrade attributes.",
 					"  range - required player distance (in blocks)",
@@ -433,7 +395,9 @@ public class SettingsFile extends AbstractFile {
 					"Should there be particles when",
 					"  an entity spawns.");
 			c.comment("Spawners.disable-item-spawners",
-					"Are item spawners disabled.");
+					"If true item spawners will not spawn any items,",
+					"  otherwise will spawn as in vanilla.",
+					"This plugin does not affect item spawners.");
 			c.comment("Spawners.warning-particles",
 					"Are warning particles shown.");
 			c.comment("Spawners.allow-renaming",
@@ -871,29 +835,6 @@ public class SettingsFile extends AbstractFile {
 					"You can change and extend this list.",
 					"Note, that the list order matters.");
 			
-			c.comment("Items.layout",
-					"In this section you can change",
-					"  the order of item lore and even",
-					"  delete lines.",
-					"You can delete a line by deleting",
-					"  the line in this file or add '!'",
-					"  after the line.",
-					"  E.g. 'INFO' -> 'INFO!'");
-			c.comment("Items.layout.spawner-item",
-					"Keys:",
-					"  HEADER, RANGE, DELAY, AMOUNT",
-					"  CHARGES, SPAWNABLE, INFO");
-			c.comment("Items.layout.upgrades.stat-item",
-					"Keys:",
-					"  EMPTY, SWITCHING, LOCATION, STACK",
-					"  WARNING, SPAWNABLE, INFO");
-			c.comment("Items.layout.upgrades.upgrade-item",
-					"Keys:",
-					"  HELP, INFO, CURRENT, NEXT, PRICE");
-			c.comment("Items.layout.upgrades.disabled-upgrade-item",
-					"Keys:",
-					"  HELP, INFO, CURRENT");
-			
 			c.comment("Configuration-version", "Version of this configuration file.",
 					"Should not be changed.");
 		}
@@ -901,8 +842,6 @@ public class SettingsFile extends AbstractFile {
 		save();
 		
 		Settings.reload();
-		
-		free();
 	}
 
 }

@@ -11,6 +11,7 @@ import mc.rellox.spawnermeta.api.view.layout.ISlot;
 import mc.rellox.spawnermeta.api.view.layout.SlotField;
 import mc.rellox.spawnermeta.configuration.Configuration.CF;
 import mc.rellox.spawnermeta.text.Text;
+import mc.rellox.spawnermeta.text.order.OrderList;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public final class LayoutRegistry {
@@ -27,6 +28,8 @@ public final class LayoutRegistry {
 				new ActiveSlot(SlotField.upgrade_charges, 26, Material.CHARCOAL, null, true, 0))
 		.forEach(slot -> l.set(slot.field(), slot));
 	}
+	
+	public static OrderList order_spawner, order_stats, order_upgrade, order_disabled;
 	
 	private static ILayout upgrades;
 	
@@ -50,6 +53,14 @@ public final class LayoutRegistry {
 						e.getMessage());
 			} else RF.debug(e);
 			upgrades = DEFAULT_UPGRADES;
+		}
+		try {
+			order_spawner = new OrderList(f.getStrings("Item-layout.spawner-item"));
+			order_stats = new OrderList(f.getStrings("Item-layout.upgrades.stat-item"));
+			order_upgrade = new OrderList(f.getStrings("Item-layout.upgrades.upgrade-item"));
+			order_disabled = new OrderList(f.getStrings("Item-layout.upgrades.disabled-upgrade-item"));
+		} catch (Exception e) {
+			RF.debug(e);
 		}
 	}
 	

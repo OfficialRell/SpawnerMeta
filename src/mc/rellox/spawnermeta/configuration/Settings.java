@@ -15,7 +15,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -34,7 +38,7 @@ import mc.rellox.spawnermeta.prices.PriceManager;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 import mc.rellox.spawnermeta.text.Text;
-import mc.rellox.spawnermeta.text.order.OrderList;
+import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Utils;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
@@ -75,6 +79,7 @@ public final class Settings {
 	public boolean warning_particles;
 	public boolean disable_item_spawners;
 	public final Set<SpawnerType> spawner_disabled;
+	public final Set<SpawnerType> spawner_ignored;
 	
 	public boolean allow_renaming;
 	
@@ -221,8 +226,6 @@ public final class Settings {
 	public String command_trust;
 	public final List<String> aliases_trust;
 	
-	public OrderList order_spawner, order_stats, order_upgrade, order_disabled;
-	
 	public boolean use_delimiter;
 	public char delimiter;
 	public boolean use_abbreviations;
@@ -242,6 +245,7 @@ public final class Settings {
 		this.breaking_price = new SinglePriceMap("Modifiers.breaking");
 		this.spawnable_amount = new SingleIntegerMap("Modifiers.spawnable.entity-amount");
 		this.spawner_disabled = EnumSet.noneOf(SpawnerType.class);
+		this.spawner_ignored = EnumSet.noneOf(SpawnerType.class);
 		this.stacking_permissions = new HashMap<>(4);
 		this.chance_permissions = new HashMap<>(4);
 		this.ownership_permissions = new HashMap<>(4);
@@ -276,7 +280,7 @@ public final class Settings {
 		spawner_values.load();
 		spawner_value_increase.load();
 		selection = RF.enumerate(Selection.class, file.getString("Spawners.spawning-type"),
-				Selection.SINGLE);
+				Selection.SPREAD);
 		radius_horizontal = file.getInteger("Spawners.spawning-radius.horizontal", 1, 8);
 		radius_vertical = file.getInteger("Spawners.spawning-radius.vertical", 1, 8);
 		spawner_switching = file.getBoolean("Spawners.switching");
@@ -293,6 +297,9 @@ public final class Settings {
 		spawner_disabled.clear();
 		spawner_disabled.addAll(RF.enumerates(SpawnerType.class,
 				file.getStrings("Spawners.disabled-spawners")));
+		spawner_ignored.clear();
+		spawner_ignored.addAll(RF.enumerates(SpawnerType.class,
+				file.getStrings("Spawners.ignored-spawners")));
 		
 		final int z = file.getInteger("Spawners.default-slime-size", 0, 8);
 		final int[] ss = {1, 2, 4};
@@ -497,11 +504,6 @@ public final class Settings {
 		aliases_trust.clear();
 		aliases_trust.addAll(file.getStrings("Commands.spawner-trust.aliases"));
 		
-		order_spawner = new OrderList(file.getStrings("Items.layout.spawner-item"));
-		order_stats = new OrderList(file.getStrings("Items.layout.upgrades.stat-item"));
-		order_upgrade = new OrderList(file.getStrings("Items.layout.upgrades.upgrade-item"));
-		order_disabled = new OrderList(file.getStrings("Items.layout.upgrades.disabled-upgrade-item"));
-		
 		PriceManager.reload();
 		
 		use_delimiter = file.getBoolean("Prices.format.use-delimiter");
@@ -558,6 +560,20 @@ public final class Settings {
 		ItemMeta meta = item.getItemMeta();
 		if(meta == null) return false;
 		return meta.getEnchantLevel(Enchantment.SILK_TOUCH) >= breaking_silk_level;
+	}
+	
+	public boolean ignored(Block block) {
+		return ignored(DataManager.getEntity(block));
+	}
+	
+	public boolean ignored(EntityType entity) {
+		if(entity == null) return true;
+		Class<? extends Entity> ec = entity.getEntityClass();
+		if(ec == null) return true;
+		if(LivingEntity.class.isAssignableFrom(ec) == false
+				&& entity != EntityType.AREA_EFFECT_CLOUD) return true;
+		var type = SpawnerType.of(entity);
+		return spawner_ignored.contains(type) == true;
 	}
 	
 	public String price(int f) {

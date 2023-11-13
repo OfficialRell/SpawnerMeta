@@ -12,6 +12,11 @@ public final class Configuration {
 		CF.l.load();
 		CF.r.load();
 		CF.y.load();
+		
+		CF.s.free();
+		CF.l.free();
+		CF.r.free();
+		CF.y.free();
 	}
 	
 	public static final class CF {

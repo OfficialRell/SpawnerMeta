@@ -1,6 +1,7 @@
 package mc.rellox.spawnermeta.configuration.file;
 
 import java.io.File;
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -8,6 +9,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.view.layout.ISlot;
 import mc.rellox.spawnermeta.configuration.AbstractFile;
+import mc.rellox.spawnermeta.configuration.Configuration.CF;
 import mc.rellox.spawnermeta.utility.Utils;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.view.layout.ActiveBackground;
@@ -22,15 +24,28 @@ public class LayoutsFile extends AbstractFile {
 
 	@Override
 	protected void initialize() {
-		var of = new File(SpawnerMeta.instance().getDataFolder(), "layout.yml");
-		if(of.exists() == true) {
-			try {
-				var old = YamlConfiguration.loadConfiguration(of);
-				convert(old);
-				of.delete();
-			} catch (Exception e) {
-				RF.debug(e);
+		if(CF.version < 6) {
+			var of = new File(SpawnerMeta.instance().getDataFolder(), "layout.yml");
+			if(of.exists() == true) {
+				try {
+					var old = YamlConfiguration.loadConfiguration(of);
+					convert(old);
+					of.delete();
+				} catch (Exception e) {
+					RF.debug(e);
+				}
 			}
+		}
+		if(CF.version < 7) {
+			List<String> list = CF.s.getStrings("Items.layout.spawner-item");
+			hold("Item-layout.spawner-item", list);
+			list = CF.s.getStrings("Items.layout.upgrades.stat-item");
+			hold("Item-layout.upgrades.stat-item", list);
+			list = CF.s.getStrings("Items.layout.upgrades.upgrade-item");
+			hold("Item-layout.upgrades.upgrade-item", list);
+			list = CF.s.getStrings("Items.layout.upgrades.disabled-upgrade-item");
+			hold("Item-layout.upgrades.disabled-upgrade-item", list);
+			CF.s.clear("Items.layout");
 		}
 		
 		if(file.isSet("Upgrade-layout") == false) {
@@ -41,8 +56,77 @@ public class LayoutsFile extends AbstractFile {
 					as.save(file, "Upgrade-layout");
 			if(l.background() instanceof ActiveBackground ab) ab.save(file, "Upgrade-layout");
 		}
+		
+		file.addDefault("Item-layout.spawner-item", List.of(
+				"!",
+				"HEADER",
+				"RANGE",
+				"DELAY",
+				"AMOUNT",
+				"!",
+				"CHARGES",
+				"SPAWNABLE",
+				"!",
+				"INFO"
+				));
+		file.addDefault("Item-layout.upgrades.stat-item", List.of(
+				"EMPTY",
+				"SWITCHING",
+				"!",
+				"LOCATION",
+				"STACK",
+				"SPAWNABLE",
+				"!",
+				"WARNING",
+				"!",
+				"INFO"
+				));
+		file.addDefault("Item-layout.upgrades.upgrade-item", List.of(
+				"HELP",
+				"!",
+				"INFO",
+				"!",
+				"CURRENT",
+				"!",
+				"NEXT",
+				"!",
+				"PRICE"
+				));
+		file.addDefault("Item-layout.upgrades.disabled-upgrade-item", List.of(
+				"HELP",
+				"!",
+				"INFO",
+				"!",
+				"CURRENT"
+				));
 
 		file.options().copyDefaults(true);
+		
+		Commenter c = commenter();
+		if(c != null) {
+			c.comment("Item-layout",
+					"In this section you can change",
+					"  the order of item lore and even",
+					"  delete lines.",
+					"You can delete a line by deleting",
+					"  the line in this file or add '!'",
+					"  after the line.",
+					"  E.g. 'INFO' -> 'INFO!'");
+			c.comment("Item-layout.spawner-item",
+					"Keys:",
+					"  HEADER, RANGE, DELAY, AMOUNT",
+					"  CHARGES, SPAWNABLE, INFO");
+			c.comment("Item-layout.upgrades.stat-item",
+					"Keys:",
+					"  EMPTY, SWITCHING, LOCATION, STACK",
+					"  WARNING, SPAWNABLE, INFO");
+			c.comment("Item-layout.upgrades.upgrade-item",
+					"Keys:",
+					"  HELP, INFO, CURRENT, NEXT, PRICE");
+			c.comment("Item-layout.upgrades.disabled-upgrade-item",
+					"Keys:",
+					"  HELP, INFO, CURRENT");
+		}
 		
 		save();
 		
