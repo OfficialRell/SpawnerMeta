@@ -907,6 +907,13 @@ public final class EventRegistry {
 	}
 
 	protected static void place(BlockPlaceEvent event, Block block) {
+		if(block.getState() instanceof CreatureSpawner cs) {
+			EntityType entity = cs.getSpawnedType();
+			if(entity != null && Settings.settings.ignored(entity) == true) {
+				event.setCancelled(false);
+				return;
+			}
+		}
 		Player player = event.getPlayer();
 		Messagable m = new Messagable(player);
 		ItemStack item = event.getItemInHand().clone();
@@ -914,6 +921,10 @@ public final class EventRegistry {
 		if(data == null) return;
 		event.setCancelled(true);
 		SpawnerType type = data.getType();
+		if(Settings.settings.ignored(type.entity()) == true) {
+			event.setCancelled(false);
+			return;
+		}
 		if(type.disabled() == true) return;
 		if(data.isEmpty() == true && Settings.settings.empty_enabled == false) {
 			m.send(Language.list("Spawners.empty.disabled"));
@@ -1012,11 +1023,13 @@ public final class EventRegistry {
 			event.setCancelled(true);
 			return;
 		}
-		if(entity.getType() == EntityType.DROPPED_ITEM) {
-			if(Settings.settings.disable_item_spawners == true) {
-				event.setCancelled(true);
-				if(entity.isDead() == false) entity.remove();
-			} else event.setCancelled(false);
+		if(entity.getType() == EntityType.DROPPED_ITEM
+				&& Settings.settings.disable_item_spawners == true) {
+			event.setCancelled(true);
+			return;
+		}
+		if(Settings.settings.ignored(event.getSpawner().getSpawnedType()) == true) {
+			event.setCancelled(false);
 			return;
 		}
 		event.setCancelled(Settings.settings.cancel_spawning_event);

@@ -76,7 +76,6 @@ public class EventListeners implements Listener {
 			EventRegistry.stack_nearby(event, player, m, block);
 			return;
 		}
-		if(DataManager.isItemSpawner(block) == true) return;
 		IGenerator generator = fetch(block);
 		if(generator == null) return;
 		try {
@@ -158,6 +157,7 @@ public class EventListeners implements Listener {
 	}
 	
 	protected static IGenerator fetch(Block block) {
+		if(Settings.settings.ignored(block) == true) return null;
 		IGenerator generator = GeneratorRegistry.get(block);
 		if(generator == null) {
 			Text.failure("Unable to get spawner generator at #0, this should never happen,"
