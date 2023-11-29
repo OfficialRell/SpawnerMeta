@@ -24,7 +24,7 @@ public class LayoutsFile extends AbstractFile {
 
 	@Override
 	protected void initialize() {
-		if(CF.version < 6) {
+		if(CF.version() < 6) {
 			var of = new File(SpawnerMeta.instance().getDataFolder(), "layout.yml");
 			if(of.exists() == true) {
 				try {
@@ -36,15 +36,15 @@ public class LayoutsFile extends AbstractFile {
 				}
 			}
 		}
-		if(CF.version < 7) {
+		if(CF.version() < 7) {
 			List<String> list = CF.s.getStrings("Items.layout.spawner-item");
-			hold("Item-layout.spawner-item", list);
+			hold("Item-layout.spawner-item", list.isEmpty() ? null : list);
 			list = CF.s.getStrings("Items.layout.upgrades.stat-item");
-			hold("Item-layout.upgrades.stat-item", list);
+			hold("Item-layout.upgrades.stat-item", list.isEmpty() ? null : list);
 			list = CF.s.getStrings("Items.layout.upgrades.upgrade-item");
-			hold("Item-layout.upgrades.upgrade-item", list);
+			hold("Item-layout.upgrades.upgrade-item", list.isEmpty() ? null : list);
 			list = CF.s.getStrings("Items.layout.upgrades.disabled-upgrade-item");
-			hold("Item-layout.upgrades.disabled-upgrade-item", list);
+			hold("Item-layout.upgrades.disabled-upgrade-item", list.isEmpty() ? null : list);
 			CF.s.clear("Items.layout");
 		}
 		

@@ -19,7 +19,6 @@ import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -90,6 +89,7 @@ public final class Settings {
 	public boolean send_spawning_event;
 	public boolean cancel_break_event;
 	public boolean ignore_break_event;
+	public boolean check_island_kick;
 	
 	public boolean kill_entities_on_spawn;
 	public boolean entities_drop_xp;
@@ -310,6 +310,7 @@ public final class Settings {
 		send_spawning_event = file.getBoolean("Events.send-spawner-event");
 		cancel_break_event = file.getBoolean("Events.cancel-break-event");
 		ignore_break_event = file.getBoolean("Events.ignore-break-event");
+		check_island_kick = file.getBoolean("Events.check-island-kick");
 		
 		kill_entities_on_spawn = file.getBoolean("Spawners.kill-entities-on-spawn");
 		entities_drop_xp = file.getBoolean("Spawners.drop-xp-when-instant-kill");
@@ -570,10 +571,8 @@ public final class Settings {
 		if(entity == null) return true;
 		Class<? extends Entity> ec = entity.getEntityClass();
 		if(ec == null) return true;
-		if(LivingEntity.class.isAssignableFrom(ec) == false
-				&& entity != EntityType.AREA_EFFECT_CLOUD) return true;
-		var type = SpawnerType.of(entity);
-		return spawner_ignored.contains(type) == true;
+		var type = SpawnerType.ofAll(entity);
+		return type == null ? true : spawner_ignored.contains(type) == true;
 	}
 	
 	public String price(int f) {

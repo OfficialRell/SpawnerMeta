@@ -12,6 +12,7 @@ import com.bgsoftware.superiorskyblock.api.wrappers.SuperiorPlayer;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
@@ -19,6 +20,7 @@ import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 public class SetupSuperiorSkyblock2 implements Listener {
 	
 	public static void load() {
+		if(Settings.settings.check_island_kick == false) return;
 		Bukkit.getPluginManager().registerEvents(new SetupSuperiorSkyblock2(), SpawnerMeta.instance());
 	}
 	
@@ -42,8 +44,10 @@ public class SetupSuperiorSkyblock2 implements Listener {
 				il.all().stream()
 				.map(Location::getBlock)
 				.map(ISpawner::of)
-				.map(ISpawner::toData)
-				.forEach(il::store);
+				.forEach(spawner -> {
+					il.store(spawner.toData());
+					spawner.block().setType(Material.AIR);
+				});
 			}
 		} catch (Exception e) {
 			RF.debug(e);

@@ -281,6 +281,10 @@ public final class DataManager {
 	}
 
 	public static IVirtual getSpawnerItem(ItemStack item) {
+		return getSpawnerItem(item, false);
+	}
+
+	public static IVirtual getSpawnerItem(ItemStack item, boolean nullable) {
 		if(item == null || item.getType() != Material.SPAWNER) return null;
 		ItemMeta meta = item.getItemMeta();
 		PersistentDataContainer p = meta.getPersistentDataContainer();
@@ -289,19 +293,20 @@ public final class DataManager {
 			type = SpawnerType.of(p.get(key_type, PersistentDataType.STRING));
 		} else if(meta instanceof BlockStateMeta bsm) {
 			if(bsm.getBlockState() instanceof CreatureSpawner cs) {
-				type = SpawnerType.of(cs.getSpawnedType());
-			} else type = SpawnerType.PIG;
-		} else type = SpawnerType.PIG;
-		int[] levels = p.getOrDefault(key_upgrades, PersistentDataType.INTEGER_ARRAY, i());
-		if(levels.length > 3) levels = Arrays.copyOf(levels, 3);
-		int charges = p.getOrDefault(key_charges, PersistentDataType.INTEGER, 0);
+				type = SpawnerType.ofAll(cs.getSpawnedType());
+			} else type = nullable ? null : SpawnerType.PIG;
+		} else type = nullable ? null : SpawnerType.PIG;
 		boolean empty = p.getOrDefault(key_empty, PersistentDataType.INTEGER, 0) >= 1;
 		if(type == null) {
 			if(Settings.settings.empty_enabled == true) {
 				type = SpawnerType.EMPTY;
 				empty = true;
-			} else type = SpawnerType.PIG;
+			} else if(nullable == false) type = SpawnerType.PIG;
+			else return null;
 		}
+		int[] levels = p.getOrDefault(key_upgrades, PersistentDataType.INTEGER_ARRAY, i());
+		if(levels.length > 3) levels = Arrays.copyOf(levels, 3);
+		int charges = p.getOrDefault(key_charges, PersistentDataType.INTEGER, 0);
 		int spawnable = p.getOrDefault(key_spawnable, PersistentDataType.INTEGER,
 				Settings.settings.spawnable_enabled
 				? Settings.settings.spawnable_amount.get(type) : 0);
@@ -578,6 +583,16 @@ public final class DataManager {
 		var cs = cast(block);
 		if(cs == null) return null;
 		return cs.getSpawnedType();
+	}
+	
+	public static EntityType getEntity(ItemStack item) {
+		if(item == null) return null;
+		ItemMeta meta = item.getItemMeta();
+		if(meta == null) return null;
+		if(meta instanceof BlockStateMeta bs
+				&& bs.getBlockState() instanceof CreatureSpawner cs)
+			return cs.getSpawnedType();
+		return null;
 	}
 	
 	private static CreatureSpawner cast(Block block) {

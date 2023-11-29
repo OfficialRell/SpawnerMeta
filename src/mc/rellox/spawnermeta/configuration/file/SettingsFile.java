@@ -108,6 +108,7 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Events.send-spawner-event", false);
 		file.addDefault("Events.cancel-break-event", true);
 		file.addDefault("Events.ignore-break-event", false);
+		file.addDefault("Events.check-island-kick", true);
 		
 		file.addDefault("Items.taking-ticks", 60 * 20);
 		file.addDefault("Items.taking-remind-ticks", 30 * 20);
@@ -441,6 +442,9 @@ public class SettingsFile extends AbstractFile {
 					"This means that SpawnerMeta will not add custom spawner",
 					"  breaking and all spawners will break as in vanilla.",
 					"Useful for custom plugins that require this event.");
+			c.comment("Events.check-island-kick",
+					"If true players that are kicked from an island",
+					"  will receive all their owned spawner.");
 			c.comment("Items.taking-ticks",
 					"Amount of ticks to get back dropped items using",
 					"  /spawnerdrops.",

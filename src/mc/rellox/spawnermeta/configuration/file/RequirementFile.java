@@ -248,7 +248,7 @@ public class RequirementFile extends AbstractFile {
 		} else {
 			List<String> list = file.getStringList(path);
 			Iterator<String> it = list.iterator();
-			boolean solid = false, water = false;
+			boolean solid = false, water = false, air = false;
 			while(it.hasNext() == true) {
 				String next = it.next();
 				if(next.equalsIgnoreCase("SOLID") == true) {
@@ -257,6 +257,9 @@ public class RequirementFile extends AbstractFile {
 				} else if(next.equalsIgnoreCase("WATER") == true) {
 					it.remove();
 					water = true;
+				} else if(next.equalsIgnoreCase("AIR") == true) {
+					it.remove();
+					air = true;
 				}
 			}
 			List<Material> and = new ArrayList<>(), not = new ArrayList<>();
@@ -276,6 +279,7 @@ public class RequirementFile extends AbstractFile {
 			List<IMaterial> ms = new ArrayList<>();
 			if(solid == true) ms.add(IMaterial.solid);
 			if(water == true) ms.add(IMaterial.water);
+			if(air == true) ms.add(IMaterial.air);
 			if(and.isEmpty() == false) ms.add(IMaterial.is(and));
 			if(not.isEmpty() == false) ms.add(IMaterial.not(not));
 			if(ms.isEmpty() == true) error = true;
