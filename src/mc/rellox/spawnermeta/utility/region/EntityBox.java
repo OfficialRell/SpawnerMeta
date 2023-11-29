@@ -57,6 +57,10 @@ public abstract class EntityBox {
 		return x * y * z;
 	}
 	
+	public int maximum() {
+		return Math.max(x, z);
+	}
+	
 	public EntityBox multiply(int a) {
 		return (a <= 1 ? this : new EntityBoxLarge(x * a, y * a, z * a));
 	}

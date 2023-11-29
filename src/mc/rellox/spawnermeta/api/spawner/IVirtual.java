@@ -11,7 +11,11 @@ import mc.rellox.spawnermeta.utility.DataManager;
 public interface IVirtual {
 	
 	public static IVirtual of(ItemStack item) {
-		return DataManager.getSpawnerItem(item);
+		return of(item, false);
+	}
+	
+	public static IVirtual of(ItemStack item, boolean nullable) {
+		return DataManager.getSpawnerItem(item, nullable);
 	}
 	
 	public static IVirtual of(Block block) {

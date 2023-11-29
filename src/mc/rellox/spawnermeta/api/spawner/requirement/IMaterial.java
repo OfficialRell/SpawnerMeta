@@ -73,7 +73,7 @@ public interface IMaterial {
 	
 	static IMaterial of(List<IMaterial> list) {
 		if(list.size() == 1) return list.get(0);
-		return block -> list.stream().allMatch(i -> i.is(block));
+		return block -> list.stream().anyMatch(i -> i.is(block));
 	}
 	
 	/**
