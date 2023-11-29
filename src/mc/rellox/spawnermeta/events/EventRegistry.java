@@ -68,6 +68,7 @@ import mc.rellox.spawnermeta.items.ItemCollector;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.prices.Group;
 import mc.rellox.spawnermeta.prices.Price;
+import mc.rellox.spawnermeta.spawner.ActiveVirtual;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.text.content.Content;
@@ -907,24 +908,23 @@ public final class EventRegistry {
 	}
 
 	protected static void place(BlockPlaceEvent event, Block block) {
-		if(block.getState() instanceof CreatureSpawner cs) {
-			EntityType entity = cs.getSpawnedType();
-			if(entity != null && Settings.settings.ignored(entity) == true) {
-				event.setCancelled(false);
-				return;
-			}
-		}
+		ItemStack item = event.getItemInHand().clone();
+		IVirtual temp = IVirtual.of(item, true), data;
+		if(temp == null) {
+			EntityType entity = DataManager.getEntity(item);
+			if(entity == null) return;
+			SpawnerType type = SpawnerType.ofAll(entity);
+			if(type == null) return;
+			data = new ActiveVirtual(type, null, 0,
+					Settings.settings.spawnable_amount.get(type), type == SpawnerType.EMPTY);
+		} else data = temp;
+		if(Settings.settings.ignored(data.getType().entity()) == true) return;
+		event.setCancelled(true);
+		
 		Player player = event.getPlayer();
 		Messagable m = new Messagable(player);
-		ItemStack item = event.getItemInHand().clone();
-		IVirtual data = IVirtual.of(item);
-		if(data == null) return;
-		event.setCancelled(true);
+		
 		SpawnerType type = data.getType();
-		if(Settings.settings.ignored(type.entity()) == true) {
-			event.setCancelled(false);
-			return;
-		}
 		if(type.disabled() == true) return;
 		if(data.isEmpty() == true && Settings.settings.empty_enabled == false) {
 			m.send(Language.list("Spawners.empty.disabled"));

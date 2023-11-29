@@ -56,7 +56,7 @@ public class EventListeners implements Listener {
 		REGISTRIES.forEach(RegistryAbstract::update);
 	}
 	
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		Messagable m = new Messagable(player);
@@ -85,7 +85,7 @@ public class EventListeners implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onBreak(BlockBreakEvent event) {
 		try {
 			Block block = event.getBlock();
@@ -98,7 +98,7 @@ public class EventListeners implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onBlockExplodeByBlock(BlockExplodeEvent event) {
 		Iterator<Block> it = event.blockList().iterator();
 		try {
@@ -108,7 +108,7 @@ public class EventListeners implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onBlockExplodeByEntity(EntityExplodeEvent event) {
 		try {
 			EventRegistry.explode_entity(event);
@@ -117,7 +117,7 @@ public class EventListeners implements Listener {
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onPlace(BlockPlaceEvent event) {
 		if(event.isCancelled() == true) return;
 		Block block = event.getBlockPlaced();
@@ -194,7 +194,7 @@ public class EventListeners implements Listener {
 			else register();
 		}
 
-		@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		private void onEntityTarget(EntityTargetEvent event) {
 			Entity entity = event.getEntity();
 			if(DataManager.isSpawned(entity) == false) return;
@@ -211,7 +211,7 @@ public class EventListeners implements Listener {
 			else register();
 		}
 
-		@EventHandler(priority = EventPriority.HIGH)
+		@EventHandler(priority = EventPriority.HIGHEST)
 		private void onUnloadLink(ChunkUnloadEvent event) {
 			Stream.of(event.getChunk().getTileEntities())
 				.filter(CreatureSpawner.class::isInstance)
@@ -229,7 +229,7 @@ public class EventListeners implements Listener {
 			else register();
 		}
 
-		@EventHandler(priority = EventPriority.HIGH)
+		@EventHandler(priority = EventPriority.HIGHEST)
 		private void onAnvilPrep(PrepareAnvilEvent event) {
 			var res = event.getResult();
 			if(res == null || res.getType() != Material.SPAWNER) return;
