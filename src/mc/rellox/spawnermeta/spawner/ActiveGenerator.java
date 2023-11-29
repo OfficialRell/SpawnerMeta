@@ -97,7 +97,7 @@ public class ActiveGenerator implements IGenerator {
 	
 	@Override
 	public boolean active() {
-		return active ;
+		return active;
 	}
 	
 	@Override
@@ -248,7 +248,7 @@ public class ActiveGenerator implements IGenerator {
 		}
 		
 		SpawnerPreSpawnEvent call = EventRegistry.call(new SpawnerPreSpawnEvent(this, count));
-		if(call.cancelled() == true) return false;
+		if(call.cancelled() == true || count < 1) return false;
 		
 		count = call.count;
 		

@@ -180,6 +180,14 @@ public enum SpawnerType {
 		}
 	}
 	
+	public static SpawnerType ofAll(EntityType type) {
+		return stream()
+				.filter(SpawnerType::exists)
+				.filter(s -> s.equals(type))
+				.findFirst()
+				.orElse(null);
+	}
+	
 	public static SpawnerType of(EntityType type) {
 		return stream()
 				.filter(SpawnerType::regular)

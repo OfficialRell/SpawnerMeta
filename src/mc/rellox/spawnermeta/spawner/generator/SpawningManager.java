@@ -15,6 +15,7 @@ import org.bukkit.entity.Ageable;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EnderDragon.Phase;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Slime;
@@ -51,12 +52,18 @@ public final class SpawningManager {
 			
 			final Consumer<Entity> modifier, m = modifier(spawner);
 			
-			if(s == true) modifier = e -> {
-				m.accept(e);
-				if(e instanceof Slime slime)
-					slime.setSize(Settings.settings.slime_size.getAsInt());
-			};
-			else modifier = m;
+			if(s == true) {
+				modifier = e -> {
+					m.accept(e);
+					if(e instanceof Slime slime)
+						slime.setSize(Settings.settings.slime_size.getAsInt());
+				};
+			} else if(type == SpawnerType.EXPERIENCE_ORB) {
+				modifier = e -> {
+					m.accept(e);
+					if(e instanceof ExperienceOrb orb) orb.setExperience(1);
+				};
+			} else modifier = m;
 
 			Class<?> clazz = type.entity().getEntityClass();
 			if(LivingEntity.class.isAssignableFrom(clazz) == true

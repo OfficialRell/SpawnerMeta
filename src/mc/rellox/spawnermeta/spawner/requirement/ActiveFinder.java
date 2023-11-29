@@ -46,7 +46,7 @@ public class ActiveFinder implements IFinder {
 		EntityBox box = generator.cache().type().box();
 		List<Location> list = new ArrayList<>();
 		Block block = generator.spawner().block();
-		if(loaded(block.getWorld(), block.getX(), block.getZ(), rx + 1) == false) {
+		if(loaded(block.getWorld(), block.getX(), block.getZ(), rx + box.maximum()) == false) {
 			errors.found = false;
 			return list;
 		}
