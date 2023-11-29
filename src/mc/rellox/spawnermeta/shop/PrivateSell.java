@@ -19,7 +19,6 @@ import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.prices.Group;
 import mc.rellox.spawnermeta.prices.Price;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
-import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Utils;
 
 public class PrivateSell {
@@ -89,7 +88,7 @@ public class PrivateSell {
 		} else {
 			if(spawners.size() >= v.getSize() - 18) return true;
 			ItemStack item = c.getItem(s);
-			IVirtual sd = DataManager.getSpawnerItem(item);
+			IVirtual sd = IVirtual.of(item);
 			if(sd == null) return true;
 			if(sd.isEmpty() == true) {
 				player.sendMessage(Language.get("Shop-sell.selling.unable").text());
