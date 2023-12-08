@@ -1,10 +1,12 @@
 package mc.rellox.spawnermeta.spawner.generator;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.bukkit.Chunk;
@@ -13,23 +15,28 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.scheduler.BukkitRunnable;
 
+import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.location.Pos;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.ActiveGenerator;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class SpawnerWorld {
 	
 	public final World world;
 	private final Map<Pos, IGenerator> spawners;
 	private final List<IGenerator> queue;
+	private final Set<Chunk> chunks;
 	
 	public SpawnerWorld(World world) {
 		this.world = world;
 		this.spawners = new HashMap<>();
-		this.queue = new LinkedList<>();
+		this.queue = new LinkedList<>();;
+		this.chunks = new HashSet<>();
 	}
 	
 	public void load() {
@@ -37,6 +44,15 @@ public class SpawnerWorld {
 	}
 	
 	public void load(Chunk chunk) {
+		load(chunk, false);
+	}
+	
+	public void load(Chunk chunk, boolean wait) {
+		if(wait == true) {
+			delay();
+			chunks.add(chunk);
+			return;
+		}
 		Stream.of(chunk.getTileEntities())
 		.filter(CreatureSpawner.class::isInstance)
 		.map(BlockState::getBlock)
@@ -44,6 +60,24 @@ public class SpawnerWorld {
 		.map(ISpawner::of)
 		.map(ActiveGenerator::new)
 		.forEach(queue::add);
+	}
+	
+	private void delay() {
+		if(chunks.isEmpty() == false) return;
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				try {
+					Iterator<Chunk> it = chunks.iterator();
+					if(it.hasNext() == true) {
+						load(it.next());
+						it.remove();
+					}
+				} catch (Exception e) {
+					RF.debug(e);
+				}
+			}
+		}.runTaskTimer(SpawnerMeta.instance(), 1, 5);
 	}
 	
 	public void unload(Chunk chunk) {
@@ -54,6 +88,9 @@ public class SpawnerWorld {
 		.map(spawners::get)
 		.filter(g -> g != null)
 		.forEach(g -> g.remove(false));
+		try {
+			if(chunks.isEmpty() == false) chunks.remove(chunk);
+		} catch (Exception e) {}
 	}
 	
 	public void clear() {
@@ -93,7 +130,6 @@ public class SpawnerWorld {
 	}
 	
 	public void put(Block block) {
-		
 		IGenerator g = new ActiveGenerator(ISpawner.of(block));
 		spawners.put(g.position(), g);
 	}

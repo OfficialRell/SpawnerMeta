@@ -154,7 +154,7 @@ public final class GeneratorRegistry implements Listener {
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	private void onChunkLoad(ChunkLoadEvent event) {
 		try {
-			get(event.getWorld()).load(event.getChunk());
+			get(event.getWorld()).load(event.getChunk(), true);
 		} catch (Exception e) {
 			RF.debug(e);
 		}
