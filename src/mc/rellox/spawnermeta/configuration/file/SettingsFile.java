@@ -142,8 +142,8 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Modifiers.changing.material-type.EXAMPLE", "IRON_INGOT");
 		file.addDefault("Modifiers.changing.deny.from", List.of());
 		file.addDefault("Modifiers.changing.deny.to", List.of());
-		file.addDefault("Modifiers.changing.reset-upgrades-regular", false);
-		file.addDefault("Modifiers.changing.reset-upgrades-empty", false);
+		file.addDefault("Modifiers.changing.reset-upgrades.regular", false);
+		file.addDefault("Modifiers.changing.reset-upgrades.empty", false);
 		
 		file.addDefault("Modifiers.placing.enabled", true);
 		file.addDefault("Modifiers.placing.use-price", false);

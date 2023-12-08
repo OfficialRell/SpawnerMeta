@@ -50,6 +50,9 @@ public final class DataManager {
 	
 	private static NamespacedKey key_spawned;
 	
+	private static Block last;
+	private static CreatureSpawner spawner;
+	
 	public static void initialize() {
 		key_empty = new NamespacedKey(SpawnerMeta.instance(), "empty");
 		key_upgrades = new NamespacedKey(SpawnerMeta.instance(), "upgrades");
@@ -597,7 +600,12 @@ public final class DataManager {
 	
 	private static CreatureSpawner cast(Block block) {
 		try {
-			return block.getState() instanceof CreatureSpawner cs ? cs : null;
+			if(block.equals(last) == true) return spawner;
+			if(block.getState() instanceof CreatureSpawner cs) {
+				last = block;
+				spawner = cs;
+				return spawner;
+			}
 		} catch (Exception e) {
 			RF.debug(e);
 		}

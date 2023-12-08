@@ -204,7 +204,6 @@ public final class EventRegistry {
 		if(Settings.settings.changing_reset_regular == true) spawner.resetUpgradeLevels();
 		spawner.update();
 		
-		
 		generator.refresh();
 	}
 

@@ -153,6 +153,8 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			else {
 				if(Settings.settings.charges_enabled == true
 						&& layout.is(o, SlotField.upgrade_charges) == true) {
+					if(Settings.settings.charges_ignore_natural == true
+							&& generator.cache().natural() == true) return;
 					ClickType ct = event.getClick();
 					SpawnerType type = generator.cache().type();
 					
@@ -264,8 +266,11 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		layout.fill(v, upgrade(0, SlotField.upgrade_range), SlotField.upgrade_range);
 		layout.fill(v, upgrade(1, SlotField.upgrade_delay), SlotField.upgrade_delay);
 		layout.fill(v, upgrade(2, SlotField.upgrade_amount), SlotField.upgrade_amount);
-		if(Settings.settings.charges_enabled == true)
+		if(Settings.settings.charges_enabled == true) {
+			if(Settings.settings.charges_ignore_natural == true
+					&& generator.cache().natural() == true) return;
 			layout.fill(v, charges(), SlotField.upgrade_charges);
+		}
 	}
 	
 	private ItemStack upgrade(ISlot slot, int i) {
