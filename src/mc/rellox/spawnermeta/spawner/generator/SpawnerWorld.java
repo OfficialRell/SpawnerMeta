@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -23,7 +24,6 @@ import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.location.Pos;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.ActiveGenerator;
-import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class SpawnerWorld {
 	
@@ -47,8 +47,8 @@ public class SpawnerWorld {
 		load(chunk, false);
 	}
 	
-	public void load(Chunk chunk, boolean wait) {
-		if(wait == true) {
+	public void load(Chunk chunk, boolean delayed) {
+		if(delayed == true) {
 			delay();
 			chunks.add(chunk);
 			return;
@@ -70,12 +70,11 @@ public class SpawnerWorld {
 				try {
 					Iterator<Chunk> it = chunks.iterator();
 					if(it.hasNext() == true) {
-						load(it.next());
-						it.remove();
+						Chunk next = it.next();
+						if(chunks.contains(next) == true) it.remove();
+						load(next);
 					}
-				} catch (Exception e) {
-					RF.debug(e);
-				}
+				} catch (Exception e) {}
 			}
 		}.runTaskTimer(SpawnerMeta.instance(), 1, 5);
 	}
@@ -88,9 +87,13 @@ public class SpawnerWorld {
 		.map(spawners::get)
 		.filter(g -> g != null)
 		.forEach(g -> g.remove(false));
-		try {
-			if(chunks.isEmpty() == false) chunks.remove(chunk);
-		} catch (Exception e) {}
+		if(Settings.settings.delayed_chunk_loading == true) {
+			try {
+				if(chunks.isEmpty() == false)
+					Bukkit.getScheduler().runTask(SpawnerMeta.instance(),
+							() -> chunks.remove(chunk));
+			} catch (Exception e) {}
+		}
 	}
 	
 	public void clear() {
@@ -112,7 +115,7 @@ public class SpawnerWorld {
 	
 	public void tick() {
 		if(queue.isEmpty() == false) {
-			queue.forEach(g -> spawners.put(g.position(), g));
+			queue.forEach(this::put);
 			queue.clear();
 		}
 		spawners.values().forEach(IGenerator::tick);
@@ -130,8 +133,12 @@ public class SpawnerWorld {
 	}
 	
 	public void put(Block block) {
-		IGenerator g = new ActiveGenerator(ISpawner.of(block));
-		spawners.put(g.position(), g);
+		put(new ActiveGenerator(ISpawner.of(block)));
+	}
+	
+	private void put(IGenerator generator) {
+		IGenerator last = spawners.put(generator.position(), generator);
+		if(last != null) last.clear();
 	}
 	
 	public IGenerator get(Block block) {
