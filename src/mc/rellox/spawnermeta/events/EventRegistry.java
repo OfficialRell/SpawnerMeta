@@ -573,6 +573,7 @@ public final class EventRegistry {
 		SpawnerType type = cache.type();
 		boolean ce = Settings.settings.cancel_break_event;
 		event.setCancelled(true);
+		event.setExpToDrop(0);
 		if(type.disabled() == true) return;
 		Player player = event.getPlayer();
 		Messagable m = new Messagable(player);
@@ -580,7 +581,7 @@ public final class EventRegistry {
 		ISpawner spawner = generator.spawner();
 		if(Utils.op(player) == true) {
 			Location bl = spawner.center();
-			List<ItemStack> items = DataManager.getSpawners(generator.block(), false);
+			List<ItemStack> items = DataManager.getSpawners(generator, false);
 			if(items.isEmpty() == true) {
 				items.add(DataManager.getSpawner(cache.type(), cache.stack()));
 			}
@@ -639,22 +640,6 @@ public final class EventRegistry {
 				}
 				
 			}
-			if(spawner.isOwner(player, true) == false) {
-				if(player.hasPermission("spawnermeta.ownership.bypass.breaking") == false) {
-					m.send(Language.list("Spawners.ownership.breaking.warning"));
-					if(Settings.settings.breaking_show_owner == true) {
-						var id = spawner.getOwnerID();
-						if(id != null) {
-							OfflinePlayer off = Bukkit.getOfflinePlayer(id);
-							var name = off.getName();
-							if(name != null) m.send(Language.list("Spawners.ownership.show-owner",
-									"player", name));
-						}
-					}
-					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-					return;
-				}
-			}
 		}
 		if(Settings.settings.breaking_drop_on_ground == false && ItemCollector.exists(player) == true) {
 			m.send(Language.list("Items.spawner-drop.try-breaking"));
@@ -669,7 +654,7 @@ public final class EventRegistry {
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
-		Location bl = spawner.center();
+		Location center = spawner.center();
 		Price price = null;
 		if(Settings.settings.breaking_price.using() == true)
 			price = Price.of(Group.breaking, Settings.settings.breaking_price.get(type) * cache.stack());
@@ -705,22 +690,22 @@ public final class EventRegistry {
 			}
 			if(player.getGameMode() == GameMode.CREATIVE) give = true;
 			if(give == true) {
-				DataManager.getSpawners(block, false).forEach(item -> {
+				DataManager.getSpawners(generator, false).forEach(item -> {
 					if(Settings.settings.breaking_drop_on_ground == true)
-						player.getWorld().dropItem(bl, item).setVelocity(new Vector());
+						player.getWorld().dropItem(center, item).setVelocity(new Vector());
 					else ItemCollector.add(player, item);
 				});
-				player.spawnParticle(Particle.CLOUD, bl, 25, 0.25, 0.25, 0.25, 0);
+				player.spawnParticle(Particle.CLOUD, center, 25, 0.25, 0.25, 0.25, 0);
 				player.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.35f, 0f);
 				mm = Language.list("Spawners.breaking.success");
 			} else {
-				player.spawnParticle(Particle.SQUID_INK, bl, 25, 0.25, 0.25, 0.25, 0.1);
+				player.spawnParticle(Particle.SQUID_INK, center, 25, 0.25, 0.25, 0.25, 0.1);
 				player.playSound(player.getEyeLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 0.2f, 0f);
 				mm = Language.list("Spawners.breaking.failure");
 				spawnXP(block, event, give);
 			}
 		} else {
-			player.spawnParticle(Particle.SQUID_INK, bl, 25, 0.25, 0.25, 0.25, 0.1);
+			player.spawnParticle(Particle.SQUID_INK, center, 25, 0.25, 0.25, 0.25, 0.1);
 			player.playSound(player.getEyeLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 0.35f, 0f);
 			mm = Language.list("Spawners.breaking.failure");
 			spawnXP(block, event, ce);
