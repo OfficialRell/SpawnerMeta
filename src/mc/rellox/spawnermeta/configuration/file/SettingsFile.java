@@ -70,7 +70,8 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Spawners.spawning-type", "SPREAD");
 		file.addDefault("Spawners.spawning-radius.horizontal", 3);
 		file.addDefault("Spawners.spawning-radius.vertical", 3);
-		
+
+		file.addDefault("Spawners.delayed-chunk-loading", false);
 		file.addDefault("Spawners.ticking-interval", 1);
 		file.addDefault("Spawners.validation-interval", 100);
 		file.addDefault("Spawners.checking-interval", 1);
@@ -324,6 +325,13 @@ public class SettingsFile extends AbstractFile {
 					"  SPREAD - spread entities around spawner.");
 			c.comment("Spawners.spawning-radius.horizontal", "Horizontal (x and z) entity spawning radius.");
 			c.comment("Spawners.spawning-radius.vertical", "Vertical (y) entity spawning radius.");
+			c.comment("Spawners.delayed-chunk-loading",
+					"If true, when chunks are loaded spawner",
+					"  initializing will be queued to improve",
+					"  server performance.",
+					"Note, this options will mostly benifit",
+					"  servers with high amounts of spawners",
+					"  or players.");
 			c.comment("Spawners.ticking-interval",
 					"Amount of ticks between each spawner tick.",
 					"Note! This is the main interval, meaning",

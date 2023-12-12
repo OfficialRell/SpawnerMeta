@@ -26,6 +26,7 @@ import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.events.SpawnerChargeEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerSwitchEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerUpgradeEvent;
+import mc.rellox.spawnermeta.api.spawner.ICache;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.SpawnerWarning;
@@ -136,6 +137,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			}.runTaskLater(SpawnerMeta.instance(), 5);
 			int o = event.getSlot();
 			UpgradeType upgrade;
+			ICache cache = generator.cache();
 			if(layout.is(o, SlotField.upgrade_stats) == true) {
 				if(Settings.settings.spawner_switching == false) return;
 				
@@ -154,11 +156,11 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 				if(Settings.settings.charges_enabled == true
 						&& layout.is(o, SlotField.upgrade_charges) == true) {
 					if(Settings.settings.charges_ignore_natural == true
-							&& generator.cache().natural() == true) return;
+							&& cache.natural() == true) return;
 					ClickType ct = event.getClick();
-					SpawnerType type = generator.cache().type();
+					SpawnerType type = cache.type();
 					
-					int r = Settings.settings.charges_price(type, spawner);
+					int r = Settings.settings.charges_price(type, generator);
 					int a;
 					if(ct.isShiftClick() == true) {
 						a = lowestCharges() / r;
@@ -174,7 +176,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 					if(call.cancelled() == true) return;
 					if(call.withdraw(player) == false) return;
 					
-					int charges = generator.cache().charges() + call.charges;
+					int charges = cache.charges() + call.charges;
 					spawner.setCharges(charges);
 					m.send(Language.list("Upgrade-GUI.charges.purchase", "charges", call.charges));
 					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
@@ -193,7 +195,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 				return;
 			}
-			if(Settings.settings.natural_can_upgrade == false && generator.cache().natural() == true) {
+			if(Settings.settings.natural_can_upgrade == false && cache.natural() == true) {
 				if(player.hasPermission("spawnermeta.ownership.bypass.upgrading") == false) {
 					m.send(Language.list("Spawners.natural.upgrading.warning"));
 					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
@@ -212,7 +214,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 					}
 				}
 			}
-			SpawnerType type = generator.cache().type();
+			SpawnerType type = cache.type();
 			int[] ls = spawner.getUpgradeLevels();
 			int[] ms = Settings.settings.upgrades_levels.get(type);
 			if(ls[i] < ms[i]) {
@@ -367,15 +369,16 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		ItemStack item = slot.toItem();
 		ItemMeta meta = item.getItemMeta();
 		
+		ICache cache = generator.cache();
 		List<Content> name = Language.list("Upgrade-GUI.items.stats.name",
-				"type", generator.cache().type());
+				"type", cache.type());
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 		
 		IOrder order = LayoutRegistry.order_stats.oderer();
 
 		order.named(name);
 
-		if(generator.cache().empty() == true) {
+		if(cache.empty() == true) {
 			order.submit("EMPTY", () -> {
 				return Language.list("Upgrade-GUI.items.stats.empty");
 			});
@@ -391,7 +394,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			return Language.list("Upgrade-GUI.items.stats.location",
 					"x", c(l[0]), "y", l[1], "z", c(l[2]));
 		});
-		int stack = generator.cache().stack();
+		int stack = cache.stack();
 		if(Settings.settings.stacking_enabled == true) {
 			order.submit("STACK", () -> {
 				if(Settings.settings.stacking_ignore_limit == true)
@@ -402,7 +405,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			});
 		}
 		if(Settings.settings.spawnable_enabled == true) {
-			int spawnable = generator.cache().spawnable();
+			int spawnable = cache.spawnable();
 			if(spawnable < 1_000_000_000) {
 				order.submit("SPAWNABLE", () -> {
 					return Language.list("Upgrade-GUI.items.stats.spawnable",
@@ -457,17 +460,18 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		if(slot == null) return null;
 		ItemStack item = slot.toItem(false);
 		ItemMeta meta = item.getItemMeta();
-		int c = generator.cache().charges();
-		boolean b = c >= 1_000_000_000;
-		String charges = b ? Text.infinity : "" + generator.cache().charges();
+		ICache cache = generator.cache();
+		int charges = cache.charges();
+		boolean b = charges >= 1_000_000_000;
+		String charges_text = b ? Text.infinity : "" + charges;
 		meta.setDisplayName(Language.get("Upgrade-GUI.items.charges.name",
-				"charges", charges).text());
+				"charges", charges_text).text());
 		if(b == false) {
 			List<String> lore = new ArrayList<>();
 			lore.add("");
 			int f0 = Settings.settings.charges_buy_first;
 			int f1 = Settings.settings.charges_buy_second;
-			int r = Settings.settings.charges_price(generator.cache().type(), spawner);
+			int r = Settings.settings.charges_price(cache.type(), generator);
 			int c0 = r * f0;
 			int c1 = r * f1;
 			int a = lowestCharges() / r;

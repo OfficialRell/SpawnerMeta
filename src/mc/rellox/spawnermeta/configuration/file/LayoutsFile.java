@@ -47,6 +47,8 @@ public class LayoutsFile extends AbstractFile {
 			hold("Item-layout.upgrades.disabled-upgrade-item", list.isEmpty() ? null : list);
 			CF.s.clear("Items.layout");
 		}
+		Object x = file.get("Item-layout");
+		if(x instanceof List list && list.isEmpty() == true) file.set("Item-layout", null); 
 		
 		if(file.isSet("Upgrade-layout") == false) {
 			file.addDefault("Upgrade-layout.rows", 3);

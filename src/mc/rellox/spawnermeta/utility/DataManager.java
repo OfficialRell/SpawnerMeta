@@ -20,6 +20,8 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
+import mc.rellox.spawnermeta.api.spawner.ICache;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.IVirtual;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
@@ -85,6 +87,13 @@ public final class DataManager {
 	public static List<ItemStack> getSpawners(Block block, boolean ignore) {
 		return getSpawners(getType(block), getUpgradeLevels(block), getCharges(block),
 				getSpawnable(block), getStack(block), isEmpty(block), ignore);
+	}
+	
+	public static List<ItemStack> getSpawners(IGenerator generator, boolean ignore) {
+		ICache cache = generator.cache();
+		return getSpawners(cache.type(), generator.spawner().getUpgradeLevels(),
+				cache.charges(), cache.spawnable(), cache.stack(),
+				cache.empty(), ignore);
 	}
 
 	public static List<ItemStack> getSpawners(SpawnerType type, int amount, boolean empty, boolean ignore) {

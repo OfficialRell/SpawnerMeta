@@ -27,7 +27,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import mc.rellox.spawnermeta.api.configuration.IFileValues;
 import mc.rellox.spawnermeta.api.events.SpawnerExplodeEvent.ExplosionType;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
-import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.location.ISelector.Selection;
 import mc.rellox.spawnermeta.configuration.Configuration.CF;
 import mc.rellox.spawnermeta.prices.Group;
@@ -63,6 +62,7 @@ public final class Settings {
 	public int check_present_interval;
 	public boolean tick_until_zero;
 	
+	public boolean delayed_chunk_loading;
 	public int radius_horizontal;
 	public int radius_vertical;
 	public Selection selection;
@@ -281,6 +281,8 @@ public final class Settings {
 		spawner_value_increase.load();
 		selection = RF.enumerate(Selection.class, file.getString("Spawners.spawning-type"),
 				Selection.SPREAD);
+		
+		delayed_chunk_loading = file.getBoolean("Spawners.delayed-chunk-loading");
 		radius_horizontal = file.getInteger("Spawners.spawning-radius.horizontal", 1, 8);
 		radius_vertical = file.getInteger("Spawners.spawning-radius.vertical", 1, 8);
 		spawner_switching = file.getBoolean("Spawners.switching");
@@ -628,8 +630,8 @@ public final class Settings {
 		return item;
 	}
 	
-	public int charges_price(SpawnerType type, ISpawner spawner) {
-		return charges_price.get(type) * spawner.getStack() * (spawner.getSpawnerLevel() + 1);
+	public int charges_price(SpawnerType type, IGenerator generator) {
+		return charges_price.get(type) * generator.cache().stack() * (generator.spawner().getSpawnerLevel() + 1);
 	}
 	
 	public static class TripleIntegerMap {
