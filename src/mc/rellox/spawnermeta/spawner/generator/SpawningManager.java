@@ -34,6 +34,7 @@ import mc.rellox.spawnermeta.utility.reflect.type.Invoker;
 import mc.rellox.spawnermeta.version.Version;
 import mc.rellox.spawnermeta.version.Version.VersionType;
 
+@SuppressWarnings("deprecation")
 public final class SpawningManager {
 	
 	public static void initialize() {}
@@ -110,6 +111,7 @@ public final class SpawningManager {
 			Location at = selector.get();
 			
 			Class<?> clazz = type.entity().getEntityClass();
+			
 			Entity entity = invoker.invoke(at, clazz, modifier, SpawnReason.SPAWNER);
 			
 			if(entity != null) particle(at);

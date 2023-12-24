@@ -136,6 +136,7 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Modifiers.charges.buy-amount.first", 16);
 		file.addDefault("Modifiers.charges.buy-amount.second", 128);
 		file.addDefault("Modifiers.charges.prices.DEFAULT", 2);
+		file.addDefault("Modifiers.charges.ignore-levels", false);
 		
 		file.addDefault("Modifiers.changing.enabled", false);
 		file.addDefault("Modifiers.changing.use-price", false);
@@ -331,7 +332,9 @@ public class SettingsFile extends AbstractFile {
 					"  server performance.",
 					"Note, this options will mostly benifit",
 					"  servers with high amounts of spawners",
-					"  or players.");
+					"  or players.",
+					"THIS OPTION IS CURRENTLY DISABLED,",
+					"  DUE TO THREAD ISSUES!");
 			c.comment("Spawners.ticking-interval",
 					"Amount of ticks between each spawner tick.",
 					"Note! This is the main interval, meaning",
@@ -533,6 +536,10 @@ public class SettingsFile extends AbstractFile {
 					"For specific entities:",
 					"  <entity>: <price>",
 					"Replace <entity> with the specific entity name.");
+			c.comment("Modifiers.charges.ignore-levels",
+					"If true, price will stay the same and will",
+					"  ignore spawner level, otherwise price,",
+					"  will be multiplied by the spawner level.");
 			c.comment("Modifiers.holograms.regular.enabled",
 					"Are spawner holograms enabled.",
 					"Holograms are rendered over spawners, showing",

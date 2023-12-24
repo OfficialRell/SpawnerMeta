@@ -123,6 +123,7 @@ public final class Settings {
 	public boolean charges_ignore_natural;
 	public int charges_buy_first;
 	public int charges_buy_second;
+	public boolean charges_ignore_levels;
 	
 	public final SinglePriceMap changing_price;
 	public boolean changing_enabled;
@@ -282,7 +283,7 @@ public final class Settings {
 		selection = RF.enumerate(Selection.class, file.getString("Spawners.spawning-type"),
 				Selection.SPREAD);
 		
-		delayed_chunk_loading = file.getBoolean("Spawners.delayed-chunk-loading");
+		delayed_chunk_loading = false;//file.getBoolean("Spawners.delayed-chunk-loading");
 		radius_horizontal = file.getInteger("Spawners.spawning-radius.horizontal", 1, 8);
 		radius_vertical = file.getInteger("Spawners.spawning-radius.vertical", 1, 8);
 		spawner_switching = file.getBoolean("Spawners.switching");
@@ -347,6 +348,7 @@ public final class Settings {
 		charges_price.load();
 		charges_buy_first = file.getInteger("Modifiers.charges.buy-amount.first", 1, Integer.MAX_VALUE);
 		charges_buy_second = file.getInteger("Modifiers.charges.buy-amount.second", 1, Integer.MAX_VALUE);
+		charges_ignore_levels = file.getBoolean("Modifiers.charges.ignore-levels");
 		
 		changing_enabled = file.getBoolean("Modifiers.changing.enabled");
 		changing_price.load();
@@ -631,6 +633,7 @@ public final class Settings {
 	}
 	
 	public int charges_price(SpawnerType type, IGenerator generator) {
+		if(charges_ignore_levels == true) return charges_price.get(type) * generator.cache().stack();
 		return charges_price.get(type) * generator.cache().stack() * (generator.spawner().getSpawnerLevel() + 1);
 	}
 	
