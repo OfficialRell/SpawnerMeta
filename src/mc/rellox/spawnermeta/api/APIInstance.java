@@ -229,7 +229,7 @@ public interface APIInstance {
 	 * 
 	 * <pre>
 	 * {@code
-	 * ILocations file = ...;
+	 * IPlayerFile file = ...;
 	 * file.set(data, 12);
 	 * // Can be null if no data was found
 	 * Integer i = file.get(data);
