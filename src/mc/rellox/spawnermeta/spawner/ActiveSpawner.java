@@ -204,6 +204,11 @@ public record ActiveSpawner(Block block) implements ISpawner {
 	public void update() {
 		DataManager.updateValues(block());
 	}
+
+	@Override
+	public void reset() {
+		DataManager.reset(block);
+	}
 	
 	@Override
 	public List<ItemStack> toItems() {
