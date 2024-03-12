@@ -18,13 +18,14 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import mc.rellox.spawnermeta.api.configuration.ILocations;
+import mc.rellox.spawnermeta.api.configuration.IData;
+import mc.rellox.spawnermeta.api.configuration.IPlayerData;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.configuration.AbstractFile;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
-public class LocationFile extends AbstractFile implements ILocations {
+public class LocationFile extends AbstractFile implements IPlayerData {
 	
 	private static final int offline_time = 1000 * 60 * 5;
 	
@@ -34,8 +35,13 @@ public class LocationFile extends AbstractFile implements ILocations {
 	private final Set<UUID> trust;
 	private final List<String> stored;
 	
+	private final ExternalData external;
+	
+	private boolean infinite;
 	private long time;
 	private boolean loaded;
+	
+	public boolean cached;
 
 	public LocationFile(UUID id) {
 		super(LocationRegistry.parent, id.toString());
@@ -43,7 +49,13 @@ public class LocationFile extends AbstractFile implements ILocations {
 		this.locations = new HashMap<>();
 		this.trust = new HashSet<>();
 		this.stored = new ArrayList<>();
+		
+		this.external = LocationRegistry.EXTERNA_DATA.isEmpty()
+				? null : new ExternalData();
+		
 		use();
+		
+		cached = true;
 	}
 
 	@Override
@@ -81,6 +93,11 @@ public class LocationFile extends AbstractFile implements ILocations {
 		} catch (Exception e) {
 			RF.debug(e);
 		}
+		try {
+			if(external != null) external.load(this);
+		} catch (Exception e) {
+			RF.debug(e);
+		}
 	}
 	
 	@Override
@@ -91,26 +108,31 @@ public class LocationFile extends AbstractFile implements ILocations {
 		super.load();
 	}
 	
-	private void update() {
+	protected void update() {
 		check();
-		hold("Spawners", List.of());
-		if(locations.isEmpty() == false) {
-			locations.forEach((world, set) -> {
-				List<String> list = set.stream()
-						.map(LocationFile::parse)
-						.toList();
-				hold("Spawners." + world.getName(), list);
-			});
+		try {
+			hold("Spawners", List.of());
+			if(locations.isEmpty() == false) {
+				locations.forEach((world, set) -> {
+					List<String> list = set.stream()
+							.map(LocationFile::parse)
+							.toList();
+					hold("Spawners." + world.getName(), list);
+				});
+			}
+			hold("Trusted-players", trust.stream()
+					.map(UUID::toString)
+					.toList());
+			hold("Stored-items", stored);
+			if(external != null) external.save(this);
+			save();
+		} catch (Exception e) {
+			RF.debug(e);
 		}
-		hold("Trusted-players", trust.stream()
-				.map(UUID::toString)
-				.toList());
-		hold("Stored-items", stored);
-		save();
 	}
 	
 	private void check() {
-		if(using() == false)
+		if(using() == false && infinite == false)
 			throw new IllegalStateException("This file is no longer in use");
 	}
 
@@ -121,12 +143,26 @@ public class LocationFile extends AbstractFile implements ILocations {
 
 	@Override
 	public boolean using() {
+		if(cached == false) return false;
+		if(infinite == true && Bukkit.getPlayer(id) != null) return true;
 		return System.currentTimeMillis() - time < offline_time;
 	}
 	
 	@Override
 	public void use() {
 		this.time = System.currentTimeMillis();
+	}
+	
+	@Override
+	public void infinite(boolean infinite) {
+		if(infinite == true && Bukkit.getPlayer(id) == null)
+			throw new IllegalStateException("Cannot set infinite because the player is offline");
+		this.infinite = infinite;
+	}
+	
+	@Override
+	public boolean infinite() {
+		return infinite;
 	}
 
 	@Override
@@ -266,8 +302,7 @@ public class LocationFile extends AbstractFile implements ILocations {
 		if(set == null) return 0;
 		set.stream()
 			.map(FinalPos::block)
-			.peek(b -> b.setType(Material.AIR))
-			.forEach(GeneratorRegistry::remove);
+			.forEach(GeneratorRegistry::delete);
 		update();
 		return set.size();
 	}
@@ -280,8 +315,7 @@ public class LocationFile extends AbstractFile implements ILocations {
 		locations.values().stream()
 			.flatMap(Set::stream)
 			.map(FinalPos::block)
-			.peek(b -> b.setType(Material.AIR))
-			.forEach(GeneratorRegistry::remove);
+			.forEach(GeneratorRegistry::delete);
 		locations.clear();
 		update();
 		return s;
@@ -298,8 +332,7 @@ public class LocationFile extends AbstractFile implements ILocations {
 			var block = it.next().block();
 			if(block.getType() == Material.SPAWNER) continue;
 			it.remove();
-			block.setType(Material.AIR);
-			GeneratorRegistry.remove(block);
+			GeneratorRegistry.delete(block);
 			r++;
 		}
 		if(r > 0) update();
@@ -320,8 +353,7 @@ public class LocationFile extends AbstractFile implements ILocations {
 				var block = ir.next().block();
 				if(block.getType() == Material.SPAWNER) continue;
 				ir.remove();
-				block.setType(Material.AIR);
-				GeneratorRegistry.remove(block);
+				GeneratorRegistry.delete(block);
 				r++;
 			}
 			if(set.isEmpty() == true) it.remove();
@@ -347,6 +379,27 @@ public class LocationFile extends AbstractFile implements ILocations {
 			update();
 		}
 		return items;
+	}
+	
+	@Override
+	public <T> T get(IData<T> data) {
+		check();
+		return external == null ? null : external.get(data);
+	}
+	
+	@Override
+	public <T> T set(IData<T> data, T value) {
+		check();
+		return external == null ? null : external.set(data, value);
+	}
+	
+	public void saveExternal() {
+		try {
+			external.save(this);
+			save();
+		} catch (Exception e) {
+			RF.debug(e);
+		}
 	}
 	
 	public static String parse(FinalPos pos) {
