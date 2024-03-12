@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mc.rellox.spawnermeta.text.Text;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class HookRegistry {
 
@@ -17,18 +18,30 @@ public class HookRegistry {
 	public static final HookSuperiorSkyblock2 SUPERIOR_SKYBLOCK_2 = new HookSuperiorSkyblock2();
 
 	public static void load() {
-		HOOKS.clear();
-		HOOKS.add(ECONOMY);
-		HOOKS.add(WILD_STACKER);
-		HOOKS.add(WILD_TOOLS);
-		HOOKS.add(SHOP_GUI);
-		HOOKS.add(FLARE_TOKENS);
-		HOOKS.add(SUPERIOR_SKYBLOCK_2);
-		HOOKS.forEach(HookInstance::load);
-		HOOKS.stream()
-			.filter(HookInstance::exists)
-			.map(HookInstance::message)
-			.forEach(Text::logInfo);
+		try {
+			HOOKS.clear();
+			HOOKS.add(ECONOMY);
+			HOOKS.add(WILD_STACKER);
+			HOOKS.add(WILD_TOOLS);
+			HOOKS.add(SHOP_GUI);
+			HOOKS.add(FLARE_TOKENS);
+			HOOKS.add(SUPERIOR_SKYBLOCK_2);
+			HOOKS.forEach(i -> {
+				try {
+					i.load();
+				} catch (Exception e) {
+					RF.debug(e);
+				}
+			});
+			HOOKS.stream()
+				.filter(HookInstance::exists)
+				.map(HookInstance::message)
+				.forEach(Text::logInfo);
+		} catch (Exception e) {
+			RF.debug(e);
+			Text.logFail("Unable to initialise hooks, make sure other supported plugins are enabled."
+					+ " If the API has changed please contact developer!");
+		}
 	}
 
 }

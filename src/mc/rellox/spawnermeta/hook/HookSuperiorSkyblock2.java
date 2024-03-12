@@ -1,10 +1,12 @@
 package mc.rellox.spawnermeta.hook;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 import com.bgsoftware.superiorskyblock.api.SuperiorSkyblock;
 import com.bgsoftware.superiorskyblock.api.SuperiorSkyblockAPI;
+import com.bgsoftware.superiorskyblock.api.key.Key;
 
 import mc.rellox.spawnermeta.hook.setup.SetupSuperiorSkyblock2;
 
@@ -38,13 +40,13 @@ public class HookSuperiorSkyblock2 implements HookInstance<SuperiorSkyblock> {
 	public void placing(Block block) {
 		if(exists() == false) return;
 		var is = plugin.getGrid().getIslandAt(block.getChunk());
-		if(is != null) is.handleBlockPlace(block);
+		if(is != null) is.handleBlockPlace(Key.of(Material.SPAWNER));
 	}
 	
 	public void breaking(Block block) {
 		if(exists() == false) return;
 		var is = plugin.getGrid().getIslandAt(block.getChunk());
-		if(is != null) is.handleBlockBreak(block);
+		if(is != null) is.handleBlockBreak(Key.of(Material.SPAWNER));
 	}
 
 }

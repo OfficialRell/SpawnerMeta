@@ -22,7 +22,6 @@ import mc.rellox.spawnermeta.api.spawner.location.ISelector;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.generator.SpawningManager;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
-import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class HookWildStacker implements HookInstance<WildStacker> {
 	
@@ -83,12 +82,9 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 				linked.values().removeIf(se -> se.getLivingEntity().isDead());
 				break x;
 			}
-			int a = RF.access(RF.fetch(plugin, "settingsHandler", false),
-						"linkedEntitiesMaxDistance", false)
-					.as(int.class)
-					.get(32);
+			int a = 32 * 32;
 			if(le.getWorld().equals(at.getWorld()) == false
-					|| le.getLocation().distanceSquared(at) > a * a) break x;
+					|| le.getLocation().distanceSquared(at) > a) break x;
 			int s = link.getStackAmount(), m = link.getStackLimit();
 			if(s >= m) break x;
 			int t = s + count;
@@ -110,10 +106,14 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 		}
 		
 		List<LivingEntity> near = block.getWorld()
-				.getLivingEntities().stream()
-				.filter(e -> e.getType() == et)
-				.filter(e -> e.getLocation().distanceSquared(at) <= 100)
+				.getNearbyEntities(at, 10, 10, 10, e -> e.getType() == et)
+				.stream()
+				.map(LivingEntity.class::cast)
 				.collect(Collectors.toList());
+//				.getLivingEntities().stream()
+//				.filter(e -> e.getType() == et)
+//				.filter(e -> e.getLocation().distanceSquared(at) <= 100)
+//				.collect(Collectors.toList());
 		if(link != null) near.remove(link.getLivingEntity());
 
 //		System.out.println(" - nearby entities: " + near.size());
