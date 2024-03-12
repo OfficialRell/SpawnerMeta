@@ -46,7 +46,7 @@ import org.bukkit.util.Vector;
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.APIInstance;
 import mc.rellox.spawnermeta.api.APIRegistry;
-import mc.rellox.spawnermeta.api.configuration.ILocations;
+import mc.rellox.spawnermeta.api.configuration.IPlayerData;
 import mc.rellox.spawnermeta.api.events.IEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerBreakEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerChangeEvent;
@@ -464,13 +464,16 @@ public final class EventRegistry {
 		}
 		if(Settings.settings.charges_enabled == true
 				&& Settings.settings.charges_allow_stacking == true) {
-			int b = cache.charges() * (stack - 1) + virtual.getCharges();
-			int r = b / stack;
-			spawner.setCharges(r);
-			int f = b % stack;
-			if(f > 0)
-				m.send(Language.list("Spawners.charges.lose-by-stacking", 
-						"charges", f));
+			if(cache.charges() < 1_000_000_000
+					|| virtual.getCharges() < 1_000_000_000) {
+				int b = cache.charges() * (stack - 1) + virtual.getCharges();
+				int r = b / stack;
+				spawner.setCharges(r);
+				int f = b % stack;
+				if(f > 0)
+					m.send(Language.list("Spawners.charges.lose-by-stacking", 
+							"charges", f));
+			}
 		}
 		if(direct == false && Settings.settings.stacking_nearby_particles == true) {
 			Location start = spawner.center();
@@ -731,8 +734,6 @@ public final class EventRegistry {
 		
 		ItemCollector.execute(player);
 		event.setCancelled(ce);
-		
-		HookRegistry.SUPERIOR_SKYBLOCK_2.breaking(block);
 	}
 
 	private static void spawnXP(Block block, BlockBreakEvent event, boolean ce) {
@@ -988,7 +989,7 @@ public final class EventRegistry {
 		DataManager.setNewSpawner(player, block, type,
 				l, virtual.getCharges(), virtual.getSpawnable(), virtual.isEmpty());
 		if(player != null) {
-			ILocations il = LocationRegistry.get(player);
+			IPlayerData il = LocationRegistry.get(player);
 			il.add(block);
 			if(Settings.settings.owned_ignore_limit == false)
 				player.sendMessage(Language.get("Spawners.ownership.limit.place",

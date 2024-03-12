@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
@@ -59,6 +60,9 @@ public class EventListeners implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
+		
+		if(Settings.inactive(player.getWorld()) == true) return;
+			
 		Messagable m = new Messagable(player);
 		if(event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			EventRegistry.verify_removing(event, player, m);
@@ -89,6 +93,9 @@ public class EventListeners implements Listener {
 	private void onBreak(BlockBreakEvent event) {
 		try {
 			Block block = event.getBlock();
+			
+			if(Settings.inactive(block.getWorld()) == true) return;
+			
 			if(block.getType() != Material.SPAWNER) return;
 			IGenerator generator = fetch(block);
 			if(generator == null) return;
@@ -100,7 +107,11 @@ public class EventListeners implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onBlockExplodeByBlock(BlockExplodeEvent event) {
-		Iterator<Block> it = event.blockList().iterator();
+		List<Block> list = event.blockList();
+		
+		if(list.size() > 0 && Settings.inactive(list.get(0).getWorld()) == true) return;
+		
+		Iterator<Block> it = list.iterator();
 		try {
 			EventRegistry.explode_block(it);
 		} catch (Exception e) {
@@ -111,6 +122,9 @@ public class EventListeners implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onBlockExplodeByEntity(EntityExplodeEvent event) {
 		try {
+			
+			if(Settings.inactive(event.getEntity().getWorld()) == true) return;
+			
 			EventRegistry.explode_entity(event);
 		} catch (Exception e) {
 			RF.debug(e);
@@ -121,6 +135,9 @@ public class EventListeners implements Listener {
 	private void onPlace(BlockPlaceEvent event) {
 		if(event.isCancelled() == true) return;
 		Block block = event.getBlockPlaced();
+		
+		if(Settings.inactive(block.getWorld()) == true) return;
+		
 		if(block.getType() != Material.SPAWNER) return;
 		try {
 			EventRegistry.place(event, block);
@@ -132,6 +149,15 @@ public class EventListeners implements Listener {
 	@EventHandler(priority = EventPriority.LOW)
 	private void onSpawn(SpawnerSpawnEvent event) {
 		Entity entity = event.getEntity();
+
+		
+		World world = entity.getWorld();
+		if(Settings.disabled(world) == true) {
+			event.setCancelled(true);
+			return;
+		}
+		if(Settings.ignored(world) == true) return;
+		
 		if(entity.getCustomName() != null) return;
 		if(Settings.settings.cancel_spawning_event == true) event.setCancelled(true);
 		else entity.remove();
@@ -157,6 +183,7 @@ public class EventListeners implements Listener {
 	}
 	
 	protected static IGenerator fetch(Block block) {
+		if(Settings.inactive(block.getWorld()) == true) return null;
 		if(Settings.settings.ignored(block) == true) return null;
 		IGenerator generator = GeneratorRegistry.get(block);
 		if(generator == null) {
