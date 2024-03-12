@@ -47,6 +47,17 @@ public interface IFile extends IFileValues {
 	void save();
 	
 	/**
+	 * Adds a default value to this file.
+	 * 
+	 * @param path - path
+	 * @param object - object
+	 */
+	
+	default void defaulted(String path, Object object) {
+		file().addDefault(path, object);
+	}
+	
+	/**
 	 * Sets an object to the path, without saving this file.
 	 * 
 	 * @param path - path

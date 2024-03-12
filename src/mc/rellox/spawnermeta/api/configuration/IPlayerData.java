@@ -10,13 +10,8 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-/**
- * This interface is deprecated,
- * use {@link IPlayerData} instead.
- */
-
-@Deprecated(forRemoval = true)
-public interface ILocations {
+@SuppressWarnings("removal")
+public interface IPlayerData extends ILocations {
 	
 	/**
 	 * Loads all values from the file if not loaded already.

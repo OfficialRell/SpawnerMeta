@@ -142,6 +142,12 @@ public interface IGenerator {
 	void clear();
 	
 	/**
+	 * Resets vanilla spawner values.
+	 */
+	
+	void unload();
+	
+	/**
 	 * @return Position of this spawner
 	 */
 	

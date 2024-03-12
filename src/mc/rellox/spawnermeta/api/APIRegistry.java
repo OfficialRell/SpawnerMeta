@@ -6,11 +6,12 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import mc.rellox.spawnermeta.api.configuration.ILocations;
+import mc.rellox.spawnermeta.api.configuration.IPlayerData;
 import mc.rellox.spawnermeta.api.events.EventExecutor;
 import mc.rellox.spawnermeta.api.events.IEvent;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
@@ -106,7 +107,17 @@ public final class APIRegistry implements APIInstance {
 	}
 	
 	@Override
-	public ILocations getLocations(UUID id) throws IllegalArgumentException {
+	public List<IGenerator> getGenerators() {
+		return GeneratorRegistry.list(null);
+	}
+	
+	@Override
+	public List<IGenerator> getGenerators(World world) {
+		return GeneratorRegistry.list(world);
+	}
+	
+	@Override
+	public IPlayerData getLocations(UUID id) throws IllegalArgumentException {
 		Objects.requireNonNull(id, "ID cannot be null");
 		return LocationRegistry.get(id);
 	}

@@ -296,13 +296,19 @@ public interface ISpawner {
 	void update();
 	
 	/**
+	 * Resets vanilla spawner values.
+	 */
+	
+	void reset();
+	
+	/**
 	 * @return List of spawner items
 	 */
 	
 	List<ItemStack> toItems();
 	
 	/**
-	 * @return converted savable spawner data
+	 * @return converted saveable spawner data
 	 */
 	
 	String toData();

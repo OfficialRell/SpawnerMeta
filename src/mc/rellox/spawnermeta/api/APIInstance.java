@@ -1,19 +1,23 @@
 package mc.rellox.spawnermeta.api;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import mc.rellox.spawnermeta.api.configuration.ILocations;
+import mc.rellox.spawnermeta.api.configuration.IData;
+import mc.rellox.spawnermeta.api.configuration.IPlayerData;
 import mc.rellox.spawnermeta.api.events.EventExecutor;
 import mc.rellox.spawnermeta.api.events.IEvent;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.IVirtual;
 import mc.rellox.spawnermeta.api.spawner.SpawnerBuilder;
+import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 
 @SuppressWarnings("removal")
@@ -159,13 +163,25 @@ public interface APIInstance {
 	IGenerator getGenerator(Block block);
 	
 	/**
+	 * @return List of all generators
+	 */
+	
+	List<IGenerator> getGenerators();
+	
+	/**
+	 * @return List of all generators in a specific world
+	 */
+	
+	List<IGenerator> getGenerators(World world);
+	
+	/**
 	 * Returns spawner location file of the specified player. Never {@code null}.
 	 * 
 	 * @param player - player
 	 * @return Spawner location file
 	 */
 	
-	default ILocations getLocations(Player player) {
+	default IPlayerData getLocations(Player player) {
 		return getLocations(player.getUniqueId());
 	}
 	
@@ -179,7 +195,53 @@ public interface APIInstance {
 	 *  the specified ID has never player before
 	 */
 	
-	ILocations getLocations(UUID id) throws IllegalArgumentException;
+	IPlayerData getLocations(UUID id) throws IllegalArgumentException;
+	
+	/**
+	 * Submits a new data parser for the player file.
+	 * With this data parser you can save additional data for each player.<br><br>
+	 * 
+	 * Creating you own data parser:
+	 * 
+	 * <pre>
+     * {@code
+     * IData<Integer> data = new IData<Integer>() {
+     *   // Value parameter will always be the data type.
+     *   // In this example an integer
+     *   public void save(IFile file, Object value) {
+     *     if(value != null) {
+     *       file.set("Other-data", value);
+     *     } else {
+     *       file.delete("Other-data");
+     *     }
+     *   }
+     *   public Integer load(IFile file) {
+     *     return file.getInteger("Other-data");
+     *   }
+     *   public String id() {
+     *     return "your_id";
+     *   }
+     * };
+     * }</pre>
+	 * 
+	 * After creating and submiting your data parser
+	 * you can set and get data from the player file:
+	 * 
+	 * <pre>
+	 * {@code
+	 * ILocations file = ...;
+	 * file.set(data, 12);
+	 * // Can be null if no data was found
+	 * Integer i = file.get(data);
+	 * }</pre>
+	 * 
+	 * 
+	 * @param data - data parser
+	 */
+	
+	default void submitFileData(IData<?> data) {
+		LocationRegistry.submit(data);
+	}
 
 	/**
 	 * Returns a spawner builder with the specified spawner type.
