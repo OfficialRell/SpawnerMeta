@@ -266,7 +266,7 @@ public final class DataManager {
 		cs.setRequiredPlayerRange(16);
 		cs.setSpawnCount(4);
 		if(cs.getSpawnedType() == SpawnerType.EMPTY.entity())
-			cs.setSpawnedType(SpawnerType.EMPTY.entity());
+			cs.setSpawnedType(null);
 		cs.update();
 	}
 	
