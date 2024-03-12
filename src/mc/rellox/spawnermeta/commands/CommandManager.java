@@ -21,7 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.api.configuration.ILocations;
+import mc.rellox.spawnermeta.api.configuration.IPlayerData;
 import mc.rellox.spawnermeta.configuration.Configuration;
 import mc.rellox.spawnermeta.configuration.Configuration.CF;
 import mc.rellox.spawnermeta.configuration.Language;
@@ -193,7 +193,7 @@ public final class CommandManager {
 					}
 					worlds = List.of(world);
 				} else worlds = Bukkit.getWorlds();
-				ILocations il = LocationRegistry.find(name);
+				IPlayerData il = LocationRegistry.find(name);
 				if(il == null) {
 					warn(sender, "This player does not have any placed spawners!");
 					return;
@@ -235,7 +235,7 @@ public final class CommandManager {
 					}
 					worlds = List.of(world);
 				} else worlds = Bukkit.getWorlds();
-				ILocations il = LocationRegistry.find(name);
+				IPlayerData il = LocationRegistry.find(name);
 				if(il == null) {
 					warn(sender, "This player does not have any placed spawners!");
 					return;
@@ -262,7 +262,7 @@ public final class CommandManager {
 					}
 					worlds = List.of(world);
 				} else worlds = Bukkit.getWorlds();
-				ILocations il = LocationRegistry.find(name);
+				IPlayerData il = LocationRegistry.find(name);
 				if(il == null) {
 					warn(sender, "This player does not have any placed spawners!");
 					return;

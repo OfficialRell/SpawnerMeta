@@ -12,7 +12,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import mc.rellox.spawnermeta.api.configuration.ILocations;
+import mc.rellox.spawnermeta.api.configuration.IPlayerData;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.location.LocationFile.FinalPos;
 import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
@@ -29,7 +29,7 @@ public class CommandLocations extends Command {
 		if(sender instanceof Player == false) return false;
 		Player player = (Player) sender;
 		Messagable m = new Messagable(player);
-		ILocations il = LocationRegistry.get(player);
+		IPlayerData il = LocationRegistry.get(player);
 		
 		List<World> worlds = new LinkedList<>();
 		List<Set<Location>> locations = new LinkedList<>();

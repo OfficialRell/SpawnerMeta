@@ -13,7 +13,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import mc.rellox.spawnermeta.api.configuration.ILocations;
+import mc.rellox.spawnermeta.api.configuration.IPlayerData;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.utility.Messagable;
@@ -29,7 +29,7 @@ public class CommandTrust extends Command {
 		if(sender instanceof Player == false) return false;
 		Player player = (Player) sender;
 		Messagable m = new Messagable(player);
-		ILocations il = LocationRegistry.get(player);
+		IPlayerData il = LocationRegistry.get(player);
 		
 		if(args.length < 1) m.send(Language.list("Trusted.help.primary"));
 		else if(args[0].equalsIgnoreCase("add") == true) {
@@ -116,7 +116,7 @@ public class CommandTrust extends Command {
 	}
 	
 	private List<String> b(Player player, String s) {
-		ILocations il = LocationRegistry.get(player);
+		IPlayerData il = LocationRegistry.get(player);
 		Set<UUID> trusted = il.trusted();
 		List<Player> list = new ArrayList<>(Bukkit.getOnlinePlayers());
 		list.removeIf(p -> trusted.contains(p.getUniqueId()));
@@ -127,7 +127,7 @@ public class CommandTrust extends Command {
 	}
 	
 	private List<String> c(Player player, String s) {
-		ILocations il = LocationRegistry.get(player);
+		IPlayerData il = LocationRegistry.get(player);
 		Set<UUID> trusted = il.trusted();
 		List<String> list = trusted.stream()
 				.map(id -> Bukkit.getOfflinePlayer(id))
