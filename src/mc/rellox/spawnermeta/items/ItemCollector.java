@@ -68,6 +68,7 @@ public class ItemCollector implements Listener {
 	}
 	
 	private static void send(Player player, int ticks) {
+		@SuppressWarnings("deprecation")
 		BaseComponent[] text = TextComponent.fromLegacyText(Language.get("Items.spawner-drop.alert",
 				"seconds", ticks / 20).text());
 		ComponentBuilder builder = new ComponentBuilder("");
