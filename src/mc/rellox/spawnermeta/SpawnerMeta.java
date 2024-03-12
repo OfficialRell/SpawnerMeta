@@ -25,7 +25,7 @@ import mc.rellox.spawnermeta.version.Version;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 22.5;
+	public static final double PLUGIN_VERSION = 23.0;
 	
 	private static SpawnerMeta plugin;
     
@@ -68,6 +68,15 @@ public final class SpawnerMeta extends JavaPlugin {
 		}
 	}
 	
+	@Override
+	public void onDisable() {
+		if(loaded == true) {
+			Text.logUnload();
+			GeneratorRegistry.clear();
+			LocationRegistry.clear();
+		}
+	}
+	
 	/**
 	 * @return Instance of this plugin
 	 */
@@ -82,14 +91,6 @@ public final class SpawnerMeta extends JavaPlugin {
 	
 	public APIInstance getAPI() {
 		return api;
-	}
-	
-	@Override
-	public void onDisable() {
-		if(loaded == true) {
-			Text.logUnload();
-			GeneratorRegistry.clear();
-		}
 	}
 	
 	@Override
