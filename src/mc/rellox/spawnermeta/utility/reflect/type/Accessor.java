@@ -19,6 +19,10 @@ public interface Accessor<R> {
 				return null;
 			}
 			@Override
+			public Object objected(Object object) {
+				return null;
+			}
+			@Override
 			public void set(Object r) {}
 			@Override
 			public String name() {
@@ -37,6 +41,8 @@ public interface Accessor<R> {
 	}
 	
 	R get();
+	
+	R objected(Object object);
 
 	void set(R r);
 	
@@ -54,8 +60,8 @@ public interface Accessor<R> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	default void force(Object o) {
-		set((R) o);
+	default void force(Object object) {
+		set((R) object);
 	}
 	
 	default Accessor<?> next(String next) {
@@ -111,6 +117,16 @@ public interface Accessor<R> {
 			@SuppressWarnings("unchecked")
 			@Override
 			public R get() {
+				try {
+					return (R) field.get(object);
+				} catch (Exception e) {
+					RF.debug(e, warn);
+				}
+				return null;
+			}
+			@SuppressWarnings("unchecked")
+			@Override
+			public R objected(Object object) {
 				try {
 					return (R) field.get(object);
 				} catch (Exception e) {

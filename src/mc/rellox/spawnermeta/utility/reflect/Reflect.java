@@ -2,6 +2,7 @@ package mc.rellox.spawnermeta.utility.reflect;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -163,8 +164,13 @@ public final class Reflect {
 		public static <E> List<E> enumerates(Function<String, E> f, List<String> list) {
 			try {
 				return list.stream()
-						.map(f)
-						.filter(e -> e != null)
+						.map(s -> {
+							try {
+								return f.apply(s);
+							} catch (Exception e) {}
+							return null;
+						})
+						.filter(Objects::nonNull)
 						.collect(Collectors.toList());
 			} catch (Exception e) {}
 			return new ArrayList<>();

@@ -258,6 +258,16 @@ public final class DataManager {
 		setDelayConstant(block, r[1]);
 	}
 	
+	public static void reset(Block block) {
+		CreatureSpawner cs = cast(block);
+		if(cs == null) return;
+		cs.setMaxSpawnDelay(800);
+		cs.setMaxSpawnDelay(200);
+		cs.setRequiredPlayerRange(16);
+		cs.setSpawnCount(4);
+		cs.update();
+	}
+	
 	public static boolean cancelledByOwner(Block block, Player player) {
 		UUID owner = getOwner(block);
 		return owner != null && player.getUniqueId().equals(owner) == false;
@@ -612,8 +622,7 @@ public final class DataManager {
 			if(block.equals(last) == true) return spawner;
 			if(block.getState() instanceof CreatureSpawner cs) {
 				last = block;
-				spawner = cs;
-				return spawner;
+				return spawner = cs;
 			}
 		} catch (Exception e) {
 			RF.debug(e);

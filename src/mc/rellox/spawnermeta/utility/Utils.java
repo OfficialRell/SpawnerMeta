@@ -1,9 +1,8 @@
 package mc.rellox.spawnermeta.utility;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
@@ -201,13 +200,13 @@ public final class Utils {
 
 	public static void check(final int id, final Consumer<String> action) {
 		new BukkitRunnable() {
-			@SuppressWarnings("deprecation")
 			@Override
 			public void run() {
-				try(InputStream is = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + id).openStream();
+				try(InputStream is = new URI("https://api.spigotmc.org/legacy/update.php?resource=" + id)
+						.toURL().openStream();
 						Scanner sc = new Scanner(is)) {
 					if(sc.hasNext() == true) action.accept(sc.next());
-				} catch(IOException x) {}
+				} catch(Exception x) {}
 			}
 		}.runTaskLaterAsynchronously(SpawnerMeta.instance(), 50);
 	}

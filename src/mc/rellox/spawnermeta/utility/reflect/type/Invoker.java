@@ -18,6 +18,10 @@ public interface Invoker<T> {
 				return null;
 			}
 			@Override
+			public Object objected(Object object, Object... os) {
+				return null;
+			}
+			@Override
 			public String name() {
 				return "null";
 			}
@@ -34,6 +38,8 @@ public interface Invoker<T> {
 	}
 	
 	T invoke(Object... os);
+	
+	T objected(Object object, Object... os);
 	
 	String name();
 	
@@ -94,6 +100,17 @@ public interface Invoker<T> {
 			@SuppressWarnings("unchecked")
 			@Override
 			public R invoke(Object... os) {
+				try {
+					method.setAccessible(true);
+					return (R) method.invoke(object, os);
+				} catch (Exception e) {
+					RF.debug(e, warn);
+				}
+				return null;
+			}
+			@SuppressWarnings("unchecked")
+			@Override
+			public R objected(Object object, Object... os) {
 				try {
 					method.setAccessible(true);
 					return (R) method.invoke(object, os);
