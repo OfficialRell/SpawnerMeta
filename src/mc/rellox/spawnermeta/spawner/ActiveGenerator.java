@@ -2,16 +2,19 @@ package mc.rellox.spawnermeta.spawner;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -31,11 +34,14 @@ import mc.rellox.spawnermeta.api.view.IUpgrades;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.events.EventRegistry;
+import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.spawner.generator.SpawningManager;
 import mc.rellox.spawnermeta.spawner.requirement.ActiveFinder;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
+import mc.rellox.spawnermeta.utility.reflect.type.Invoker;
 import mc.rellox.spawnermeta.view.ActiveUpgrades;
 
 public class ActiveGenerator implements IGenerator {
@@ -103,9 +109,11 @@ public class ActiveGenerator implements IGenerator {
 	@Override
 	public boolean present() {
 		if(Settings.settings.check_present_enabled == false) return true;
-		boolean loaded = block().getChunk().isLoaded() == true;
+		Block block = block();
+		boolean loaded = block.getWorld()
+				.isChunkLoaded(block.getX() >> 4, block.getZ() >> 4);
 		if(loaded == false) return false;
-		return block().getType() == Material.SPAWNER;
+		return block.getType() == Material.SPAWNER;
 	}
 	
 	@Override
@@ -116,6 +124,7 @@ public class ActiveGenerator implements IGenerator {
 			Block block = block();
 			LocationRegistry.remove(block);
 			block.setType(Material.AIR);
+			HookRegistry.SUPERIOR_SKYBLOCK_2.breaking(block);
 		}
 	}
 	
@@ -159,13 +168,38 @@ public class ActiveGenerator implements IGenerator {
 	
 	@Override
 	public void control() {
-		if(Settings.settings.owned_if_online == true) {
-			if(cache.natural() == true) online = true;
-			else {
-				Player owner = spawner.getOwner();
-				online = owner == null ? false : owner.isOnline();
+		Settings s = Settings.settings;
+		
+		UUID id;
+		if(s.owned_if_online == false
+				|| cache.natural() == true
+				|| (id = spawner.getOwnerID()) == null
+				|| s.owned_offline_ignore.contains(id) == true) {
+			online = true;
+			return;
+		}
+		
+		Player owner = Bukkit.getPlayer(id);
+		if(owner != null && owner.isOnline() == true) {
+			online = true;
+			return;
+		}
+		
+		int ot = s.owned_offline_time;
+		if(ot <= 0) online = false;
+		else {
+			OfflinePlayer op = Bukkit.getOfflinePlayer(id);
+			long last = op.getLastPlayed();
+			if(last == 0) {
+				online = false;
+				return;
 			}
-		} else online = true;
+			long sub = System.currentTimeMillis() - last;
+			sub /= 1000; // to seconds
+			sub /= 60; // to minutes
+			
+			online = sub > ot ? false : true;
+		}
 	}
 
 	@Override
@@ -300,15 +334,14 @@ public class ActiveGenerator implements IGenerator {
 		
 		if(s.kill_entities_on_spawn == true) {
 			if(s.entities_drop_xp == true) {
-				Optional<Entity> opt = block.getWorld()
+				Entity killer = block.getWorld()
 						.getNearbyEntities(block.getLocation(), 32, 32, 32)
 						.stream()
 						.filter(n -> n instanceof Player)
-						.findAny();
+						.findAny()
+						.orElse(null);
 				entities.forEach(e -> {
-					if(e instanceof LivingEntity living)
-						opt.ifPresentOrElse(killer -> kill(living, killer),
-								() -> kill(living, null));
+					if(e instanceof LivingEntity living) kill(living, killer);
 				});
 			} else {
 				entities.forEach(e -> {
@@ -333,9 +366,11 @@ public class ActiveGenerator implements IGenerator {
 		damage(entity, killer);
 	}
 	
+	private static final Invoker<?> _damage = RF.order(Damageable.class, "damage", double.class, Entity.class);
+	
 	private void damage(Entity entity, Entity killer) {
 		if(entity instanceof LivingEntity living) {
-			living.damage(10_000_000, killer);
+			_damage.objected(living, 10_000_000, killer);
 			living.setHealth(0);
 		}
 	}
@@ -450,6 +485,13 @@ public class ActiveGenerator implements IGenerator {
 		if(warning != null) warning.clear();
 		warning = null;
 		SpawningManager.unlink(spawner.block());
+		unload();
+	}
+	
+	@Override
+	public void unload() {
+		if(Settings.settings.reset_spawner_values == false) return;
+		spawner.reset();
 	}
 
 }
