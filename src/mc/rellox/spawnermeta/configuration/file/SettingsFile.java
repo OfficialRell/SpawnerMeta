@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.bukkit.Material;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 import mc.rellox.spawnermeta.api.events.SpawnerExplodeEvent.ExplosionType;
 import mc.rellox.spawnermeta.configuration.AbstractFile;
@@ -79,6 +80,8 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Spawners.check-if-present.interval", 1200);
 		file.addDefault("Spawners.tick-until-zero", false);
 		
+		file.addDefault("Spawners.reset-spawner-values", false);
+		
 		file.addDefault("Spawners.switching", false);
 		
 		file.addDefault("Spawners.empty.enabled", false);
@@ -89,9 +92,13 @@ public class SettingsFile extends AbstractFile {
 		
 		file.addDefault("Spawners.disabled-spawners", List.of());
 		file.addDefault("Spawners.ignored-spawners", List.of());
+		file.addDefault("Spawners.disabled-worlds", List.of());
+		file.addDefault("Spawners.ignored-worlds", List.of());
 		file.addDefault("Spawners.spawning-particles", true);
 		file.addDefault("Spawners.disable-item-spawners", false);
 		file.addDefault("Spawners.warning-particles", true);
+		
+		file.addDefault("Spawners.spawning-reason", SpawnReason.SPAWNER.name());
 		
 		file.addDefault("Spawners.allow-renaming", true);
 		
@@ -203,6 +210,8 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Modifiers.chunk-limits.entities-in-chuck", 0);
 
 		file.addDefault("Modifiers.players.owned.spawn-if-online", false);
+		file.addDefault("Modifiers.players.owned.offline-time-limit", 0);
+		file.addDefault("Modifiers.players.owned.offline-ignore-list", List.of());
 		file.addDefault("Modifiers.players.owned.ignore-limit", true);
 		file.addDefault("Modifiers.players.owned.spawner-limit", 16);
 		file.addDefault("Modifiers.players.owned.can-break", true);
@@ -211,6 +220,7 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Modifiers.players.owned.can-open", true);
 		file.addDefault("Modifiers.players.owned.can-upgrade", true);
 		file.addDefault("Modifiers.players.owned.limit-permissions.example", 32);
+		
 		file.addDefault("Modifiers.players.natural.can-break", true);
 		file.addDefault("Modifiers.players.natural.can-stack", true);
 		file.addDefault("Modifiers.players.natural.can-change", true);
@@ -268,6 +278,7 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Prices.breaking.item.material", Material.GOLD_INGOT.name());
 		file.addDefault("Prices.changing.price-type", type.name());
 		file.addDefault("Prices.changing.item.material", Material.GOLD_INGOT.name());
+		
 		file.addDefault("Prices.format.use-delimiter", false);
 		file.addDefault("Prices.format.delimiter", ",");
 		file.addDefault("Prices.format.use-abbreviations", false);
@@ -296,6 +307,13 @@ public class SettingsFile extends AbstractFile {
 			c.comment("Spawners.ignored-spawners",
 					"List of ignored spawners.",
 					"Ignored spawner will stay, work and spawn the same",
+					"  as in vanilla Minecraft.");
+			c.comment("Spawners.disabled-worlds",
+					"List of disabled worlds.",
+					"In these worlds spawners will not spawn.");
+			c.comment("Spawners.ignored-worlds",
+					"List of ignored worlds.",
+					"In these worlds spawners will work",
 					"  as in vanilla Minecraft.");
 			c.comment("Spawners.values",
 					"Spawner values define spawner upgrade attributes.",
@@ -379,6 +397,11 @@ public class SettingsFile extends AbstractFile {
 					"This will cause the spawner to tick even if",
 					"  there are no nearby players, but will spawn",
 					"  entities only when a player comes nearby.");
+			c.comment("Spawners.reset-spawner-values",
+					"If true after spawner unloading all spawner",
+					"  values will be reset to vanilla values.",
+					"Useful if you want to remove SpawnerMeta and",
+					"  make all spawners work as vanilla after.");
 			c.comment("Spawners.switching",
 					"Is spawner switching enabled.",
 					"To switch a spawner on or off players must click",
@@ -412,6 +435,15 @@ public class SettingsFile extends AbstractFile {
 					"This plugin does not affect item spawners.");
 			c.comment("Spawners.warning-particles",
 					"Are warning particles shown.");
+			c.comment("Spawners.spawning-reason",
+					"The entity spawn reason.",
+					"Changing this might help with other",
+					"  plugins, such as Multiverse.",
+					"By default this is set to SPAWNER,",
+					"  but setting to CUSTOM might work",
+					"  for some plugins.",
+					"Possible spawn reasons:",
+					"  https://hub.spigotmc.org/javadocs/spigot/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html");
 			c.comment("Spawners.allow-renaming",
 					"If spawners can be renamed in an anvil.");
 			c.comment("Spawners.nearby-entities.limit",
@@ -748,6 +780,18 @@ public class SettingsFile extends AbstractFile {
 					"  otherwise the owner will be ignored and",
 					"  the spawner will spawn whenever there is",
 					"  a player nearby.");
+			c.comment("Modifiers.players.owned.offline-time-limit",
+					"The time (in minutes) that a player can be offline",
+					"  for the spawner to still be active, after the time",
+					"  has passed the spawner becomes inacitve for other users.",
+					"This option only works if 'spawn-if-online' is true.");
+			c.comment("Modifiers.players.owned.offline-ignore-list",
+					"List of player UUIDs, that will be ignored if",
+					"  the option 'spawn-if-online' is enabled, meaning",
+					"  those player spawners will spawn even if they",
+					"  are offline.",
+					"Useful for spawners in safe zones that need to",
+					"  always active.");
 			c.comment("Modifiers.players.owned.ignore-limit",
 					"Is player owner spawner limit enabled.",
 					"If false, each player will only have a specific",

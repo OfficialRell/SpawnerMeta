@@ -42,6 +42,7 @@ public abstract class AbstractFile implements IFile {
 			}
 		}
 		file = YamlConfiguration.loadConfiguration(f);
+		file.options().copyDefaults(true);
 	}
 	
 	public void load() {

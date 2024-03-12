@@ -5,21 +5,25 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.IntPredicate;
 import java.util.function.IntSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -62,6 +66,8 @@ public final class Settings {
 	public int check_present_interval;
 	public boolean tick_until_zero;
 	
+	public boolean reset_spawner_values;
+	
 	public boolean delayed_chunk_loading;
 	public int radius_horizontal;
 	public int radius_vertical;
@@ -79,6 +85,10 @@ public final class Settings {
 	public boolean disable_item_spawners;
 	public final Set<SpawnerType> spawner_disabled;
 	public final Set<SpawnerType> spawner_ignored;
+	public final Set<String> world_disabled;
+	public final Set<String> world_ignored;
+	
+	public SpawnReason spawn_reason;
 	
 	public boolean allow_renaming;
 	
@@ -187,6 +197,8 @@ public final class Settings {
 	public boolean item_show_amount;
 
 	public boolean owned_if_online;
+	public int owned_offline_time;
+	public final List<UUID> owned_offline_ignore;
 	public boolean owned_ignore_limit;
 	public int owned_spawner_limit;
 	public boolean owned_can_break;
@@ -247,6 +259,8 @@ public final class Settings {
 		this.spawnable_amount = new SingleIntegerMap("Modifiers.spawnable.entity-amount");
 		this.spawner_disabled = EnumSet.noneOf(SpawnerType.class);
 		this.spawner_ignored = EnumSet.noneOf(SpawnerType.class);
+		this.world_disabled = new HashSet<>();
+		this.world_ignored = new HashSet<>();
 		this.stacking_permissions = new HashMap<>(4);
 		this.chance_permissions = new HashMap<>(4);
 		this.ownership_permissions = new HashMap<>(4);
@@ -256,6 +270,7 @@ public final class Settings {
 		this.changing_deny_to = EnumSet.noneOf(SpawnerType.class);
 		this.silent_entities = EnumSet.noneOf(SpawnerType.class);
 		this.spawner_view_entities = new ArrayList<>(8);
+		this.owned_offline_ignore = new ArrayList<>(4);
 		this.abbreviations = new ArrayList<>();
 		this.aliases_view = new ArrayList<>();
 		this.aliases_shop = new ArrayList<>();
@@ -278,6 +293,8 @@ public final class Settings {
 		check_present_interval = file.getInteger("Spawners.check-if-present.interval", 100, 100000);
 		tick_until_zero = file.getBoolean("Spawners.tick-until-zero");
 		
+		reset_spawner_values = file.getBoolean("Spawners.reset-spawner-values");
+		
 		spawner_values.load();
 		spawner_value_increase.load();
 		selection = RF.enumerate(Selection.class, file.getString("Spawners.spawning-type"),
@@ -294,6 +311,9 @@ public final class Settings {
 		empty_store_inside = file.getBoolean("Spawners.empty.store-eggs-inside");
 		empty_verify_removing = file.getBoolean("Spawners.empty.egg-removing-verify");
 		
+		spawn_reason = RF.enumerate(SpawnReason.class, file.getString("Spawners.spawning-reason"),
+				SpawnReason.SPAWNER);
+		
 		spawning_particles = file.getBoolean("Spawners.spawning-particles");
 		warning_particles = file.getBoolean("Spawners.warning-particles");
 		disable_item_spawners = file.getBoolean("Spawners.disable-item-spawners");
@@ -303,6 +323,10 @@ public final class Settings {
 		spawner_ignored.clear();
 		spawner_ignored.addAll(RF.enumerates(SpawnerType.class,
 				file.getStrings("Spawners.ignored-spawners")));
+		world_disabled.clear();
+		world_disabled.addAll(file.getStrings("Spawners.disabled-worlds"));
+		world_ignored.clear();
+		world_ignored.addAll(file.getStrings("Spawners.ignored-worlds"));
 		
 		final int z = file.getInteger("Spawners.default-slime-size", 0, 8);
 		final int[] ss = {1, 2, 4};
@@ -441,6 +465,10 @@ public final class Settings {
 		item_show_amount = file.getBoolean("Modifiers.spawner-item.show-amount");
 		
 		owned_if_online = file.getBoolean("Modifiers.players.owned.spawn-if-online");
+		owned_offline_time = file.getInteger("Modifiers.players.owned.offline-time-limit");
+		owned_offline_ignore.clear();
+		owned_offline_ignore.addAll(RF.enumerates(UUID::fromString,
+				file.getStrings("Modifiers.players.owned.offline-ignore-list")));
 		owned_ignore_limit = file.getBoolean("Modifiers.players.owned.ignore-limit");
 		owned_spawner_limit = file.getInteger("Modifiers.players.owned.spawner-limit");
 		owned_can_break = file.getBoolean("Modifiers.players.owned.can-break");
@@ -635,6 +663,18 @@ public final class Settings {
 	public int charges_price(SpawnerType type, IGenerator generator) {
 		if(charges_ignore_levels == true) return charges_price.get(type) * generator.cache().stack();
 		return charges_price.get(type) * generator.cache().stack() * (generator.spawner().getSpawnerLevel() + 1);
+	}
+	
+	public static boolean ignored(World world) {
+		return settings.world_ignored.contains(world.getName());
+	}
+	
+	public static boolean disabled(World world) {
+		return settings.world_disabled.contains(world.getName());
+	}
+	
+	public static boolean inactive(World world) {
+		return ignored(world) == true || disabled(world) == true;
 	}
 	
 	public static class TripleIntegerMap {
