@@ -6,9 +6,9 @@ This plugin implements fully customizable and upgradeable spawners.
 
 ```
 <dependency>
-  <groupId>com.github.OfficialRell</groupId>
+  <groupId>mc.rellox</groupId>
   <artifactId>SpawnerMeta</artifactId>
-  <version>22.5</version>
+  <version>23.0</version>
   <scope>provided</scope>
 </dependency>
 
