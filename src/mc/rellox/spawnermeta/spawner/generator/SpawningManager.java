@@ -42,22 +42,24 @@ public final class SpawningManager {
 	public static List<Entity> spawn(ISpawner spawner, SpawnerType type, ISelector selector, int count) {
 		List<Entity> entities;
 		try {
+			Settings s = Settings.settings;
+			
 			Block block = spawner.block();
 
 			Invoker<Entity> invoker = spawner(block);
 			
-			boolean s = switch(type) {
+			boolean r = switch(type) {
 			case SLIME, MAGMA_CUBE -> true;
 			default -> false;
 			};
 			
 			final Consumer<Entity> modifier, m = modifier(spawner);
 			
-			if(s == true) {
+			if(r == true) {
 				modifier = e -> {
 					m.accept(e);
 					if(e instanceof Slime slime)
-						slime.setSize(Settings.settings.slime_size.getAsInt());
+						slime.setSize(s.slime_size.getAsInt());
 				};
 			} else if(type == SpawnerType.EXPERIENCE_ORB) {
 				modifier = e -> {
@@ -76,7 +78,7 @@ public final class SpawningManager {
 				entities = new ArrayList<>(count);
 				for(int i = 0; i < count; i++) {
 					Location at = selector.get();
-					Entity entity = invoker.invoke(at, clazz, modifier, SpawnReason.SPAWNER);
+					Entity entity = invoker.invoke(at, clazz, modifier, s.spawn_reason);
 					if(entity == null) continue;
 					entities.add(entity);
 					particle(at);
@@ -91,20 +93,22 @@ public final class SpawningManager {
 	
 	public static Entity spawn(ISpawner spawner, SpawnerType type, ISelector selector) {
 		try {
+			Settings s = Settings.settings;
+			
 			Block block = spawner.block();
 			
 			Invoker<Entity> invoker = spawner(block);
 			
-			int s = switch(type) {
-			case SLIME, MAGMA_CUBE -> Settings.settings.slime_size.getAsInt();
+			int r = switch(type) {
+			case SLIME, MAGMA_CUBE -> s.slime_size.getAsInt();
 			default -> 0;
 			};
 			
 			final Consumer<Entity> modifier, m = modifier(spawner);
 			
-			if(s > 0) modifier = e -> {
+			if(r > 0) modifier = e -> {
 				m.accept(e);
-				if(e instanceof Slime slime) slime.setSize(s);
+				if(e instanceof Slime slime) slime.setSize(r);
 			};
 			else modifier = m;
 
@@ -112,7 +116,7 @@ public final class SpawningManager {
 			
 			Class<?> clazz = type.entity().getEntityClass();
 			
-			Entity entity = invoker.invoke(at, clazz, modifier, SpawnReason.SPAWNER);
+			Entity entity = invoker.invoke(at, clazz, modifier, s.spawn_reason);
 			
 			if(entity != null) particle(at);
 			

@@ -265,6 +265,20 @@ public final class DataManager {
 		cs.setMaxSpawnDelay(200);
 		cs.setRequiredPlayerRange(16);
 		cs.setSpawnCount(4);
+		if(cs.getSpawnedType() == SpawnerType.EMPTY.entity())
+			cs.setSpawnedType(SpawnerType.EMPTY.entity());
+		cs.update();
+	}
+	
+	public static void validateEmpty(Block block) {
+		if(Settings.settings.reset_spawner_values == false) return;
+		CreatureSpawner cs = cast(block);
+		if(cs == null) return;
+		EntityType type = cs.getSpawnedType();
+		if(type != null) return;
+		boolean empty = isEmpty(block);
+		if(empty == false) return;
+		cs.setSpawnedType(SpawnerType.EMPTY.entity());
 		cs.update();
 	}
 	

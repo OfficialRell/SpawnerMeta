@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -28,7 +29,7 @@ import mc.rellox.spawnermeta.spawner.ActiveGenerator;
 public class SpawnerWorld {
 	
 	public final World world;
-	private final Map<Pos, IGenerator> spawners;
+	protected final Map<Pos, IGenerator> spawners;
 	private final List<IGenerator> queue;
 	private final Set<Chunk> chunks;
 	
@@ -37,6 +38,10 @@ public class SpawnerWorld {
 		this.spawners = new HashMap<>();
 		this.queue = new LinkedList<>();;
 		this.chunks = new HashSet<>();
+	}
+	
+	public Stream<IGenerator> stream() {
+		return spawners.values().stream();
 	}
 	
 	public void load() {
@@ -85,7 +90,7 @@ public class SpawnerWorld {
 		.map(BlockState::getBlock)
 		.map(Pos::of)
 		.map(spawners::get)
-		.filter(g -> g != null)
+		.filter(Objects::nonNull)
 		.forEach(g -> g.remove(false));
 		if(Settings.settings.delayed_chunk_loading == true) {
 			try {

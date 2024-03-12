@@ -69,6 +69,8 @@ public class ActiveGenerator implements IGenerator {
 	private boolean active = true;
 	
 	public ActiveGenerator(ISpawner spawner) {
+		DataManager.validateEmpty(spawner.block());
+		
 		this.spawner = spawner;
 		this.cache = ICache.of(spawner);
 		cache.cache();
