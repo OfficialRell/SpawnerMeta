@@ -101,8 +101,9 @@ public final class Settings {
 	public boolean ignore_break_event;
 	public boolean check_island_kick;
 	
-	public boolean kill_entities_on_spawn;
-	public boolean entities_drop_xp;
+	public boolean instant_kill_enabled;
+	public boolean instant_kill_drop_xp;
+	public boolean instant_kill_death_animation;
 	
 	public int required_redstone_power;
 	
@@ -339,8 +340,9 @@ public final class Settings {
 		ignore_break_event = file.getBoolean("Events.ignore-break-event");
 		check_island_kick = file.getBoolean("Events.check-island-kick");
 		
-		kill_entities_on_spawn = file.getBoolean("Spawners.kill-entities-on-spawn");
-		entities_drop_xp = file.getBoolean("Spawners.drop-xp-when-instant-kill");
+		instant_kill_enabled = file.getBoolean("Spawners.instant-kill.enabled");
+		instant_kill_drop_xp = file.getBoolean("Spawners.instant-kill.drop-xp");
+		instant_kill_death_animation = file.getBoolean("Spawners.instant-kill.death-animation");
 		
 		required_redstone_power = file.getInteger("Spawners.required-redstone-power", 0, 15);
 		

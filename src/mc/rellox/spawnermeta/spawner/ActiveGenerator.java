@@ -334,8 +334,8 @@ public class ActiveGenerator implements IGenerator {
 		
 		EventRegistry.call(new SpawnerPostSpawnEvent(this, entities));
 		
-		if(s.kill_entities_on_spawn == true) {
-			if(s.entities_drop_xp == true) {
+		if(s.instant_kill_enabled == true) {
+			if(s.instant_kill_drop_xp == true) {
 				Entity killer = block.getWorld()
 						.getNearbyEntities(block.getLocation(), 32, 32, 32)
 						.stream()
@@ -374,6 +374,8 @@ public class ActiveGenerator implements IGenerator {
 		if(entity instanceof LivingEntity living) {
 			_damage.objected(living, 10_000_000, killer);
 			living.setHealth(0);
+			if(Settings.settings.instant_kill_death_animation == false)
+				living.remove();
 		}
 	}
 

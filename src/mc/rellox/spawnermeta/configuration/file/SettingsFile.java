@@ -17,7 +17,7 @@ import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 
 public class SettingsFile extends AbstractFile {
 	
-	private static final int version = 7;
+	private static final int version = 8;
 
 	public SettingsFile() {
 		super("configuration");
@@ -57,6 +57,10 @@ public class SettingsFile extends AbstractFile {
 			if(r <= 0) r = 3;
 			hold("Spawners.spawning-radius.horizontal", r);
 			hold("Spawners.spawning-radius.vertical", r);
+		}
+		if(CF.version < 8) {
+			copy("Spawners.kill-entities-on-spawn", "Spawners.instant-kill.enabled");
+			copy("Spawners.drop-xp-when-instant-kill", "Spawners.instant-kill.drop-xp");
 		}
 
 		file.addDefault("Debug-errors", true);
@@ -105,8 +109,9 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Spawners.nearby-entities.limit", 8);
 		file.addDefault("Spawners.nearby-entities.reduce", false);
 		
-		file.addDefault("Spawners.kill-entities-on-spawn", false);
-		file.addDefault("Spawners.drop-xp-when-instant-kill", true);
+		file.addDefault("Spawners.instant-kill.enabled", false);
+		file.addDefault("Spawners.instant-kill.drop-xp", true);
+		file.addDefault("Spawners.instant-kill.death-animation", true);
 		
 		file.addDefault("Spawners.required-redstone-power", 0);
 		
@@ -457,12 +462,15 @@ public class SettingsFile extends AbstractFile {
 					"E.g. if spawning amount is 4 and limit is 8,",
 					"  and nearby amount is 6, then the spawning",
 					"  amount is reduced to 2.");
-			c.comment("Spawners.kill-entities-on-spawn",
+			c.comment("Spawners.instant-kill.enabled",
 					"Will entities be killed when they spawn.");
-			c.comment("Spawners.drop-xp-when-instant-kill",
+			c.comment("Spawners.instant-kill.drop-xp",
 					"Will entities drop xp when killed.",
-					"Only applies when kill-entities-on-spawn",
-					"  is set to true.");
+					"Only applies when instant-kill is enabled.",
+					"For xp to drop a player has to be in a",
+					"  32 block radius.");
+			c.comment("Spawners.instant-kill.death-animation",
+					"Should the death animation be displayed.");
 			c.comment("Spawners.required-redstone-power",
 					"The required redstone power for this spawner",
 					"  to spawn. [0-15]",
