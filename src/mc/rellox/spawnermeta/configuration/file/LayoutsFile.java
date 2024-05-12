@@ -47,6 +47,18 @@ public class LayoutsFile extends AbstractFile {
 			hold("Item-layout.upgrades.disabled-upgrade-item", list.isEmpty() ? null : list);
 			CF.s.clear("Items.layout");
 		}
+		if(CF.version() < 9) {
+			List<String> list = CF.s.getStrings("Item-layout.upgrades.stat-item");
+			if(list.isEmpty() == false) {
+				int a;
+				if(list.indexOf("INFO") == list.size() - 1) a = list.size() - 1;
+				else a = list.size();
+				list.add(a, "!");
+				list.add(a, "OFFLINE");
+				hold("Item-layout.upgrades.stat-item", list);
+			}
+		}
+		
 		Object x = file.get("Item-layout");
 		if(x instanceof List list && list.isEmpty() == true) file.set("Item-layout", null); 
 		
@@ -80,6 +92,8 @@ public class LayoutsFile extends AbstractFile {
 				"SPAWNABLE",
 				"!",
 				"WARNING",
+				"!",
+				"OFFLINE",
 				"!",
 				"INFO"
 				));
@@ -121,7 +135,7 @@ public class LayoutsFile extends AbstractFile {
 			c.comment("Item-layout.upgrades.stat-item",
 					"Keys:",
 					"  EMPTY, SWITCHING, LOCATION, STACK",
-					"  WARNING, SPAWNABLE, INFO");
+					"  WARNING, OFFLINE, SPAWNABLE, INFO");
 			c.comment("Item-layout.upgrades.upgrade-item",
 					"Keys:",
 					"  HELP, INFO, CURRENT, NEXT, PRICE");
