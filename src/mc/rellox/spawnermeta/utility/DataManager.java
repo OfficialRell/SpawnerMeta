@@ -65,7 +65,6 @@ public final class DataManager {
 		key_type = new NamespacedKey(SpawnerMeta.instance(), "type");
 		key_stack = new NamespacedKey(SpawnerMeta.instance(), "stack");
 		key_levels = new NamespacedKey(SpawnerMeta.instance(), "levels");
-		key_spawnable = new NamespacedKey(SpawnerMeta.instance(), "maximum");
 		key_enabled = new NamespacedKey(SpawnerMeta.instance(), "enabled");
 		key_owner = new NamespacedKey(SpawnerMeta.instance(), "owner");
 		key_spawned = new NamespacedKey(SpawnerMeta.instance(), "spawned");
@@ -73,6 +72,10 @@ public final class DataManager {
 	
 	public static int[] i() {
 		return new int[] {1, 1, 1};
+	}
+	
+	public static NamespacedKey typeKey() {
+		return key_type;
 	}
 
 	public static ItemStack getSpawner(IVirtual spawner, int a) {
@@ -261,8 +264,14 @@ public final class DataManager {
 	public static void reset(Block block) {
 		CreatureSpawner cs = cast(block);
 		if(cs == null) return;
-		cs.setMaxSpawnDelay(800);
-		cs.setMaxSpawnDelay(200);
+		int max = cs.getMaxSpawnDelay();
+		if(max >= 200) {
+			cs.setMinSpawnDelay(200);
+			cs.setMaxSpawnDelay(800);
+		} else {
+			cs.setMaxSpawnDelay(800);
+			cs.setMinSpawnDelay(200);
+		}
 		cs.setRequiredPlayerRange(16);
 		cs.setSpawnCount(4);
 		if(cs.getSpawnedType() == SpawnerType.EMPTY.entity())
@@ -412,7 +421,7 @@ public final class DataManager {
 	public static boolean isItemSpawner(Block block) {
 		CreatureSpawner cs = cast(block);
 		if(cs == null) return false;
-		return cs.getSpawnedType() == EntityType.DROPPED_ITEM;
+		return Utils.isItem(cs.getSpawnedType()) == true;
 	}
 
 	public static void setType(Block block, SpawnerType type) {
