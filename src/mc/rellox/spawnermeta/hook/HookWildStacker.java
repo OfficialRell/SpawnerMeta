@@ -110,10 +110,6 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 				.stream()
 				.map(LivingEntity.class::cast)
 				.collect(Collectors.toList());
-//				.getLivingEntities().stream()
-//				.filter(e -> e.getType() == et)
-//				.filter(e -> e.getLocation().distanceSquared(at) <= 100)
-//				.collect(Collectors.toList());
 		if(link != null) near.remove(link.getLivingEntity());
 
 //		System.out.println(" - nearby entities: " + near.size());
