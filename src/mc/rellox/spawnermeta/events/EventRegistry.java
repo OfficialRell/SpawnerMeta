@@ -28,6 +28,8 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.LargeFireball;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.Wither;
+import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -197,7 +199,7 @@ public final class EventRegistry {
 		}
 		m.send(Language.list("Spawners.changing.type-changed", "type", call.getNewType()));
 		player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 2f, 2f);
-		player.spawnParticle(Particle.VILLAGER_HAPPY, spawner.center(), 25, 0.25, 0.25, 0.25, 0.1);
+		player.spawnParticle(Utils.particle_happy, spawner.center(), 25, 0.25, 0.25, 0.25, 0.1);
 		ItemMatcher.remove(player, item, stack);
 		
 		spawner.setType(change);
@@ -260,7 +262,7 @@ public final class EventRegistry {
 		}
 		m.send(Language.list("Spawners.changing.type-changed", "type", change));
 		player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 2f, 2f);
-		player.spawnParticle(Particle.VILLAGER_HAPPY, spawner.center(), 25, 0.25, 0.25, 0.25, 0.1);
+		player.spawnParticle(Utils.particle_happy, spawner.center(), 25, 0.25, 0.25, 0.25, 0.1);
 		
 		ItemMatcher.remove(player, item, stack);
 		spawner.setType(change);
@@ -315,7 +317,7 @@ public final class EventRegistry {
 				public void run() {
 					if(block.equals(verify) == true) {
 						verify = null;
-						player.spawnParticle(Particle.REDSTONE, Utils.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
+						player.spawnParticle(Utils.particle_redstone, Utils.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
 								new DustOptions(Color.MAROON, 2f));
 					}
 				}
@@ -389,15 +391,16 @@ public final class EventRegistry {
 
 	protected static boolean stacking(Player player, Messagable m, IGenerator generator, ItemStack item, boolean direct) {
 		int stack = generator.cache().stack();
-		int limit = Settings.settings.stacking_limit(player, generator);
-		if(Settings.settings.stacking_ignore_limit == false) {
+		Settings s = Settings.settings;
+		int limit = s.stacking_limit(player, generator);
+		if(s.stacking_ignore_limit == false) {
 			if(stack >= limit) {
 				m.send(Language.list("Spawners.stacking.limit-reached"));
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 				return true;
 			}
 		}
-		int tt = Settings.settings.stacking_ticks;
+		int tt = s.stacking_ticks;
 		if(tt > 0) {
 			long b = System.currentTimeMillis() / 50;
 			if(time >= b - tt) return false;
@@ -410,18 +413,18 @@ public final class EventRegistry {
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return false;
 		}
-		if(Settings.settings.natural_can_stack == false && generator.cache().natural() == true) {
+		if(s.natural_can_stack == false && generator.cache().natural() == true) {
 			if(player.hasPermission("spawnermeta.natural.bypass.stacking") == false) {
 				m.send(Language.list("Spawners.natural.breaking.warning"));
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 				return false;
 			}
 		}
-		x: if(Settings.settings.owned_can_stack == false) {
+		x: if(s.owned_can_stack == false) {
 			UUID owner = generator.spawner().getOwnerID();
 			if(owner != null && owner.equals(player.getUniqueId()) == false) {
 				if(player.hasPermission("spawnermeta.ownership.bypass.stacking") == false) {
-					if(Settings.settings.trusted_can_stack == true
+					if(s.trusted_can_stack == true
 							&& LocationRegistry.trusted(owner, player) == true) break x;
 					m.send(Language.list("Spawners.ownership.stacking.warning"));
 					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
@@ -436,8 +439,8 @@ public final class EventRegistry {
 			return false;
 		}
 		Price price = null;
-		if(Settings.settings.stacking_price.using() == true)
-			price = Price.of(Group.stacking, Settings.settings.stacking_price.get(generator.cache().type()));
+		if(s.stacking_price.using() == true)
+			price = Price.of(Group.stacking, s.stacking_price.get(generator.cache().type()));
 
 		SpawnerStackEvent call = call(new SpawnerStackEvent(player, generator, price, virtual, direct));
 		if(call.cancelled() == true) return false;
@@ -449,24 +452,32 @@ public final class EventRegistry {
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return false;
 		}
-		stack++;
+		int stacked;
+		if(s.stacking_stack_all == true) {
+			int amount = item.getAmount();
+			if(s.stacking_ignore_limit == false) {
+				int left = limit - stack;
+				stacked = Math.min(amount, left);
+			} else stacked = amount;
+		} else stacked = 1;
+		stack += stacked;
 		ISpawner spawner = generator.spawner();
 		ICache cache = generator.cache();
 		spawner.setStack(stack);
-		m.send((Settings.settings.stacking_ignore_limit
+		m.send((s.stacking_ignore_limit
 				? Language.list("Spawners.stacking.stacked.infinite", "stack", stack)
 						: Language.list("Spawners.stacking.stacked.finite", "stack", stack,
 								"limit", limit)));
 		player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 0.75f, 1.5f);
-		if(Settings.settings.spawnable_enabled == true) {
-			int s = cache.spawnable() + virtual.getSpawnable();
-			spawner.setSpawnable(s);
+		if(s.spawnable_enabled == true) {
+			int spawnable = cache.spawnable() + virtual.getSpawnable() * stacked;
+			spawner.setSpawnable(spawnable);
 		}
-		if(Settings.settings.charges_enabled == true
-				&& Settings.settings.charges_allow_stacking == true) {
+		if(s.charges_enabled == true
+				&& s.charges_allow_stacking == true) {
 			if(cache.charges() < 1_000_000_000
 					|| virtual.getCharges() < 1_000_000_000) {
-				int b = cache.charges() * (stack - 1) + virtual.getCharges();
+				int b = cache.charges() * (stack - stacked) + virtual.getCharges() * stacked;
 				int r = b / stack;
 				spawner.setCharges(r);
 				int f = b % stack;
@@ -475,7 +486,7 @@ public final class EventRegistry {
 							"charges", f));
 			}
 		}
-		if(direct == false && Settings.settings.stacking_nearby_particles == true) {
+		if(direct == false && s.stacking_nearby_particles == true) {
 			Location start = spawner.center();
 			Location end = player.getLocation().add(0, 1, 0);
 			Vector dis = end.toVector().subtract(start.toVector())
@@ -483,10 +494,10 @@ public final class EventRegistry {
 			double loops = start.distance(end) / 0.25;
 			for(int i = 0; i < loops; i++) {
 				start.add(dis);
-				player.spawnParticle(Particle.CRIT_MAGIC, start, 1, 0, 0, 0, 0);
+				player.spawnParticle(Utils.particle_sharpness, start, 1, 0, 0, 0, 0);
 			}
 		}
-		ItemMatcher.remove(player, item, 1);
+		ItemMatcher.remove(player, item, stacked);
 
 		generator.refresh();
 		return false;
@@ -509,6 +520,7 @@ public final class EventRegistry {
 					 */
 					if(item.getType() != Material.SPAWNER) break y;
 					event.setCancelled(true);
+					
 					if(EventRegistry.stacking(player, m, generator, item, true) == true) break y;
 					return;
 				}
@@ -559,7 +571,7 @@ public final class EventRegistry {
 		call.getRefund().ifPresent(i -> player.getInventory().setItemInMainHand(i));
 		
 		player.playSound(player.getEyeLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 2f, 1f);
-		player.spawnParticle(Particle.FIREWORKS_SPARK, spawner.center(), 25, 0.3, 0.3, 0.3, 0.1);
+		player.spawnParticle(Utils.particle_firework, spawner.center(), 25, 0.3, 0.3, 0.3, 0.1);
 		
 		spawner.setType(SpawnerType.EMPTY);
 		if(Settings.settings.changing_reset_empty == true) spawner.resetUpgradeLevels();
@@ -772,7 +784,7 @@ public final class EventRegistry {
 			} else {
 				if(xs[2] == true) destroy(generator, xs[3]);
 			}
-			block.getWorld().spawnParticle(Particle.VILLAGER_ANGRY,
+			block.getWorld().spawnParticle(Utils.particle_angry,
 					block.getLocation().add(0.5, 0.5, 0.5), 10, 0.2, 0.2, 0.2, 0);
 			it.remove();
 		}
@@ -859,6 +871,8 @@ public final class EventRegistry {
 				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.FIREBALLS);
 			} else if(entity instanceof EnderCrystal) {
 				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.END_CRYSTALS);
+			} else if(entity instanceof Wither || entity instanceof WitherSkull) {
+				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.WITHER);
 			} else continue;
 			
 			SpawnerExplodeEvent call = call(new SpawnerExplodeEvent(generator, explosion, xs));
@@ -874,7 +888,7 @@ public final class EventRegistry {
 					if(xs[2] == true) destroy(generator, xs[3]);
 				}
 			}
-			block.getWorld().spawnParticle(Particle.VILLAGER_ANGRY,
+			block.getWorld().spawnParticle(Utils.particle_angry,
 					block.getLocation().add(0.5, 0.5, 0.5), 10, 0.2, 0.2, 0.2, 0);
 			it.remove();
 		}
@@ -1008,7 +1022,7 @@ public final class EventRegistry {
 			event.setCancelled(true);
 			return;
 		}
-		if(entity.getType() == EntityType.DROPPED_ITEM
+		if(Utils.isItem(entity.getType()) == true
 				&& Settings.settings.disable_item_spawners == true) {
 			event.setCancelled(true);
 			return;
