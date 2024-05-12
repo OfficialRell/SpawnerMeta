@@ -63,12 +63,13 @@ public final class GeneratorRegistry implements Listener {
 	
 	private static void offline() {
 		if(offline_task != null && offline_task.isCancelled() == false) offline_task.cancel();
-		new BukkitRunnable() {
+		if(Settings.settings.owned_offline_time <= 0) return;
+		(offline_task = new BukkitRunnable() {
 			@Override
 			public void run() {
-				
+				SPAWNERS.values().forEach(SpawnerWorld::control);
 			}
-		}.runTaskTimer(SpawnerMeta.instance(), 20 * 60, 20 * 60);
+		}).runTaskTimer(SpawnerMeta.instance(), 20 * 60, 20 * 60);
 	}
 	
 	private static void control() {
@@ -127,6 +128,11 @@ public final class GeneratorRegistry implements Listener {
 	public static IGenerator get(Block block) {
 		if(Settings.inactive(block.getWorld()) == true) return null;
 		return get(block.getWorld()).get(block);
+	}
+	
+	public static IGenerator raw(Block block) {
+		if(Settings.inactive(block.getWorld()) == true) return null;
+		return get(block.getWorld()).raw(block);
 	}
 	
 	public static List<IGenerator> list(World world) {
