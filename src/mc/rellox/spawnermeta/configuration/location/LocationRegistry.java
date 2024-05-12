@@ -138,6 +138,7 @@ public final class LocationRegistry implements Listener {
 		String[] list = parent.list();
 		if(list == null || list.length <= 0) return null;
 		for(String file : list) {
+			if(uuid_validation.matcher(file).matches() == false) continue;
 			try {
 				UUID id = UUID.fromString(file.replace(".yml", ""));
 				String name = Bukkit.getOfflinePlayer(id).getName();
