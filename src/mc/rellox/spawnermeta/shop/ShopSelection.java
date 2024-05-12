@@ -3,7 +3,6 @@ package mc.rellox.spawnermeta.shop;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -16,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.configuration.Language;
+import mc.rellox.spawnermeta.utility.Utils;
 
 public class ShopSelection implements Listener {
 	
@@ -64,7 +64,7 @@ public class ShopSelection implements Listener {
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(Language.get("Shop-select.buy-shop").text());
 		meta.addItemFlags(ItemFlag.values());
-		meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
+		meta.addEnchant(Utils.enchantment_power, 1, true);
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -74,7 +74,7 @@ public class ShopSelection implements Listener {
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(Language.get("Shop-select.sell-shop").text());
 		meta.addItemFlags(ItemFlag.values());
-		meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
+		meta.addEnchant(Utils.enchantment_power, 1, true);
 		item.setItemMeta(meta);
 		return item;
 	}

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Sound;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -179,7 +178,7 @@ public class PrivateSell {
 		}
 		meta.addItemFlags(ItemFlag.values());
 		Utils.hideCustomFlags(meta);
-		meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
+		meta.addEnchant(Utils.enchantment_power, 1, true);
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -190,7 +189,7 @@ public class PrivateSell {
 		meta.setDisplayName(Language.get("Shop-sell.cancel").text());
 		meta.addItemFlags(ItemFlag.values());
 		Utils.hideCustomFlags(meta);
-		meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
+		meta.addEnchant(Utils.enchantment_power, 1, true);
 		item.setItemMeta(meta);
 		return item;
 	}
