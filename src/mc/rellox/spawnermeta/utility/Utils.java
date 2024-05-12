@@ -8,10 +8,14 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -30,6 +34,8 @@ public final class Utils {
 	public static boolean op(Player player) {
 		return player.isOp() == true && player.getGameMode() == GameMode.CREATIVE;
 	}
+	
+	// Experience
 
 	public static void changeExp(Player player, int exp) {
 		player.giveExp(exp);
@@ -53,6 +59,8 @@ public final class Utils {
 		else return 9 * level - 158;
 	}
 	
+	// Locations
+	
 	public static Location center(Block block) {
 		return block.getLocation().add(0.5, 0.5, 0.5);
 	}
@@ -60,6 +68,8 @@ public final class Utils {
 	public static int[] location(Block block) {
 		return new int[] {block.getX(), block.getY(), block.getZ()};
 	}
+	
+	// Roman numerals
 	
 	// 1-I 5-V 10-X 50-L 100-C 500-D 1000-M
 	public static String roman(int i) {
@@ -86,6 +96,8 @@ public final class Utils {
 		return i;
 	}
 	
+	// Items
+	
 	public static String displayName(ItemStack item) {
 		Class<?> c = RF.craft("inventory.CraftItemStack");
 		try {
@@ -106,8 +118,15 @@ public final class Utils {
 				m = c.getDeclaredMethod("x");
 				o = m.invoke(o);
 				m = o.getClass().getMethod("getString");
-			} else if(Version.version == VersionType.v_20_1) {
+			} else if(Version.version == VersionType.v_20_1
+					|| Version.version == VersionType.v_20_2
+					|| Version.version == VersionType.v_20_3) {
 				m = c.getDeclaredMethod("y");
+				o = m.invoke(o);
+				m = o.getClass().getMethod("getString");
+				m = o.getClass().getMethod("getString");
+			} else if(Version.version == VersionType.v_20_4) {
+				m = c.getDeclaredMethod("x");
 				o = m.invoke(o);
 				m = o.getClass().getMethod("getString");
 			} else {
@@ -120,7 +139,7 @@ public final class Utils {
 				m = o.getClass().getMethod("getString");
 				name = (String) m.invoke(o);
 			}
-			return name;
+			return ChatColor.stripColor(name);
 		} catch(Exception e) {
 			RF.debug(new RuntimeException("Cannot get item display name"));
 			return "null";
@@ -136,11 +155,32 @@ public final class Utils {
 			RF.debug(new RuntimeException("Unable to apply hidden item flag"));
 		}
 	}
+	
+	public static boolean nulled(ItemStack item) {
+		return item == null ? true : item.getType() == Material.AIR ? true : false;
+	}
+	
+	// Math
 
 	public static double round(double d) {
 		int i = (int) (d * 100);
 		return (double) (i / 100.0);
 	}
+
+	public static boolean chance(double chance) {
+		return R.nextDouble() * 100 < chance;
+	}
+
+	public static int random(int r) {
+		return R.nextInt(r);
+	}
+
+	public static <E> E random(List<E> list) {
+		int size = list.size();
+		return size > 0 ? list.get(R.nextInt(size)) : null;
+	}
+	
+	// Validation
 	
 	public static boolean isInteger(String s) {
 		try {
@@ -166,10 +206,6 @@ public final class Utils {
 		return true;
 	}
 	
-	public static boolean nulled(ItemStack item) {
-		return item == null ? true : item.getType() == Material.AIR ? true : false;
-	}
-	
 	public static boolean isLetter(char c) {
 		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 	}
@@ -184,19 +220,23 @@ public final class Utils {
 				return false;
 		return true;
 	}
-
-	public static boolean chance(double chance) {
-		return R.nextDouble() * 100 < chance;
+	
+	public static boolean isItem(EntityType type) {
+		return type == RF.enumerate(EntityType.class, "DROPPED_ITEM", "ITEM");
 	}
-
-	public static int random(int r) {
-		return R.nextInt(r);
-	}
-
-	public static <E> E random(List<E> list) {
-		int size = list.size();
-		return size > 0 ? list.get(R.nextInt(size)) : null;
-	}
+	
+	// Types
+	
+	public static final Particle particle_sharpness = RF.enumerate(Particle.class, "CRIT_MAGIC", "ENCHANTED_HIT");
+	public static final Particle particle_redstone = RF.enumerate(Particle.class, "REDSTONE", "DUST");
+	public static final Particle particle_happy = RF.enumerate(Particle.class, "VILLAGER_HAPPY", "HAPPY_VILLAGER");
+	public static final Particle particle_angry = RF.enumerate(Particle.class, "VILLAGER_ANGRY", "ANGRY_VILLAGER");
+	public static final Particle particle_firework = RF.enumerate(Particle.class, "FIREWORKS_SPARK", "FIREWORK");
+	
+	@SuppressWarnings("deprecation")
+	public static final Enchantment enchantment_power = RF.enumerate(Enchantment::getByName, "ARROW_DAMAGE", "POWER");
+	
+	// Version check
 
 	public static void check(final int id, final Consumer<String> action) {
 		new BukkitRunnable() {
