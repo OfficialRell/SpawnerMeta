@@ -17,7 +17,7 @@ import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 
 public class SettingsFile extends AbstractFile {
 	
-	private static final int version = 8;
+	private static final int version = 10;
 
 	public SettingsFile() {
 		super("configuration");
@@ -62,6 +62,9 @@ public class SettingsFile extends AbstractFile {
 			copy("Spawners.kill-entities-on-spawn", "Spawners.instant-kill.enabled");
 			copy("Spawners.drop-xp-when-instant-kill", "Spawners.instant-kill.drop-xp");
 		}
+		if(CF.version < 10) {
+			copy("Spawners.required-redstone-power", "Spawners.redstone-power.required");
+		}
 
 		file.addDefault("Debug-errors", true);
 		
@@ -96,9 +99,11 @@ public class SettingsFile extends AbstractFile {
 		
 		file.addDefault("Spawners.disabled-spawners", List.of());
 		file.addDefault("Spawners.ignored-spawners", List.of());
+		file.addDefault("Spawners.ignore-natural", false);
 		file.addDefault("Spawners.disabled-worlds", List.of());
 		file.addDefault("Spawners.ignored-worlds", List.of());
 		file.addDefault("Spawners.spawning-particles", true);
+		file.addDefault("Spawners.owner-warning-particles", true);
 		file.addDefault("Spawners.disable-item-spawners", false);
 		file.addDefault("Spawners.warning-particles", true);
 		
@@ -113,7 +118,8 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Spawners.instant-kill.drop-xp", true);
 		file.addDefault("Spawners.instant-kill.death-animation", true);
 		
-		file.addDefault("Spawners.required-redstone-power", 0);
+		file.addDefault("Spawners.redstone-power.required", 0);
+		file.addDefault("Spawners.redstone-power.ignore-natural", true);
 		
 		file.addDefault("Spawners.default-slime-size", 0);
 		
@@ -165,6 +171,7 @@ public class SettingsFile extends AbstractFile {
 		
 		file.addDefault("Modifiers.stacking.enabled", false);
 		file.addDefault("Modifiers.stacking.use-price", false);
+		file.addDefault("Modifiers.stacking.stack-all", false);
 		file.addDefault("Modifiers.stacking.ticks-per", 5);
 		file.addDefault("Modifiers.stacking.prices.DEFAULT", 100);
 		file.addDefault("Modifiers.stacking.spawner-limit.natural", 16);
@@ -313,6 +320,10 @@ public class SettingsFile extends AbstractFile {
 					"List of ignored spawners.",
 					"Ignored spawner will stay, work and spawn the same",
 					"  as in vanilla Minecraft.");
+			c.comment("Spawners.ignore-natural",
+					"If true then all natural spawners will not be",
+					"  converted as custom ones. They will work as in",
+					"  vanilla Minecraft.");
 			c.comment("Spawners.disabled-worlds",
 					"List of disabled worlds.",
 					"In these worlds spawners will not spawn.");
@@ -440,6 +451,10 @@ public class SettingsFile extends AbstractFile {
 					"This plugin does not affect item spawners.");
 			c.comment("Spawners.warning-particles",
 					"Are warning particles shown.");
+			c.comment("Spawners.owner-warning-particles",
+					"Should there be particles when the spawner owner",
+					"  is offline.",
+					"Only work if 'spawn-if-online' is false.");
 			c.comment("Spawners.spawning-reason",
 					"The entity spawn reason.",
 					"Changing this might help with other",
@@ -471,10 +486,13 @@ public class SettingsFile extends AbstractFile {
 					"  32 block radius.");
 			c.comment("Spawners.instant-kill.death-animation",
 					"Should the death animation be displayed.");
-			c.comment("Spawners.required-redstone-power",
+			c.comment("Spawners.redstone-power.required",
 					"The required redstone power for this spawner",
 					"  to spawn. [0-15]",
 					"Set 0 to ignore.");
+			c.comment("Spawners.redstone-power.ignore-natural",
+					"If true then natural spawners will not",
+					"  require redstone power to spawn.");
 			c.comment("Spawners.default-slime-size",
 					"What size slimes and magma cubes spawners will spawn.",
 					"If the value is 0 then the size will vary (1, 2 or 4).");
@@ -632,6 +650,11 @@ public class SettingsFile extends AbstractFile {
 			c.comment("Modifiers.stacking.ticks-per",
 					"Ticks between each stacking.");
 			c.comment("Modifiers.stacking.use-price", "Does stacking cost.");
+			c.comment("Modifiers.stacking.stack-all",
+					"When stacking to a spawner all the items",
+					"  in player's hand will be stacked to it.",
+					"If false then players will stack spawners",
+					"  individually.");
 			c.comment("Modifiers.stacking.prices.DEFAULT",
 					"Default stacking price.",
 					"For specific entities:",

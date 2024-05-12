@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.IntPredicate;
@@ -19,6 +20,7 @@ import java.util.stream.Stream;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -27,6 +29,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 
 import mc.rellox.spawnermeta.api.configuration.IFileValues;
 import mc.rellox.spawnermeta.api.events.SpawnerExplodeEvent.ExplosionType;
@@ -82,11 +85,13 @@ public final class Settings {
 	
 	public boolean spawning_particles;
 	public boolean warning_particles;
+	public boolean owner_particles;
 	public boolean disable_item_spawners;
 	public final Set<SpawnerType> spawner_disabled;
 	public final Set<SpawnerType> spawner_ignored;
 	public final Set<String> world_disabled;
 	public final Set<String> world_ignored;
+	public boolean ignore_natural;
 	
 	public SpawnReason spawn_reason;
 	
@@ -105,7 +110,8 @@ public final class Settings {
 	public boolean instant_kill_drop_xp;
 	public boolean instant_kill_death_animation;
 	
-	public int required_redstone_power;
+	public int redstone_power_required;
+	public boolean redstone_power_ignore_natural;
 	
 	public int nearby_limit;
 	public boolean nearby_reduce;
@@ -148,6 +154,7 @@ public final class Settings {
 	public boolean placing_enabled;
 
 	public final SinglePriceMap stacking_price;
+	public boolean stacking_stack_all;
 	public boolean stacking_enabled;
 	public int stacking_limit_natural;
 	public int stacking_limit_owned;
@@ -317,6 +324,7 @@ public final class Settings {
 		
 		spawning_particles = file.getBoolean("Spawners.spawning-particles");
 		warning_particles = file.getBoolean("Spawners.warning-particles");
+		owner_particles = file.getBoolean("Spawners.owner-warning-particles");
 		disable_item_spawners = file.getBoolean("Spawners.disable-item-spawners");
 		spawner_disabled.clear();
 		spawner_disabled.addAll(RF.enumerates(SpawnerType.class,
@@ -324,6 +332,7 @@ public final class Settings {
 		spawner_ignored.clear();
 		spawner_ignored.addAll(RF.enumerates(SpawnerType.class,
 				file.getStrings("Spawners.ignored-spawners")));
+		ignore_natural = file.getBoolean("Spawners.ignore-natural");
 		world_disabled.clear();
 		world_disabled.addAll(file.getStrings("Spawners.disabled-worlds"));
 		world_ignored.clear();
@@ -344,7 +353,8 @@ public final class Settings {
 		instant_kill_drop_xp = file.getBoolean("Spawners.instant-kill.drop-xp");
 		instant_kill_death_animation = file.getBoolean("Spawners.instant-kill.death-animation");
 		
-		required_redstone_power = file.getInteger("Spawners.required-redstone-power", 0, 15);
+		redstone_power_required = file.getInteger("Spawners.redstone-power.required", 0, 15);
+		redstone_power_ignore_natural = file.getBoolean("Spawners.redstone-power.ignore-natural");
 		
 		allow_renaming = file.getBoolean("Spawners.allow-renaming");
 		
@@ -399,6 +409,7 @@ public final class Settings {
 		placing_price.load();
 		
 		stacking_enabled = file.getBoolean("Modifiers.stacking.enabled");
+		stacking_stack_all = file.getBoolean("Modifiers.stacking.stack-all");
 		stacking_price.load();
 		stacking_limit_natural = file.getInteger("Modifiers.stacking.spawner-limit.natural");
 		stacking_limit_owned = file.getInteger("Modifiers.stacking.spawner-limit.owned");
@@ -515,11 +526,12 @@ public final class Settings {
 		spawner_view_enabled = file.getBoolean("Spawner-view.enabled");
 		Set<SpawnerType> list = file.getStrings("Spawner-view.ignore-entities").stream()
 				.map(SpawnerType::of)
-				.filter(s -> s != null)
+				.filter(Objects::nonNull)
 				.collect(Collectors.toSet());
 		spawner_view_entities.clear();
 		spawner_view_entities.addAll(Stream.of(SpawnerType.values())
-				.filter(s -> s.exists() == true && list.contains(s) == false)
+				.filter(SpawnerType::exists)
+				.filter(s -> list.contains(s) == false)
 				.collect(Collectors.toList()));
 		spawner_view_entities.remove(SpawnerType.EMPTY);
 		
@@ -598,6 +610,11 @@ public final class Settings {
 	}
 	
 	public boolean ignored(Block block) {
+		if(ignore_natural == true
+				&& block.getState() instanceof CreatureSpawner spawner) {
+			PersistentDataContainer data = spawner.getPersistentDataContainer();
+			if(data.has(DataManager.typeKey()) == false) return true;
+		}
 		return ignored(DataManager.getEntity(block));
 	}
 	
