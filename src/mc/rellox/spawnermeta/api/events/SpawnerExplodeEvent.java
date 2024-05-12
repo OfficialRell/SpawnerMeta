@@ -52,7 +52,7 @@ public class SpawnerExplodeEvent extends SpawnerEvent implements IGeneratorEvent
 	
 	public static enum ExplosionType {
 		
-		TNT, CREEPERS, FIREBALLS, END_CRYSTALS;
+		TNT, CREEPERS, FIREBALLS, END_CRYSTALS, WITHER;
 
 	}
 
