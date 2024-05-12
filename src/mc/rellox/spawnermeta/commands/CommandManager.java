@@ -401,7 +401,7 @@ public final class CommandManager {
 						} else {
 							String values = "";
 							for(int i = 4; i < args.length; i++) values += args[i];
-							if(values.matches("(?:(?:\\d+|-)[,;:]){1,4}(\\d+|-?)") == true) {
+							if(values.matches("((\\d+|-)[,;:]){2}(\\d+|-)([,;:](\\d+|-|[a-z]+)){0,2}") == true) {
 								List<ItemStack> items = DataManager.getSpawner(type, values, amount, empty);
 								if(items.isEmpty() == true) warn(sender, "Unable to read values (#0)!", values);
 								else items.forEach(item -> ItemMatcher.add(getter, item));
