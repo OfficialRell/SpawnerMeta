@@ -88,6 +88,20 @@ public class EventListeners implements Listener {
 			RF.debug(e);
 		}
 	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	private void onBreakFirst(BlockBreakEvent event) {
+		try {
+			Block block = event.getBlock();
+			if(Settings.inactive(block.getWorld()) == true) return;
+			if(Settings.settings.ignored(block) == true) return;
+			IGenerator generator = GeneratorRegistry.raw(block);
+			if(generator == null) return;
+			event.setExpToDrop(0);
+		} catch (Exception e) {
+			RF.debug(e);
+		}
+	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onBreak(BlockBreakEvent event) {
