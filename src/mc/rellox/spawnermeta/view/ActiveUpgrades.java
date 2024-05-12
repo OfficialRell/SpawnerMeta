@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -20,7 +19,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.events.SpawnerChargeEvent;
@@ -54,11 +52,12 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	private final ILayout layout;
 
 	private final IGenerator generator;
+	private final ICache cache;
 	private final ISpawner spawner;
 	
 	private final List<Player> players;
 	private final Inventory v;
-	private boolean t;
+	private long pause;
 	private boolean enabled;
 	
 	private boolean active;
@@ -67,13 +66,13 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		this.layout = LayoutRegistry.upgrades();
 		
 		this.generator = generator;
+		this.cache = generator.cache();
 		this.spawner = generator.spawner();
 		
 		this.players = new ArrayList<>();
 		this.v = layout.create(Language.get("Upgrade-GUI.name",
-				"type", generator.cache().type().formated()));
-		this.t = true;
-		this.enabled = generator.cache().enabled();
+				"type", cache.type().formated()));
+		this.enabled = cache.enabled();
 		
 		this.active = true;
 		
@@ -123,21 +122,15 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		if(event.getInventory().equals(v) == true) event.setCancelled(true);
 		Inventory clicked = event.getClickedInventory();
 		Player player = (Player) event.getWhoClicked();
-		if(clicked == null || clicked.equals(v) == false
-				|| players.contains(player) == false) return;
+		if(clicked == null || clicked.equals(v) == false || players.contains(player) == false) return;
 		Messagable m = new Messagable(player);
 		try {
-			if(t == false) return;
-			t = false;
-			new BukkitRunnable() {
-				@Override
-				public void run() {
-					t = true;
-				}
-			}.runTaskLater(SpawnerMeta.instance(), 5);
+			long now = System.currentTimeMillis();
+			if(now - pause < 250) return;
+			pause = now;
+			
 			int o = event.getSlot();
 			UpgradeType upgrade;
-			ICache cache = generator.cache();
 			if(layout.is(o, SlotField.upgrade_stats) == true) {
 				if(Settings.settings.spawner_switching == false) return;
 				
@@ -241,7 +234,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 				m.send(Language.list("Upgrade-GUI.purchase." + ut.lower(),
 						"level", Utils.roman(ls[i])));
 				DustOptions d = new DustOptions(ut.color, 2f);
-				player.spawnParticle(Particle.REDSTONE, Utils.center(spawner.block()), 50, 0.25, 0.25, 0.25, 0, d);
+				player.spawnParticle(Utils.particle_redstone, Utils.center(spawner.block()), 50, 0.25, 0.25, 0.25, 0, d);
 				
 				update();
 			} else player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
@@ -270,7 +263,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		layout.fill(v, upgrade(2, SlotField.upgrade_amount), SlotField.upgrade_amount);
 		if(Settings.settings.charges_enabled == true) {
 			if(Settings.settings.charges_ignore_natural == true
-					&& generator.cache().natural() == true) return;
+					&& cache.natural() == true) return;
 			layout.fill(v, charges(), SlotField.upgrade_charges);
 		}
 	}
@@ -290,7 +283,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		
 		order.named(name);
 
-		SpawnerType type = generator.cache().type();
+		SpawnerType type = cache.type();
 		int[] max_levels = Settings.settings.upgrades_levels.get(type);
 		if(level < max_levels[i]) {
 			order.submit("HELP", () -> {
@@ -344,7 +337,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		order.named(name);
 		
 		int level = spawner.getUpgradeLevels()[i];
-		SpawnerType type = generator.cache().type();
+		SpawnerType type = cache.type();
 		
 		order.submit("HELP", () -> {
 			return Language.list("Upgrade-GUI.items.disabled-upgrade.help");
@@ -369,7 +362,6 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		ItemStack item = slot.toItem();
 		ItemMeta meta = item.getItemMeta();
 		
-		ICache cache = generator.cache();
 		List<Content> name = Language.list("Upgrade-GUI.items.stats.name",
 				"type", cache.type());
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
@@ -379,9 +371,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		order.named(name);
 
 		if(cache.empty() == true) {
-			order.submit("EMPTY", () -> {
-				return Language.list("Upgrade-GUI.items.stats.empty");
-			});
+			order.submit("EMPTY", () -> Language.list("Upgrade-GUI.items.stats.empty"));
 		}
 		if(Settings.settings.spawner_switching == true) {
 			order.submit("SWITCHING", () -> {
@@ -430,9 +420,11 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			});
 		}
 		
-		order.submit("INFO", () -> {
-			return Language.list("Upgrade-GUI.items.stats.lore");
-		});
+		if(generator.online() == false) {
+			order.submit("OFFLINE", () -> Language.list("Upgrade-GUI.items.stats.owner-offline"));
+		}
+		
+		order.submit("INFO", () -> Language.list("Upgrade-GUI.items.stats.lore"));
 		
 		meta.setLore(order.build());
 		
@@ -460,7 +452,6 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		if(slot == null) return null;
 		ItemStack item = slot.toItem(false);
 		ItemMeta meta = item.getItemMeta();
-		ICache cache = generator.cache();
 		int charges = cache.charges();
 		boolean b = charges >= 1_000_000_000;
 		String charges_text = b ? Text.infinity : "" + charges;
@@ -492,7 +483,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		int value = Settings.settings.upgrades_prices.get(type)[i],
 				increase = Settings.settings.upgrades_price_increase.get(type)[i];
 		for(int j = 1; j < level; j++) value = Settings.settings.upgrade_increase_type.price(value, increase);
-		return Price.of(Group.upgrades, value * generator.cache().stack());
+		return Price.of(Group.upgrades, value * cache.stack());
 	}
 	
 	private String value(SpawnerType type, int level, int i) {
@@ -511,7 +502,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			if(v <= 0) return "0";
 			return time(v * 0.05);
 		} else if(i == 2) {
-			int s = generator.cache().stack();
+			int s = cache.stack();
 			if(v <= 0) return s + "";
 			else if(v > 4048) return 4048 * s + "";
 			return v * s + "";
@@ -524,8 +515,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	}
 	
 	private boolean allowed(int i) {
-		SpawnerType type = generator.cache().type();
-		return Settings.settings.upgrades_upgradeable.get(type)[i];
+		return Settings.settings.upgrades_upgradeable.get(cache.type())[i];
 	}
 
 }
