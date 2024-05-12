@@ -88,6 +88,9 @@ public class LanguageFile extends AbstractFile {
 		put("Upgrade-GUI.items.stats.warnings.charges", "  <#ff8000><!italic>out of charges");
 		put("Upgrade-GUI.items.stats.warnings.power", "  <#ff8000><!italic>insufficient redstone power");
 		put("Upgrade-GUI.items.stats.warnings.unknown", "  <#ff8000><!italic>invalid spawn conditions");
+		put("Upgrade-GUI.items.stats.owner-offline", List.of(
+				"<#ffbf00>Unable to spawn because the owner",
+				"  <#ffbf00>of this spawner is offline!"));
 		put("Upgrade-GUI.items.stats.lore", List.of());
 		put("Upgrade-GUI.items.charges.name", "<#ff0080-#ff0000>Spawning Charges: <#00ffff>%charges%");
 		put("Upgrade-GUI.items.charges.purchase.first", "<#bfbfbf>Left-Click to purchase <#ffff00>%charges% charges <#808080><!italic>(%price%)");
