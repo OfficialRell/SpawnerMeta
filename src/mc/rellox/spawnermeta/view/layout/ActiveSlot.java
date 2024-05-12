@@ -4,7 +4,6 @@ import java.util.stream.IntStream;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.MemorySection;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
@@ -50,7 +49,7 @@ public record ActiveSlot(SlotField field, int[] slots, Material material, Materi
 		var item = new ItemStack(m);
 		var meta = item.getItemMeta();
 		if(glint == true) {
-			meta.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
+			meta.addEnchant(Utils.enchantment_power, 1, true);
 			meta.addItemFlags(ItemFlag.values());
 			Utils.hideCustomFlags(meta);
 		}
