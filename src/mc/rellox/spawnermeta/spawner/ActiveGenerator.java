@@ -46,7 +46,8 @@ import mc.rellox.spawnermeta.view.ActiveUpgrades;
 
 public class ActiveGenerator implements IGenerator {
 	
-	private static final DustOptions dust = new DustOptions(Color.MAROON, 1.5f);
+	private static final DustOptions dust_warn = new DustOptions(Color.MAROON, 1.5f);
+	private static final DustOptions dust_owner = new DustOptions(Color.ORANGE, 1.5f);
 	
 	private final ISpawner spawner;
 	private final IFinder finder;
@@ -187,8 +188,8 @@ public class ActiveGenerator implements IGenerator {
 			return;
 		}
 		
-		int ot = s.owned_offline_time;
-		if(ot <= 0) online = false;
+		int time = s.owned_offline_time;
+		if(time <= 0) online = false;
 		else {
 			OfflinePlayer op = Bukkit.getOfflinePlayer(id);
 			long last = op.getLastPlayed();
@@ -200,7 +201,7 @@ public class ActiveGenerator implements IGenerator {
 			sub /= 1000; // to seconds
 			sub /= 60; // to minutes
 			
-			online = sub > ot ? false : true;
+			online = sub <= time;
 		}
 	}
 
@@ -321,7 +322,7 @@ public class ActiveGenerator implements IGenerator {
 		}
 		
 		if(count <= 0) {
-			block.getWorld().spawnParticle(Particle.REDSTONE, block.getLocation().add(0.5, 0.5, 0.5),
+			block.getWorld().spawnParticle(Utils.particle_redstone, block.getLocation().add(0.5, 0.5, 0.5),
 					25, 0.45, 0.45, 0.45, 0.075, new DustOptions(Color.MAROON, 2.5f));
 			return false;
 		}
@@ -403,10 +404,14 @@ public class ActiveGenerator implements IGenerator {
 	
 	private boolean validate() {
 		if(warnings.isEmpty() == true || rotating == false || active == false) return true;
-		if(rotating == true && Settings.settings.warning_particles == true) {
-			Block block = spawner.block();
-			block.getWorld().spawnParticle(Particle.REDSTONE, Utils.center(block),
-					1, 0.5, 0.5, 0.5, 0, dust);
+		Block block = spawner.block();
+		if(online == false) {
+			block.getWorld().spawnParticle(Utils.particle_redstone, Utils.center(block),
+					1, 0.5, 0.5, 0.5, 0, dust_owner);
+		}
+		if(rotating == true && Settings.settings.warning_particles == true ) {
+			block.getWorld().spawnParticle(Utils.particle_redstone, Utils.center(block),
+					1, 0.5, 0.5, 0.5, 0, dust_warn);
 		}
 		if(validation == 0 && cache.enabled() == true) valid();
 		return false;
@@ -458,9 +463,15 @@ public class ActiveGenerator implements IGenerator {
 			boolean ignore = s.charges_ignore_natural == true && cache.natural() == true;
 			if(ignore == false) warn(SpawnerWarning.CHARGES);
 		}
-		int power = s.required_redstone_power;
-		if(power > 0 && spawner.block().getBlockPower() < power)
+		int power = s.redstone_power_required;
+		if(power > 0 && spawner.block().getBlockPower() < power
+				&& !(s.redstone_power_ignore_natural == true && cache.natural() == true))
 			warn(SpawnerWarning.POWER);
+	}
+	
+	@Override
+	public boolean online() {
+		return online;
 	}
 	
 	@Override
