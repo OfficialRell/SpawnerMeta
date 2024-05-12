@@ -127,6 +127,20 @@ public final class Reflect {
 		}
 		
 		/**
+		 * Returns a value list from the given class and name array.
+		 * 
+		 * @param <E> - type
+		 * @param mapper - mapper
+		 * @param ss - array of enum constant names
+		 * @return valid enum value list from the given name list
+		 */
+		
+		public static <E> E enumerate(Function<String, E> mapper, String... ss) {
+			var a = enumerates(mapper, List.of(ss));
+			return a.isEmpty() == true ? null : a.get(0);
+		}
+		
+		/**
 		 * Returns an enum value list from the given class and name array.
 		 * 
 		 * @param <E> - enum type
