@@ -107,12 +107,21 @@ public interface IGenerator {
 	
 	/**
 	 * Checks if all spawner requirements are met. Such as, light level,
-	 *  flood material, spawning space, charges and other.
+	 * floor material, spawning space, charges and other.
 	 * 
 	 * @return {@code true} if this spawner is valid to spawner entities
 	 */
 	
 	boolean valid();
+	
+	/**
+	 * Returns {@code true} if the owner of this spawner is online
+	 * or if the option 'spawn-if-online' is true.
+	 * 
+	 * @return {@code true} or {@code false}
+	 */
+	
+	boolean online();
 	
 	/**
 	 * @return Spawner upgrade GUI or {@code null} if not opened
