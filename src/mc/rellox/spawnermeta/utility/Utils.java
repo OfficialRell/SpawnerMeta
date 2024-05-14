@@ -1,13 +1,13 @@
 package mc.rellox.spawnermeta.utility;
 
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -99,49 +99,41 @@ public final class Utils {
 	// Items
 	
 	public static String displayName(ItemStack item) {
-		Class<?> c = RF.craft("inventory.CraftItemStack");
 		try {
-			Method m = c.getMethod("asNMSCopy", ItemStack.class);
-			Object o = m.invoke(null, item);
-			c = o.getClass();
+			Class<?> clazz = RF.craft("inventory.CraftItemStack");
+			Object nms_item = RF.order(clazz, "asNMSCopy", ItemStack.class).invoke(item);
+			String a, b = "getString";
+			
 			if(Version.version == VersionType.v_18_1) {
-				m = c.getDeclaredMethod("v");
-				o = m.invoke(o);
-				m = o.getClass().getMethod("a");
+				a = "v";
+				b = "a";
 			} else if(Version.version == VersionType.v_18_2) {
-				m = c.getDeclaredMethod("w");
-				o = m.invoke(o);
-				m = o.getClass().getMethod("a");
+				a = "w";
+				b = "a";
 			} else if(Version.version == VersionType.v_19_1
 					|| Version.version == VersionType.v_19_2
 					|| Version.version == VersionType.v_19_3) {
-				m = c.getDeclaredMethod("x");
-				o = m.invoke(o);
-				m = o.getClass().getMethod("getString");
+				a ="x";
 			} else if(Version.version == VersionType.v_20_1
 					|| Version.version == VersionType.v_20_2
 					|| Version.version == VersionType.v_20_3) {
-				m = c.getDeclaredMethod("y");
-				o = m.invoke(o);
-				m = o.getClass().getMethod("getString");
-				m = o.getClass().getMethod("getString");
+				a = "y";
 			} else if(Version.version == VersionType.v_20_4) {
-				m = c.getDeclaredMethod("x");
-				o = m.invoke(o);
-				m = o.getClass().getMethod("getString");
+				a = "x";
 			} else {
-				m = c.getDeclaredMethod("getName");
-				o = m.invoke(o);
-				m = o.getClass().getMethod("getText");
+				a = "getName";
+				b = "getText";
 			}
-			String name = (String) m.invoke(o);
-			if(name == null || name.isEmpty() == true) {
-				m = o.getClass().getMethod("getString");
-				name = (String) m.invoke(o);
-			}
+			
+			Object component = RF.direct(nms_item, a);
+			String name = RF.direct(component, b, String.class);
+			
+			if(name == null)
+				Bukkit.getLogger().warning("Null name got returned when trying to fetch item name");
+			
 			return ChatColor.stripColor(name);
 		} catch(Exception e) {
-			RF.debug(new RuntimeException("Cannot get item display name"));
+			Bukkit.getLogger().warning("Cannot get item display name");
 			return "null";
 		}
 	}

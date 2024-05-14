@@ -48,6 +48,8 @@ public final class Reflect {
 		}
 		
 		public static Class<?> craft(String s) {
+			if(SERVER_VERSION.equalsIgnoreCase("craftbukkit") == true)
+				return RF.get("org.bukkit.craftbukkit." + s);
 			return RF.get("org.bukkit.craftbukkit." + SERVER_VERSION + "." + s);
 		}
 		
