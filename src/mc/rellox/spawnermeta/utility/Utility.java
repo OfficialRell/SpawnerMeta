@@ -27,7 +27,7 @@ import mc.rellox.spawnermeta.utility.reflect.type.Accessor;
 import mc.rellox.spawnermeta.version.Version;
 import mc.rellox.spawnermeta.version.Version.VersionType;
 
-public final class Utils {
+public final class Utility {
 	
 	private static final Random R = new Random();
 	
@@ -120,6 +120,8 @@ public final class Utils {
 				a = "y";
 			} else if(Version.version == VersionType.v_20_4) {
 				a = "x";
+			} else if(Version.version == VersionType.v_21_1) {
+				a = "w";
 			} else {
 				a = "getName";
 				b = "getText";

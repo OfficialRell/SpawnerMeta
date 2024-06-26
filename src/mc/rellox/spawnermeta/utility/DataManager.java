@@ -156,9 +156,9 @@ public final class DataManager {
 		
 		order.named(name);
 		order.submit("HEADER", () -> Language.list("Spawner-item.header"));
-		order.submit("RANGE", () -> Language.list("Spawner-item.upgrade.range", "level", Utils.roman(levels[0])));
-		order.submit("DELAY", () -> Language.list("Spawner-item.upgrade.delay", "level", Utils.roman(levels[1])));
-		order.submit("AMOUNT", () -> Language.list("Spawner-item.upgrade.amount", "level", Utils.roman(levels[2])));
+		order.submit("RANGE", () -> Language.list("Spawner-item.upgrade.range", "level", Utility.roman(levels[0])));
+		order.submit("DELAY", () -> Language.list("Spawner-item.upgrade.delay", "level", Utility.roman(levels[1])));
+		order.submit("AMOUNT", () -> Language.list("Spawner-item.upgrade.amount", "level", Utility.roman(levels[2])));
 		if(Settings.settings.charges_enabled == true) {
 			boolean inf = charges >= 1_000_000_000;
 			order.submit("CHARGES", () -> Language.list("Spawner-item.charges",
@@ -171,7 +171,7 @@ public final class DataManager {
 		meta.setLore(order.build());
 		
 		meta.addItemFlags(ItemFlag.values());
-		Utils.hideCustomFlags(meta);
+		Utility.hideCustomFlags(meta);
 		item.setItemMeta(meta);
 		modify(item, type, levels, charges, spawnable, empty);
 		List<ItemStack> list = new ArrayList<>(amount + 63 >> 6);
@@ -198,7 +198,7 @@ public final class DataManager {
 			if(i > 2 && vs[i].equals("inf") == true
 					|| vs[i].equals("infinite") == true) is[i] = 1_500_000_000;
 			else if(vs[i].equals("-") == true) is[i] = 0;
-			else if(Utils.isInteger(vs[i]) == true) is[i] = Integer.parseInt(vs[i]);
+			else if(Utility.isInteger(vs[i]) == true) is[i] = Integer.parseInt(vs[i]);
 			else return List.of();
 		}
 		int[] ls = Settings.settings.upgrades_levels.get(type);
@@ -421,7 +421,7 @@ public final class DataManager {
 	public static boolean isItemSpawner(Block block) {
 		CreatureSpawner cs = cast(block);
 		if(cs == null) return false;
-		return Utils.isItem(cs.getSpawnedType()) == true;
+		return Utility.isItem(cs.getSpawnedType()) == true;
 	}
 
 	public static void setType(Block block, SpawnerType type) {

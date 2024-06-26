@@ -16,7 +16,7 @@ import mc.rellox.spawnermeta.prices.Group;
 import mc.rellox.spawnermeta.prices.Price;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.utility.DataManager;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 
 public record BuyData(SpawnerType type, int value) {
 	
@@ -55,7 +55,7 @@ public record BuyData(SpawnerType type, int value) {
 		if(bs[3] == true) lore.add(Language.get("Shop-buy.items.spawner.purchase.all").text());
 		meta.setLore(lore);
 		meta.addItemFlags(ItemFlag.values());
-		Utils.hideCustomFlags(meta);
+		Utility.hideCustomFlags(meta);
 		item.setItemMeta(meta);
 		return item;
 	}

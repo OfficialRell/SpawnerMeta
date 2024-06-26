@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import org.bukkit.Location;
 
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 
 public interface ISelector extends Supplier<Location> {
 	
@@ -18,13 +18,13 @@ public interface ISelector extends Supplier<Location> {
 		SINGLE {
 			@Override
 			public ISelector get(List<Location> list) {
-				Location location = Utils.random(list);
+				Location location = Utility.random(list);
 				return () -> location.clone();
 			}
 		}, SPREAD {
 			@Override
 			public ISelector get(List<Location> list) {
-				return () -> Utils.random(list).clone();
+				return () -> Utility.random(list).clone();
 			}
 		};
 		

@@ -76,7 +76,7 @@ import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Messagable;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 
 public final class EventRegistry {
 	
@@ -199,7 +199,7 @@ public final class EventRegistry {
 		}
 		m.send(Language.list("Spawners.changing.type-changed", "type", call.getNewType()));
 		player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 2f, 2f);
-		player.spawnParticle(Utils.particle_happy, spawner.center(), 25, 0.25, 0.25, 0.25, 0.1);
+		player.spawnParticle(Utility.particle_happy, spawner.center(), 25, 0.25, 0.25, 0.25, 0.1);
 		ItemMatcher.remove(player, item, stack);
 		
 		spawner.setType(change);
@@ -211,7 +211,7 @@ public final class EventRegistry {
 
 	protected static void changing_empty(Player player, Messagable m, IGenerator generator, ItemStack item,
 			SpawnerType change) {
-		if(change.unique() == true && Utils.op(player) == false) return;
+		if(change.unique() == true && Utility.op(player) == false) return;
 		ICache cache = generator.cache();
 		SpawnerType type = cache.type();
 		if(type != SpawnerType.EMPTY) return;
@@ -262,7 +262,7 @@ public final class EventRegistry {
 		}
 		m.send(Language.list("Spawners.changing.type-changed", "type", change));
 		player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 2f, 2f);
-		player.spawnParticle(Utils.particle_happy, spawner.center(), 25, 0.25, 0.25, 0.25, 0.1);
+		player.spawnParticle(Utility.particle_happy, spawner.center(), 25, 0.25, 0.25, 0.25, 0.1);
 		
 		ItemMatcher.remove(player, item, stack);
 		spawner.setType(change);
@@ -303,7 +303,7 @@ public final class EventRegistry {
 				}
 			}
 		}
-		boolean b = Utils.nulled(player.getInventory().getItemInMainHand()) == false;
+		boolean b = Utility.nulled(player.getInventory().getItemInMainHand()) == false;
 		if(b == true) {
 			m.send(Language.list("Spawners.empty.hand-full"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
@@ -317,7 +317,7 @@ public final class EventRegistry {
 				public void run() {
 					if(block.equals(verify) == true) {
 						verify = null;
-						player.spawnParticle(Utils.particle_redstone, Utils.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
+						player.spawnParticle(Utility.particle_redstone, Utility.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
 								new DustOptions(Color.MAROON, 2f));
 					}
 				}
@@ -374,8 +374,8 @@ public final class EventRegistry {
 		ISpawner spawner = getAPI().getSpawner(block);
 		SpawnerType type = spawner.getType();
 		if(type == SpawnerType.EMPTY || spawner.isEmpty() == false) return;
-		boolean b = Utils.nulled(player.getInventory().getItemInMainHand()) == false;
-		if(b == false && Utils.op(player) == true) event.setCancelled(true);
+		boolean b = Utility.nulled(player.getInventory().getItemInMainHand()) == false;
+		if(b == false && Utility.op(player) == true) event.setCancelled(true);
 		if(verify == null) {
 			m.send(Language.list("Spawners.empty.verify-removing.try-again"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
@@ -494,7 +494,7 @@ public final class EventRegistry {
 			double loops = start.distance(end) / 0.25;
 			for(int i = 0; i < loops; i++) {
 				start.add(dis);
-				player.spawnParticle(Utils.particle_sharpness, start, 1, 0, 0, 0, 0);
+				player.spawnParticle(Utility.particle_sharpness, start, 1, 0, 0, 0, 0);
 			}
 		}
 		ItemMatcher.remove(player, item, stacked);
@@ -571,7 +571,7 @@ public final class EventRegistry {
 		call.getRefund().ifPresent(i -> player.getInventory().setItemInMainHand(i));
 		
 		player.playSound(player.getEyeLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 2f, 1f);
-		player.spawnParticle(Utils.particle_firework, spawner.center(), 25, 0.3, 0.3, 0.3, 0.1);
+		player.spawnParticle(Utility.particle_firework, spawner.center(), 25, 0.3, 0.3, 0.3, 0.1);
 		
 		spawner.setType(SpawnerType.EMPTY);
 		if(Settings.settings.changing_reset_empty == true) spawner.resetUpgradeLevels();
@@ -594,7 +594,7 @@ public final class EventRegistry {
 		Messagable m = new Messagable(player);
 		
 		ISpawner spawner = generator.spawner();
-		if(Utils.op(player) == true) {
+		if(Utility.op(player) == true) {
 			Location bl = spawner.center();
 			List<ItemStack> items = DataManager.getSpawners(generator, false);
 			if(items.isEmpty() == true) {
@@ -696,7 +696,7 @@ public final class EventRegistry {
 		}
 		Block block = generator.block();
 		List<Content> mm;
-		if(Utils.chance(call.chance) == true) {
+		if(Utility.chance(call.chance) == true) {
 			boolean give = true;
 			if(Settings.settings.breaking_silk_enabled == true) {
 				give = silk;
@@ -784,7 +784,7 @@ public final class EventRegistry {
 			} else {
 				if(xs[2] == true) destroy(generator, xs[3]);
 			}
-			block.getWorld().spawnParticle(Utils.particle_angry,
+			block.getWorld().spawnParticle(Utility.particle_angry,
 					block.getLocation().add(0.5, 0.5, 0.5), 10, 0.2, 0.2, 0.2, 0);
 			it.remove();
 		}
@@ -823,7 +823,7 @@ public final class EventRegistry {
 		Block block = generator.block();
 		if(Settings.settings.empty_destroy_eggs_breaking == true
 				|| Settings.settings.empty_store_inside == true) {
-			block.getWorld().spawnParticle(Particle.CRIT, Utils.center(block), 10, 0, 0, 0, 0.1);
+			block.getWorld().spawnParticle(Particle.CRIT, Utility.center(block), 10, 0, 0, 0, 0.1);
 			return;
 		}
 		ICache cache = generator.cache();
@@ -888,7 +888,7 @@ public final class EventRegistry {
 					if(xs[2] == true) destroy(generator, xs[3]);
 				}
 			}
-			block.getWorld().spawnParticle(Utils.particle_angry,
+			block.getWorld().spawnParticle(Utility.particle_angry,
 					block.getLocation().add(0.5, 0.5, 0.5), 10, 0.2, 0.2, 0.2, 0);
 			it.remove();
 		}
@@ -1022,7 +1022,7 @@ public final class EventRegistry {
 			event.setCancelled(true);
 			return;
 		}
-		if(Utils.isItem(entity.getType()) == true
+		if(Utility.isItem(entity.getType()) == true
 				&& Settings.settings.disable_item_spawners == true) {
 			event.setCancelled(true);
 			return;

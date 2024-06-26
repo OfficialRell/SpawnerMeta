@@ -19,7 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
@@ -135,7 +135,7 @@ public class ItemCollector implements Listener {
 
 	private int free(PlayerInventory v) {
 		return IntStream.range(0, 36)
-				.map(i -> Utils.nulled(v.getItem(i)) == true ? 1 : 0)
+				.map(i -> Utility.nulled(v.getItem(i)) == true ? 1 : 0)
 				.sum();
 	}
 

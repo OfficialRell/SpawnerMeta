@@ -39,7 +39,7 @@ import mc.rellox.spawnermeta.spawner.generator.SpawningManager;
 import mc.rellox.spawnermeta.spawner.requirement.ActiveFinder;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.utility.DataManager;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.utility.reflect.type.Invoker;
 import mc.rellox.spawnermeta.view.ActiveUpgrades;
@@ -322,7 +322,7 @@ public class ActiveGenerator implements IGenerator {
 		}
 		
 		if(count <= 0) {
-			block.getWorld().spawnParticle(Utils.particle_redstone, block.getLocation().add(0.5, 0.5, 0.5),
+			block.getWorld().spawnParticle(Utility.particle_redstone, block.getLocation().add(0.5, 0.5, 0.5),
 					25, 0.45, 0.45, 0.45, 0.075, new DustOptions(Color.MAROON, 2.5f));
 			return false;
 		}
@@ -357,7 +357,7 @@ public class ActiveGenerator implements IGenerator {
 
 		if(clear == true) {
 			remove(true);
-			block.getWorld().spawnParticle(Particle.LAVA, Utils.center(block),
+			block.getWorld().spawnParticle(Particle.LAVA, Utility.center(block),
 					25, 0.1, 0.1, 0.1, 0);
 		}
 		return true;
@@ -406,11 +406,11 @@ public class ActiveGenerator implements IGenerator {
 		if(warnings.isEmpty() == true || rotating == false || active == false) return true;
 		Block block = spawner.block();
 		if(online == false) {
-			block.getWorld().spawnParticle(Utils.particle_redstone, Utils.center(block),
+			block.getWorld().spawnParticle(Utility.particle_redstone, Utility.center(block),
 					1, 0.5, 0.5, 0.5, 0, dust_owner);
 		}
 		if(rotating == true && Settings.settings.warning_particles == true ) {
-			block.getWorld().spawnParticle(Utils.particle_redstone, Utils.center(block),
+			block.getWorld().spawnParticle(Utility.particle_redstone, Utility.center(block),
 					1, 0.5, 0.5, 0.5, 0, dust_warn);
 		}
 		if(validation == 0 && cache.enabled() == true) valid();

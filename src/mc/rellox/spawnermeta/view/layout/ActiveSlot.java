@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.api.view.layout.ISlot;
 import mc.rellox.spawnermeta.api.view.layout.SlotField;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 
 public record ActiveSlot(SlotField field, int[] slots, Material material, Material denier,
 		boolean glint, int model) implements ISlot {
@@ -49,9 +49,9 @@ public record ActiveSlot(SlotField field, int[] slots, Material material, Materi
 		var item = new ItemStack(m);
 		var meta = item.getItemMeta();
 		if(glint == true) {
-			meta.addEnchant(Utils.enchantment_power, 1, true);
+			meta.addEnchant(Utility.enchantment_power, 1, true);
 			meta.addItemFlags(ItemFlag.values());
-			Utils.hideCustomFlags(meta);
+			Utility.hideCustomFlags(meta);
 		}
 		if(model > 0) meta.setCustomModelData(model);
 		item.setItemMeta(meta);

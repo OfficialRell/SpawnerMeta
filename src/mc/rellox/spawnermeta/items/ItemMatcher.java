@@ -17,7 +17,7 @@ import org.bukkit.util.Vector;
 import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.text.content.ContentParser;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public final class ItemMatcher {
@@ -25,7 +25,7 @@ public final class ItemMatcher {
 	public static final ItemMatcher DEFAULT = new ItemMatcher(Material.GOLD_INGOT);
 	
 	public static boolean has(Player player, ItemStack item, int a) {
-		if(Utils.op(player) == true) return true;
+		if(Utility.op(player) == true) return true;
 		PlayerInventory v = player.getInventory();
 		int t = IntStream.range(0, 36).map(i -> {
 			ItemStack slot = v.getItem(i);
@@ -56,7 +56,7 @@ public final class ItemMatcher {
 	}
 	
 	public static void remove(Player player, ItemStack item, int a) {
-		if(Utils.op(player) == true) return;
+		if(Utility.op(player) == true) return;
 		ItemStack r = item.clone();
 		r.setAmount(a);
 		player.getInventory().removeItem(r);

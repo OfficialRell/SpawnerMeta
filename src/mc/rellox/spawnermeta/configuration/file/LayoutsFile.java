@@ -10,7 +10,7 @@ import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.view.layout.ISlot;
 import mc.rellox.spawnermeta.configuration.AbstractFile;
 import mc.rellox.spawnermeta.configuration.Configuration.CF;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.view.layout.ActiveBackground;
 import mc.rellox.spawnermeta.view.layout.ActiveSlot;
@@ -175,7 +175,7 @@ public class LayoutsFile extends AbstractFile {
 				hold("Upgrade-layout." + n + ".glint", cs.get(key + ".Glint"));
 				hold("Upgrade-layout." + n + ".model", cs.get(key + ".Model"));
 				var slots = file.getIntegerList("Upgrade-layout." + n + ".slots");
-				int i = Utils.isInteger(key) ? Integer.parseInt(key) : -1;
+				int i = Utility.isInteger(key) ? Integer.parseInt(key) : -1;
 				if(i >= 0) {
 					slots.add(i);
 					hold("Upgrade-layout." + n + ".slots", slots);

@@ -39,7 +39,7 @@ import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.text.content.Colorer.Colors;
 import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Messagable;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public final class CommandManager {
@@ -304,7 +304,7 @@ public final class CommandManager {
 			if(args.length < 3) sender.sendMessage(help1);
 			else {
 				String a = args[2];
-				if(Utils.isInteger(a) == false) warn(sender, "Invalid value!");
+				if(Utility.isInteger(a) == false) warn(sender, "Invalid value!");
 				else {
 					int s = Integer.parseInt(a);
 					Block block = player.getTargetBlock(null, 10);
@@ -324,7 +324,7 @@ public final class CommandManager {
 			else {
 				String a = args[2];
 				boolean inf = a.equalsIgnoreCase("infinite");
-				if(Utils.isInteger(a) == false && inf == false) warn(sender, "Invalid value!");
+				if(Utility.isInteger(a) == false && inf == false) warn(sender, "Invalid value!");
 				else {
 					int s = inf ? 1_500_000_000 : Integer.parseInt(a);
 					Block block = player.getTargetBlock(null, 10);
@@ -344,7 +344,7 @@ public final class CommandManager {
 			else {
 				String a = args[2];
 				boolean inf = a.equalsIgnoreCase("infinite");
-				if(Utils.isInteger(a) == false && inf == false) warn(sender, "Invalid value!");
+				if(Utility.isInteger(a) == false && inf == false) warn(sender, "Invalid value!");
 				else {
 					int s = inf ? 1_500_000_000 : Integer.parseInt(a);
 					Block block = player.getTargetBlock(null, 10);
@@ -382,7 +382,7 @@ public final class CommandManager {
 							player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 2f);
 						}
 					}
-				} else if(Utils.isInteger(args[2]) == false) warn(sender, "Invalid amount!");
+				} else if(Utility.isInteger(args[2]) == false) warn(sender, "Invalid amount!");
 				else {
 					int amount = Integer.parseInt(args[2]);
 					if(amount < 1) warn(sender, "Amount must be greater then 0!");
@@ -519,7 +519,7 @@ public final class CommandManager {
 				if(args.length < 3) return entities(args[1]);
 				else if(args.length < 4) return l;
 				else {
-					if(Utils.isInteger(args[2]) == true) {
+					if(Utility.isInteger(args[2]) == true) {
 						if(args.length < 5) return pl(args[3]);
 						else return l;
 					} else return l;

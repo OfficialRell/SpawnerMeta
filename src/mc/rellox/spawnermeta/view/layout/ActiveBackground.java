@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.api.view.layout.IBackground;
 import mc.rellox.spawnermeta.api.view.layout.SlotField;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 
 public record ActiveBackground(SlotField field, Material material, boolean glint, int model) implements IBackground {
 
@@ -25,7 +25,7 @@ public record ActiveBackground(SlotField field, Material material, boolean glint
 		var meta = item.getItemMeta();
 		if(glint == true) {
 			meta.addItemFlags(ItemFlag.values());
-			Utils.hideCustomFlags(meta);
+			Utility.hideCustomFlags(meta);
 		}
 		if(model > 0) meta.setCustomModelData(model);
 		meta.setDisplayName(" ");

@@ -18,7 +18,7 @@ import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.prices.Group;
 import mc.rellox.spawnermeta.prices.Price;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 
 public class PrivateSell {
 	
@@ -177,8 +177,8 @@ public class PrivateSell {
 			meta.setLore(lore);
 		}
 		meta.addItemFlags(ItemFlag.values());
-		Utils.hideCustomFlags(meta);
-		meta.addEnchant(Utils.enchantment_power, 1, true);
+		Utility.hideCustomFlags(meta);
+		meta.addEnchant(Utility.enchantment_power, 1, true);
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -188,8 +188,8 @@ public class PrivateSell {
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(Language.get("Shop-sell.cancel").text());
 		meta.addItemFlags(ItemFlag.values());
-		Utils.hideCustomFlags(meta);
-		meta.addEnchant(Utils.enchantment_power, 1, true);
+		Utility.hideCustomFlags(meta);
+		meta.addEnchant(Utility.enchantment_power, 1, true);
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -223,7 +223,7 @@ public class PrivateSell {
 					"price", c).text());
 			meta.setLore(lore);
 			meta.addItemFlags(ItemFlag.values());
-			Utils.hideCustomFlags(meta);
+			Utility.hideCustomFlags(meta);
 			clone.setItemMeta(meta);
 			return clone;
 		}

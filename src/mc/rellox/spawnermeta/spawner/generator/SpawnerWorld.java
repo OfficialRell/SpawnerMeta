@@ -100,7 +100,7 @@ public class SpawnerWorld {
 			} catch (Exception e) {}
 		}
 	}
-	
+
 	public void clear() {
 		spawners.values().forEach(IGenerator::clear);
 		spawners.clear();

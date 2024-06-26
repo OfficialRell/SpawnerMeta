@@ -44,7 +44,7 @@ import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.utility.DataManager;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public final class Settings {
@@ -340,7 +340,7 @@ public final class Settings {
 		
 		final int z = file.getInteger("Spawners.default-slime-size", 0, 8);
 		final int[] ss = {1, 2, 4};
-		slime_size = z <= 0 ? () -> ss[Utils.random(3)] : () -> z;
+		slime_size = z <= 0 ? () -> ss[Utility.random(3)] : () -> z;
 		slime_box = z <= 0 ? 3 : (int) (0.51 * (z + 1) + 1);
 		
 		cancel_spawning_event = file.getBoolean("Events.cancel-spawning-event");
@@ -674,7 +674,7 @@ public final class Settings {
 		}
 		meta.setLore(lore);
 		meta.addItemFlags(ItemFlag.values());
-		Utils.hideCustomFlags(meta);
+		Utility.hideCustomFlags(meta);
 		item.setItemMeta(meta);
 		return item;
 	}

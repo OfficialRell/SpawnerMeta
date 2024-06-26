@@ -44,7 +44,7 @@ import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.text.order.IOrder;
 import mc.rellox.spawnermeta.utility.Messagable;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.view.layout.LayoutRegistry;
 
 public final class ActiveUpgrades implements Listener, IUpgrades {
@@ -232,9 +232,9 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
 				UpgradeType ut = UpgradeType.of(i);
 				m.send(Language.list("Upgrade-GUI.purchase." + ut.lower(),
-						"level", Utils.roman(ls[i])));
+						"level", Utility.roman(ls[i])));
 				DustOptions d = new DustOptions(ut.color, 2f);
-				player.spawnParticle(Utils.particle_redstone, Utils.center(spawner.block()), 50, 0.25, 0.25, 0.25, 0, d);
+				player.spawnParticle(Utility.particle_redstone, Utility.center(spawner.block()), 50, 0.25, 0.25, 0.25, 0, d);
 				
 				update();
 			} else player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
@@ -276,7 +276,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		UpgradeType u = UpgradeType.of(i);
 		
 		List<Content> name = Language.list("Upgrade-GUI.items.upgrade.name." + u.lower(),
-				"level", Utils.roman(level));
+				"level", Utility.roman(level));
 		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
 
 		IOrder order = LayoutRegistry.order_upgrade.oderer();
@@ -379,7 +379,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 						: Language.list("Upgrade-GUI.items.stats.disabled");
 			});
 		}
-		int[] l = Utils.location(spawner.block());
+		int[] l = Utility.location(spawner.block());
 		order.submit("LOCATION", () -> {
 			return Language.list("Upgrade-GUI.items.stats.location",
 					"x", c(l[0]), "y", l[1], "z", c(l[2]));

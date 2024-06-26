@@ -11,7 +11,7 @@ import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.hook.ICurrency;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.text.content.Content;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 
 public abstract class Price {
 	
@@ -49,13 +49,13 @@ public abstract class Price {
 
 		@Override
 		public boolean has(Player player) {
-			return Utils.op(player) == true || Utils.getExp(player) >= value;
+			return Utility.op(player) == true || Utility.getExp(player) >= value;
 		}
 		
 		@Override
 		public void remove(Player player) {
-			if(Utils.op(player) == true) return;
-			Utils.changeExp(player, -value);
+			if(Utility.op(player) == true) return;
+			Utility.changeExp(player, -value);
 		}
 		
 		@Override
@@ -76,12 +76,12 @@ public abstract class Price {
 
 		@Override
 		public int balance(Player player) {
-			return Utils.getExp(player);
+			return Utility.getExp(player);
 		}
 		
 		@Override
 		public void refund(Player player) {
-			Utils.changeExp(player, value);
+			Utility.changeExp(player, value);
 		}
 		
 	}
@@ -94,12 +94,12 @@ public abstract class Price {
 
 		@Override
 		public boolean has(Player player) {
-			return Utils.op(player) == true || player.getLevel() >= value;
+			return Utility.op(player) == true || player.getLevel() >= value;
 		}
 		
 		@Override
 		public void remove(Player player) {
-			if(Utils.op(player) == true) return;
+			if(Utility.op(player) == true) return;
 			player.setLevel(player.getLevel() - value);
 		}
 		
@@ -143,7 +143,7 @@ public abstract class Price {
 
 		@Override
 		public boolean has(Player player) {
-			if(Utils.op(player) == true) return true;
+			if(Utility.op(player) == true) return true;
 			Inventory v = player.getInventory();
 			int h = IntStream.range(0, 36).map(i -> {
 				ItemStack item = v.getItem(i);
@@ -154,7 +154,7 @@ public abstract class Price {
 		
 		@Override
 		public void remove(Player player) {
-			if(Utils.op(player) == true) return;
+			if(Utility.op(player) == true) return;
 			Inventory v = player.getInventory();
 			int[] f = {value};
 			IntStream.range(0, 36).forEach(i -> {
@@ -180,13 +180,13 @@ public abstract class Price {
 		@Override
 		public Content text() {
 			return Language.get("Prices.type.material.amount",
-					"amount", value, "material", Utils.displayName(matcher.refund()));
+					"amount", value, "material", Utility.displayName(matcher.refund()));
 		}
 		
 		@Override
 		public Content requires(Player player) {
 			return Language.get("Prices.type.material.amount",
-					"amount", value - balance(player), "material", Utils.displayName(matcher.refund()));
+					"amount", value - balance(player), "material", Utility.displayName(matcher.refund()));
 		}
 
 		@Override
@@ -266,12 +266,12 @@ public abstract class Price {
 
 		@Override
 		public boolean has(Player player) {
-			return Utils.op(player) == true || currency.has(player, value) == true;
+			return Utility.op(player) == true || currency.has(player, value) == true;
 		}
 		
 		@Override
 		public void remove(Player player) {
-			if(Utils.op(player) == true) return;
+			if(Utility.op(player) == true) return;
 			currency.remove(player, value);
 		}
 		
