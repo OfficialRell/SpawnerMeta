@@ -20,12 +20,12 @@ import mc.rellox.spawnermeta.spawner.generator.SpawningManager;
 import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Metrics;
-import mc.rellox.spawnermeta.utility.Utils;
+import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.version.Version;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 24.1;
+	public static final double PLUGIN_VERSION = 24.2;
 	
 	private static SpawnerMeta plugin;
     
@@ -47,8 +47,8 @@ public final class SpawnerMeta extends JavaPlugin {
 	public void onEnable() {
 		if(loaded == true) {
 			Text.logLoad();
-			Utils.check(74188, s -> {
-				if(Utils.isDouble(s) == false) return;
+			Utility.check(74188, s -> {
+				if(Utility.isDouble(s) == false) return;
 				double v = Double.parseDouble(s);
 				if(v > PLUGIN_VERSION) Text.logOutdated(v);
 			});
