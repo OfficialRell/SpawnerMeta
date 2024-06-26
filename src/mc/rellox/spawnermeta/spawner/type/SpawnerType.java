@@ -17,6 +17,7 @@ public enum SpawnerType {
 	EMPTY(EntityType.AREA_EFFECT_CLOUD, "EMPTY", null, true, EntityBox.box(0, 0, 0)),
 
 	ALLAY(_e("ALLAY"), "Allay", _m("ALLAY_SPAWN_EGG"), EntityBox.single()),
+	ARMADILLO(_e("ARMADILLO"), "Armadillo", _m("ARMADILLO_SPAWN_EGG"), EntityBox.single()),
 	ARMOR_STAND(EntityType.ARMOR_STAND, "Armor Stand", Material.ARMOR_STAND, true, EntityBox.box(1, 2, 1)),
 	AXOLOTL(_e("AXOLOTL"), "Axolotl", _m("AXOLOTL_SPAWN_EGG"), EntityBox.single()),
 	BAT(EntityType.BAT, "Bat", Material.BAT_SPAWN_EGG, EntityBox.single()),
