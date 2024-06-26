@@ -34,6 +34,7 @@ public class RequirementFile extends AbstractFile {
 				solid = "SOLID";
 		
 		put(SpawnerType.ALLAY, "", air, "");
+		put(SpawnerType.ARMADILLO, "9+", air, grass);
 		put(SpawnerType.AXOLOTL, "", water, "");
 		put(SpawnerType.BAT, "-3", air, "");
 		put(SpawnerType.BEE, "9+", air, "");
