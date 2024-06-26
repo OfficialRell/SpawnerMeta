@@ -13,7 +13,8 @@ public final class Version {
 	static {
 		String s = Bukkit.getServer().getClass().getPackage().getName();
 		server = s.substring(s.lastIndexOf('.') + 1);
-		if(server.contains("v1_20_R4") == true
+		if(server.contains("v1_21_R1") == true) version = VersionType.v_21_1;
+		else if(server.contains("v1_20_R4") == true
 				|| Bukkit.getBukkitVersion().startsWith("1.20.6-R0.1") == true
 				|| server.equalsIgnoreCase("craftbukkit") == true) version = VersionType.v_20_4;
 		else if(server.contains("v1_20_R3") == true) version = VersionType.v_20_3;
@@ -42,7 +43,8 @@ public final class Version {
 		v_17_1,
 		v_18_1, v_18_2,
 		v_19_1, v_19_2, v_19_3,
-		v_20_1, v_20_2, v_20_3, v_20_4;
+		v_20_1, v_20_2, v_20_3, v_20_4,
+		v_21_1;
 		
 		public boolean high(VersionType type) {
 			return ordinal() >= type.ordinal();
