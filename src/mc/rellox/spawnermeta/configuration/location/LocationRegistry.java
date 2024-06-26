@@ -114,9 +114,10 @@ public final class LocationRegistry implements Listener {
 		if(list == null || list.length <= 0) return List.of();
 		List<String> names = new ArrayList<>();
 		for(String file : list) {
+			file = file.replace(".yml", "");
 			if(uuid_validation.matcher(file).matches() == false) continue;
 			try {
-				UUID id = UUID.fromString(file.replace(".yml", ""));
+				UUID id = UUID.fromString(file);
 				String name = Bukkit.getOfflinePlayer(id).getName();
 				if(name != null) names.add(name);
 			} catch (Exception e) {
@@ -138,9 +139,10 @@ public final class LocationRegistry implements Listener {
 		String[] list = parent.list();
 		if(list == null || list.length <= 0) return null;
 		for(String file : list) {
+			file = file.replace(".yml", "");
 			if(uuid_validation.matcher(file).matches() == false) continue;
 			try {
-				UUID id = UUID.fromString(file.replace(".yml", ""));
+				UUID id = UUID.fromString(file);
 				String name = Bukkit.getOfflinePlayer(id).getName();
 				if(name != null && name.equalsIgnoreCase(player) == true)
 					return get(id);
