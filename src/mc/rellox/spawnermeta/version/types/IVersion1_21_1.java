@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
@@ -57,7 +58,8 @@ public class IVersion1_21_1 implements IVersion {
 		
 		Class<?> a = RF.get("net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata");
 
-		int b = RF.direct(entity, "an", int.class);
+		Entity bukkit = RF.direct(entity, "getBukkitEntity", Entity.class);
+		int b = bukkit.getEntityId();
 		
 		Object c = RF.direct(entity, "ar");
 		
@@ -72,8 +74,9 @@ public class IVersion1_21_1 implements IVersion {
 	public Object destroy(Object entity) {
 
 		Class<?> a = RF.get("net.minecraft.network.protocol.game.PacketPlayOutEntityDestroy");
-		
-		int b = RF.direct(entity, "an", int.class);
+
+		Entity bukkit = RF.direct(entity, "getBukkitEntity", Entity.class);
+		int b = bukkit.getEntityId();
 		
 		Object c = RF.build(a, int[].class).instance(new int[] {b});
 		
