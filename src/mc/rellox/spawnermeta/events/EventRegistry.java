@@ -767,10 +767,10 @@ public final class EventRegistry {
 		Block block;
 		while(it.hasNext() == true && (block = it.next()) != null) {
 			if(block.getType() != Material.SPAWNER) continue;
-			BlockState bs = block.getState();
-			if(bs instanceof CreatureSpawner == false) continue;
+			
 			IGenerator generator = EventListeners.fetch(block);
 			if(generator == null) continue;
+			
 			boolean[] xs = Settings.settings.explosion_types.get(ExplosionType.TNT);
 
 			SpawnerExplodeEvent call = call(new SpawnerExplodeEvent(generator, ExplosionType.TNT, xs));
@@ -857,10 +857,15 @@ public final class EventRegistry {
 		Block block;
 		while(it.hasNext() == true && (block = it.next()) != null) {
 			if(block.getType() != Material.SPAWNER) continue;
-			BlockState bs = block.getState();
-			if(bs instanceof CreatureSpawner == false) continue;
+			
+			if(Utility.isWindCharge(entity) == true) {
+				it.remove();
+				continue;
+			}
+			
 			IGenerator generator = EventListeners.fetch(block);
 			if(generator == null) continue;
+			
 			ExplosionType explosion;
 			boolean[] xs;
 			if(entity instanceof TNTPrimed) {

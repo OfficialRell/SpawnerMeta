@@ -15,6 +15,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -148,6 +149,14 @@ public final class Utility {
 		} catch (Exception e) {
 			RF.debug(new RuntimeException("Unable to apply hidden item flag"));
 		}
+	}
+	
+	public static boolean isWindCharge(Entity entity) {
+		if(Version.version.high(VersionType.v_21_1) == false) return false;
+		return switch (entity.getType().name()) {
+		case "WIND_CHARGE", "BREEZE_WIND_CHARGE" -> true;
+		default -> false;
+		};
 	}
 	
 	public static boolean nulled(ItemStack item) {
