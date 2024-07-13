@@ -213,7 +213,7 @@ public final class GeneratorRegistry implements Listener {
 			World world = event.getWorld();
 			if(Settings.inactive(world) == true) return;
 			
-			get(world).load(event.getChunk(), Settings.settings.delayed_chunk_loading);
+			get(world).load(event.getChunk());
 		} catch (Exception e) {
 			RF.debug(e);
 		}

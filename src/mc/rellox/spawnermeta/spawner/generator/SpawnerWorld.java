@@ -1,25 +1,19 @@
 package mc.rellox.spawnermeta.spawner.generator;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Stream;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.scheduler.BukkitRunnable;
 
-import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.location.Pos;
@@ -31,13 +25,11 @@ public class SpawnerWorld {
 	public final World world;
 	protected final Map<Pos, IGenerator> spawners;
 	private final List<IGenerator> queue;
-	private final Set<Chunk> chunks;
 	
 	public SpawnerWorld(World world) {
 		this.world = world;
 		this.spawners = new HashMap<>();
-		this.queue = new LinkedList<>();;
-		this.chunks = new HashSet<>();
+		this.queue = new LinkedList<>();
 	}
 	
 	public Stream<IGenerator> stream() {
@@ -49,15 +41,6 @@ public class SpawnerWorld {
 	}
 	
 	public void load(Chunk chunk) {
-		load(chunk, false);
-	}
-	
-	public void load(Chunk chunk, boolean delayed) {
-		if(delayed == true) {
-			delay();
-			chunks.add(chunk);
-			return;
-		}
 		Stream.of(chunk.getTileEntities())
 		.filter(CreatureSpawner.class::isInstance)
 		.map(BlockState::getBlock)
@@ -67,38 +50,10 @@ public class SpawnerWorld {
 		.forEach(queue::add);
 	}
 	
-	private void delay() {
-		if(chunks.isEmpty() == false) return;
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				try {
-					Iterator<Chunk> it = chunks.iterator();
-					if(it.hasNext() == true) {
-						Chunk next = it.next();
-						if(chunks.contains(next) == true) it.remove();
-						load(next);
-					}
-				} catch (Exception e) {}
-			}
-		}.runTaskTimer(SpawnerMeta.instance(), 1, 5);
-	}
-	
 	public void unload(Chunk chunk) {
-		Stream.of(chunk.getTileEntities())
-		.filter(CreatureSpawner.class::isInstance)
-		.map(BlockState::getBlock)
-		.map(Pos::of)
-		.map(spawners::get)
-		.filter(Objects::nonNull)
+		spawners.values().stream()
+		.filter(g -> g.in(chunk))
 		.forEach(g -> g.remove(false));
-		if(Settings.settings.delayed_chunk_loading == true) {
-			try {
-				if(chunks.isEmpty() == false)
-					Bukkit.getScheduler().runTask(SpawnerMeta.instance(),
-							() -> chunks.remove(chunk));
-			} catch (Exception e) {}
-		}
 	}
 
 	public void clear() {

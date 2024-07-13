@@ -1,5 +1,6 @@
 package mc.rellox.spawnermeta.api.spawner;
 
+import org.bukkit.Chunk;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -162,6 +163,17 @@ public interface IGenerator {
 	
 	default Pos position() {
 		return Pos.of(spawner().block());
+	}
+	
+	/**
+	 * @param chunk - chunk
+	 * @return {@code true} if this spawner is in the specified chunk
+	 */
+	
+	default boolean in(Chunk chunk) {
+		Block block = block();
+		if(block.getWorld().equals(chunk.getWorld()) == false) return false;
+		return chunk.getX() == (block.getX() >> 4) && chunk.getZ() == (block.getZ() >> 4);
 	}
 
 }
