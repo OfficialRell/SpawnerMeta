@@ -24,6 +24,8 @@ public enum SpawnerType {
 	BEE(_e("BEE"), "Bee", _m("BEE_SPAWN_EGG"), EntityBox.single()),
 	BLAZE(EntityType.BLAZE, "Blaze", Material.BLAZE_SPAWN_EGG, EntityBox.box(1, 2, 1)),
 	BOAT(EntityType.BOAT, "Boat", Material.OAK_BOAT, true, EntityBox.box(2, 1, 2)),
+	BOGGED(_e("BOGGED"), "Bogged", _m("BOGGED_SPAWN_EGG"), EntityBox.box(1, 2, 1)),
+	BREEZE(_e("BREEZE"), "Breeze", _m("BREEZE_SPAWN_EGG"), EntityBox.box(1, 2, 1)),
 	CAMEL(_e("CAMEL"), "Camel", _m("CAMEL_SPAWN_EGG"), EntityBox.box(2, 3, 2)),
 	CAT(_e("CAT"), "Cat", _m("CAT_SPAWN_EGG"), EntityBox.single()),
 	CAVE_SPIDER(EntityType.CAVE_SPIDER, "Cave Spider", Material.CAVE_SPIDER_SPAWN_EGG, EntityBox.single()),

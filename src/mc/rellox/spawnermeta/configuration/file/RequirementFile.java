@@ -39,6 +39,8 @@ public class RequirementFile extends AbstractFile {
 		put(SpawnerType.BAT, "-3", air, "");
 		put(SpawnerType.BEE, "9+", air, "");
 		put(SpawnerType.BLAZE, "-11", air, "");
+		put(SpawnerType.BOGGED, "-4", air, "");
+		put(SpawnerType.BREEZE, "-11", air, "");
 		put(SpawnerType.CAMEL, "9+", air, List.of(sand, red));
 		put(SpawnerType.CAT, "9+", air, solid);
 		put(SpawnerType.CAVE_SPIDER, "-4", air, "", true);
