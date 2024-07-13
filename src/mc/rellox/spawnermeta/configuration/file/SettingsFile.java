@@ -17,7 +17,7 @@ import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 
 public class SettingsFile extends AbstractFile {
 	
-	private static final int version = 10;
+	private static final int version = 11;
 
 	public SettingsFile() {
 		super("configuration");
@@ -65,6 +65,9 @@ public class SettingsFile extends AbstractFile {
 		if(CF.version < 10) {
 			copy("Spawners.required-redstone-power", "Spawners.redstone-power.required");
 		}
+		if(CF.version < 11) {
+			delete("Spawners.delayed-chunk-loading");
+		}
 
 		file.addDefault("Debug-errors", true);
 		
@@ -79,7 +82,6 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Spawners.spawning-radius.horizontal", 3);
 		file.addDefault("Spawners.spawning-radius.vertical", 3);
 
-		file.addDefault("Spawners.delayed-chunk-loading", false);
 		file.addDefault("Spawners.ticking-interval", 1);
 		file.addDefault("Spawners.validation-interval", 100);
 		file.addDefault("Spawners.checking-interval", 1);
@@ -360,15 +362,6 @@ public class SettingsFile extends AbstractFile {
 					"  SPREAD - spread entities around spawner.");
 			c.comment("Spawners.spawning-radius.horizontal", "Horizontal (x and z) entity spawning radius.");
 			c.comment("Spawners.spawning-radius.vertical", "Vertical (y) entity spawning radius.");
-			c.comment("Spawners.delayed-chunk-loading",
-					"If true, when chunks are loaded spawner",
-					"  initializing will be queued to improve",
-					"  server performance.",
-					"Note, this options will mostly benifit",
-					"  servers with high amounts of spawners",
-					"  or players.",
-					"THIS OPTION IS CURRENTLY DISABLED,",
-					"  DUE TO THREAD ISSUES!");
 			c.comment("Spawners.ticking-interval",
 					"Amount of ticks between each spawner tick.",
 					"Note! This is the main interval, meaning",

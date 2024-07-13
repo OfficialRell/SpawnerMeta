@@ -71,7 +71,6 @@ public final class Settings {
 	
 	public boolean reset_spawner_values;
 	
-	public boolean delayed_chunk_loading;
 	public int radius_horizontal;
 	public int radius_vertical;
 	public Selection selection;
@@ -308,7 +307,6 @@ public final class Settings {
 		selection = RF.enumerate(Selection.class, file.getString("Spawners.spawning-type"),
 				Selection.SPREAD);
 		
-		delayed_chunk_loading = false;//file.getBoolean("Spawners.delayed-chunk-loading");
 		radius_horizontal = file.getInteger("Spawners.spawning-radius.horizontal", 1, 8);
 		radius_vertical = file.getInteger("Spawners.spawning-radius.vertical", 1, 8);
 		spawner_switching = file.getBoolean("Spawners.switching");
