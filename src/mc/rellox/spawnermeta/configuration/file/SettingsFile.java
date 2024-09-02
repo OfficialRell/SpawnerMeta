@@ -88,6 +88,7 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Spawners.check-if-present.enabled", true);
 		file.addDefault("Spawners.check-if-present.interval", 1200);
 		file.addDefault("Spawners.tick-until-zero", false);
+		file.addDefault("Spawners.delay-offset", 5);
 		
 		file.addDefault("Spawners.reset-spawner-values", false);
 		
@@ -406,6 +407,12 @@ public class SettingsFile extends AbstractFile {
 					"This will cause the spawner to tick even if",
 					"  there are no nearby players, but will spawn",
 					"  entities only when a player comes nearby.");
+			c.comment("Spawners.delay-offset",
+					"Delay offset when the spawner resets its spawn",
+					"  delay.",
+					"This value is a percentage, meaning by default it",
+					"  will offset the delay by 5% of the maximum delay.",
+					"Interval [0-99]");
 			c.comment("Spawners.reset-spawner-values",
 					"If true after spawner unloading all spawner",
 					"  values will be reset to vanilla values.",

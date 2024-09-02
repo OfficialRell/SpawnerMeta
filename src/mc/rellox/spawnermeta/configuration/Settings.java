@@ -68,6 +68,7 @@ public final class Settings {
 	public boolean check_present_enabled;
 	public int check_present_interval;
 	public boolean tick_until_zero;
+	public double delay_offset;
 	
 	public boolean reset_spawner_values;
 	
@@ -299,6 +300,10 @@ public final class Settings {
 		check_present_enabled = file.getBoolean("Spawners.check-if-present.enabled");
 		check_present_interval = file.getInteger("Spawners.check-if-present.interval", 100, 100000);
 		tick_until_zero = file.getBoolean("Spawners.tick-until-zero");
+		delay_offset = file.getDouble("Spawners.delay-offset");
+		if(delay_offset > 99) delay_offset = 99;
+		else if(delay_offset < 1) delay_offset = 1;
+		delay_offset *= 0.01;
 		
 		reset_spawner_values = file.getBoolean("Spawners.reset-spawner-values");
 		

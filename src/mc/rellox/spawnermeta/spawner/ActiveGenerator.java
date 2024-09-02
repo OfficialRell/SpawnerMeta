@@ -136,8 +136,7 @@ public class ActiveGenerator implements IGenerator {
 		if(active == false) return;
 		cache.cache();
 		
-		delay = cache.delay() / Settings.settings.ticking_interval;
-		if(ticks <= 0 || ticks > delay) ticks = delay;
+		retime();
 		
 		spawner.setDelay(ticks);
 		finder.update();
@@ -149,6 +148,17 @@ public class ActiveGenerator implements IGenerator {
 				|| emptied == true) spawner.setRotating(rotating = false);
 		else spawner.setRotating(rotating);
 		check();
+	}
+	
+	private void retime() {
+		delay = cache.delay() / Settings.settings.ticking_interval;
+		int next = delay;
+		double offset = Settings.settings.delay_offset;
+		if(offset > 0) {
+			int o = (int) (delay * offset);
+			if(o > 0) next += Utility.random(o << 1) - o;
+		}
+		if(ticks <= 0 || ticks > delay) ticks = next;
 	}
 	
 	@Override
