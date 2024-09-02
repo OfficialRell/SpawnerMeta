@@ -15,7 +15,8 @@ public final class Version {
 		server = s.substring(s.lastIndexOf('.') + 1);
 		String bukkit = Bukkit.getBukkitVersion();
 		if(server.contains("v1_21_R1") == true
-				|| bukkit.startsWith("1.21-R0.1") == true) version = VersionType.v_21_1;
+				|| bukkit.startsWith("1.21-R0.1") == true
+				|| bukkit.startsWith("1.21.1-R0.1") == true) version = VersionType.v_21_1;
 		else if(server.contains("v1_20_R4") == true
 				|| bukkit.startsWith("1.20.6-R0.1") == true) version = VersionType.v_20_4;
 		else if(server.contains("v1_20_R3") == true) version = VersionType.v_20_3;
@@ -45,7 +46,7 @@ public final class Version {
 		v_18_1, v_18_2,
 		v_19_1, v_19_2, v_19_3,
 		v_20_1, v_20_2, v_20_3, v_20_4,
-		v_21_1;
+		v_21_1, v_21_2;
 		
 		public boolean high(VersionType type) {
 			return ordinal() >= type.ordinal();
