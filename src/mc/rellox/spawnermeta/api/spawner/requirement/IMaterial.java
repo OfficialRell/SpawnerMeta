@@ -24,10 +24,14 @@ public interface IMaterial {
 		if(type == Material.WATER) return true;
 		if(type.getHardness() > 0) return false;
 		if(block.getBlockData() instanceof Waterlogged) return true;
-		if(type == Material.SEAGRASS || type == Material.TALL_SEAGRASS
-				|| type == Material.KELP_PLANT) return true;
-		return false;
+		return type == Material.SEAGRASS || type == Material.TALL_SEAGRASS
+				|| type == Material.KELP_PLANT;
 	};
+	static IMaterial slab = block -> block.getType().name().endsWith("_SLAB");
+	static IMaterial stairs = block -> block.getType().name().endsWith("_STAIRS");
+	static IMaterial fence = block -> block.getType().name().endsWith("_FENCE")
+			|| block.getType().name().endsWith("_FENCE_GATE")
+			|| block.getType().name().endsWith("_WALL");
 	
 	static IMaterial is(Material m) {
 		return new IMaterial() {

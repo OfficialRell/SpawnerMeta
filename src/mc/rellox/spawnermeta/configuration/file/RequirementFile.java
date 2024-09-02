@@ -89,7 +89,7 @@ public class RequirementFile extends AbstractFile {
 		put(SpawnerType.SALMON, "", water, "");
 		put(SpawnerType.SHEEP, "9+", air, grass);
 		put(SpawnerType.SHULKER, "-4", air, "", true);
-		put(SpawnerType.SILVERFISH, "-4", air, "", true);
+		put(SpawnerType.SILVERFISH, "-11", air, "", true);
 		put(SpawnerType.SKELETON, "-4", air, "", true);
 		put(SpawnerType.SKELETON_HORSE, "", air, solid);
 		put(SpawnerType.SLIME, "-7", air, "", true);
@@ -153,6 +153,9 @@ public class RequirementFile extends AbstractFile {
 				"Built-in values:",
 				"# SOLID (all solid block types)",
 				"# AIR (air and insta-break block types)",
+				"# SLAB (all slab types)",
+				"# STAIRS (stair types)",
+				"# FENCE (fence, fence gate and wall types)",
 				"",
 				"Syntax:",
 				"  'STONE' (to include this block type)",
@@ -245,6 +248,9 @@ public class RequirementFile extends AbstractFile {
 			else if(s.equalsIgnoreCase("SOLID") == true) return IMaterial.solid;
 			else if(s.equalsIgnoreCase("AIR") == true) return IMaterial.air;
 			else if(s.equalsIgnoreCase("WATER") == true) return IMaterial.water;
+			else if(s.equalsIgnoreCase("SLAB") == true) return IMaterial.slab;
+			else if(s.equalsIgnoreCase("STAIRS") == true) return IMaterial.stairs;
+			else if(s.equalsIgnoreCase("FENCE") == true) return IMaterial.fence;
 			Material m = RF.enumerate(Material.class, s.toUpperCase());
 			if(m == null) error = true;
 			else return not ? IMaterial.not(m) : IMaterial.is(m);
