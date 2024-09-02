@@ -177,6 +177,10 @@ public final class Utility {
 	public static int random(int r) {
 		return R.nextInt(r);
 	}
+	
+	public static int between(int a, int b) {
+		return random(b - a + 1) + a;
+	}
 
 	public static <E> E random(List<E> list) {
 		int size = list.size();
