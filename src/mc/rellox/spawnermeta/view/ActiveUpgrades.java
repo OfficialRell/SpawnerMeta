@@ -109,12 +109,16 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 
 	@Override
 	public void close() {
-		if(active == true) {
+		boolean unregister = active;
+		active = false;
+		
+		players.forEach(Player::closeInventory);
+		players.clear();
+		
+		if(unregister == true) {
 			HandlerList.unregisterAll(this);
-			active = false;
 			generator.close();
 		}
-		players.forEach(Player::closeInventory);
 	}
 	
 	@EventHandler
@@ -246,8 +250,11 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	
 	@EventHandler
 	private void onClose(InventoryCloseEvent event) {
+		if(active == false) return;
+		
 		Player player = (Player) event.getPlayer();
 		players.remove(player);
+		
 		if(players.isEmpty() == true) close();
 		else update();
 	}
