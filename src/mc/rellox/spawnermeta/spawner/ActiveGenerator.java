@@ -309,6 +309,7 @@ public class ActiveGenerator implements IGenerator {
 		}
 		
 		boolean clear = false;
+		int spawned = -1;
 		x: if(call.bypass_checks == false && s.spawnable_enabled == true) {
 			int spawnable = cache.spawnable();
 			if(spawnable >= 1_000_000_000) break x;
@@ -321,14 +322,7 @@ public class ActiveGenerator implements IGenerator {
 				count = spawnable;
 				spawnable = 0;
 			} else spawnable -= count;
-			spawner.setSpawnable(spawnable);
-			if(spawnable < cache.stack()) {
-				if(spawnable <= 0) clear = true;
-				else {
-					spawner.setStack(spawnable);
-					if(hologram != null) hologram.rewrite();
-				}
-			}
+			spawned = spawnable;
 		}
 		
 		if(count <= 0) {
@@ -365,6 +359,17 @@ public class ActiveGenerator implements IGenerator {
 		if(call.bypass_checks == false && s.charges_enabled == true
 				&& cache.charges() < 1_000_000_000) spawner.setCharges(cache.charges() - 1);
 
+		if(spawned >= 0) {
+			spawner.setSpawnable(spawned);
+			if(spawned < cache.stack()) {
+				if(spawned <= 0) clear = true;
+				else {
+					spawner.setStack(spawned);
+					if(hologram != null) hologram.rewrite();
+				}
+			}
+		}
+		
 		if(clear == true) {
 			remove(true);
 			block.getWorld().spawnParticle(Particle.LAVA, Utility.center(block),
