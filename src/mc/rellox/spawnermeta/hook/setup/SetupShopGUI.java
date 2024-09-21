@@ -13,6 +13,7 @@ import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import net.brcdev.shopgui.ShopGuiPlusApi;
 import net.brcdev.shopgui.event.ShopGUIPlusPostEnableEvent;
+import net.brcdev.shopgui.exception.api.ExternalSpawnerProviderNameConflictException;
 import net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider;
 
 public class SetupShopGUI {
@@ -24,9 +25,11 @@ public class SetupShopGUI {
 	public static class ShopGUIPlusHook implements Listener {
 
 		@EventHandler
-		public void onenable(ShopGUIPlusPostEnableEvent event) {
+		public void onEnable(ShopGUIPlusPostEnableEvent event) {
 			try {
 				ShopGuiPlusApi.registerSpawnerProvider(new SpawnerMetaSpawnerProvider());
+			} catch (ExternalSpawnerProviderNameConflictException e) {
+				// ignore
 			} catch(Exception e) {
 				RF.debug(e);
 			}
