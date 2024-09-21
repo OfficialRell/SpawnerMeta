@@ -71,15 +71,13 @@ public final class SpawningManager {
 			Class<?> clazz = type.entity().getEntityClass();
 			if(LivingEntity.class.isAssignableFrom(clazz) == true
 					&& HookRegistry.WILD_STACKER.exists() == true) {
-//				Bukkit.getLogger().info("Spawning through WS");
 				entities = HookRegistry.WILD_STACKER.combine(spawner, type, selector, count);
 			} else {
-//				Bukkit.getLogger().info("Spawning as regular");
 				entities = new ArrayList<>(count);
 				for(int i = 0; i < count; i++) {
 					Location at = selector.get();
 					Entity entity = invoker.invoke(at, clazz, modifier, s.spawn_reason);
-					if(entity == null) continue;
+					if(entity == null || entity.isValid() == false) continue;
 					entities.add(entity);
 					particle(at);
 				}
