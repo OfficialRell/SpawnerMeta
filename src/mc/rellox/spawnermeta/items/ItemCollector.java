@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.bukkit.Sound;
@@ -19,7 +18,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.utility.Utility;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
@@ -118,7 +116,7 @@ public class ItemCollector implements Listener {
 	
 	public boolean get(boolean silent) {
 		PlayerInventory v = player.getInventory();
-		int f = free(v);
+		int f = ItemMatcher.free(player);
 		if(f < items.size()) {
 			if(silent == false) {
 				player.sendMessage(Language.get("Inventory.insufficient-space").text());
@@ -131,12 +129,6 @@ public class ItemCollector implements Listener {
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
 		unregister(player);
 		return true;
-	}
-
-	private int free(PlayerInventory v) {
-		return IntStream.range(0, 36)
-				.map(i -> Utility.nulled(v.getItem(i)) == true ? 1 : 0)
-				.sum();
 	}
 
 }

@@ -35,6 +35,13 @@ public final class ItemMatcher {
 		return t >= a;
 	}
 	
+	public static int free(Player player) {
+		PlayerInventory v = player.getInventory();
+		return IntStream.range(0, 36)
+				.map(i -> Utility.nulled(v.getItem(i)) == true ? 1 : 0)
+				.sum();
+	}
+	
 	public static void add(Player player, ItemStack item) {
 		int f = 0, a = item.getAmount();
 		PlayerInventory pi = player.getInventory();

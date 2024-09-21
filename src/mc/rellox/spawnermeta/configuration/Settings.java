@@ -175,6 +175,7 @@ public final class Settings {
 	public ValueChanger breaking_chance_changer_not_owned;
 	public ValueChanger breaking_chance_changer_natural;
 	public boolean breaking_drop_on_ground;
+	public boolean breaking_cancel_if_full;
 	public boolean breaking_silk_enabled;
 	public int breaking_silk_level;
 	public boolean breaking_silk_break_owned;
@@ -442,6 +443,7 @@ public final class Settings {
 		breaking_chance_changer_not_owned = ValueChanger.of("Modifiers.breaking.chance-changing.not-owned");
 		breaking_chance_changer_natural = ValueChanger.of("Modifiers.breaking.chance-changing.natural");
 		breaking_drop_on_ground = file.getBoolean("Modifiers.breaking.drop-on-ground");
+		breaking_cancel_if_full = file.getBoolean("Modifiers.breaking.cancel-if-full");
 		breaking_silk_enabled = file.getBoolean("Modifiers.breaking.silk-requirement.enabled");
 		breaking_silk_level = file.getInteger("Modifiers.breaking.silk-requirement.level");
 		breaking_silk_break_owned = file.getBoolean("Modifiers.breaking.silk-requirement.break-owned");

@@ -656,10 +656,17 @@ public final class EventRegistry {
 				
 			}
 		}
-		if(Settings.settings.breaking_drop_on_ground == false && ItemCollector.exists(player) == true) {
-			m.send(Language.list("Items.spawner-drop.try-breaking"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
+		if(Settings.settings.breaking_drop_on_ground == false) {
+			if(ItemCollector.exists(player) == true) {
+				m.send(Language.list("Items.spawner-drop.try-breaking"));
+				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+				return;
+			}
+			if(Settings.settings.breaking_cancel_if_full == true && ItemMatcher.free(player) <= 0) {
+				m.send(Language.list("Inventory.insufficient-space"));
+				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+				return;
+			}
 		}
 		boolean silk = Settings.settings.breaking_silk_enabled ? getAPI().hasSilkTouch(player) == true : true;
 		if(player.hasPermission("spawnermeta.breaking.bypass.silktouch") == true)

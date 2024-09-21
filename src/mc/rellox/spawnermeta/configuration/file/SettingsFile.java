@@ -197,6 +197,7 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Modifiers.breaking.chance-changing.not-owned", "+0");
 		file.addDefault("Modifiers.breaking.chance-changing.natural", "+0");
 		file.addDefault("Modifiers.breaking.drop-on-ground", true);
+		file.addDefault("Modifiers.breaking.cancel-if-full", false);
 		file.addDefault("Modifiers.breaking.silk-requirement.enabled", true);
 		file.addDefault("Modifiers.breaking.silk-requirement.level", 1);
 		file.addDefault("Modifiers.breaking.silk-requirement.break-owned", true);
@@ -731,6 +732,10 @@ public class SettingsFile extends AbstractFile {
 			c.comment("Modifiers.breaking.drop-on-ground",
 					"Should the spawner be dropped on the ground",
 					"  or automatically be teleported into player inventory.");
+			c.comment("Modifiers.breaking.cancel-if-full",
+					"If enabled players will not be able to break the spawner",
+					"  if their inventory is full.",
+					"Only works if 'drop-on-ground' is false.");
 			c.comment("Modifiers.breaking.show-owner",
 					"If set to true then when a player fails",
 					"  to break another player's owned spawner",
