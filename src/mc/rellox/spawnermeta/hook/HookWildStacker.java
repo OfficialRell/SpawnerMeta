@@ -22,6 +22,8 @@ import mc.rellox.spawnermeta.api.spawner.location.ISelector;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.generator.SpawningManager;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import mc.rellox.spawnermeta.utility.Utility;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class HookWildStacker implements HookInstance<WildStacker> {
 	
@@ -52,6 +54,17 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 	@Override
 	public String message() {
 		return "Wild Stacker has been found, entity stacking enabled!";
+	}
+	
+	public boolean stacking(SpawnerType type, Location at) {
+		try {
+			Entity entity = Utility.create(at, type.entity());
+			Class<?> utils = RF.get("com.bgsoftware.wildstacker.utils.entity.EntityUtils");
+			return RF.order(utils, "isStackable", Entity.class)
+					.as(boolean.class)
+					.invoke(entity);
+		} catch (Exception e) {}
+		return true;
 	}
 	
 	public List<Entity> combine(ISpawner spawner, SpawnerType type, ISelector selector, int count) {
