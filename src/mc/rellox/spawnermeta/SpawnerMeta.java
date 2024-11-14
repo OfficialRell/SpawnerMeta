@@ -25,7 +25,7 @@ import mc.rellox.spawnermeta.version.Version;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 24.6;
+	public static final double PLUGIN_VERSION = 24.7;
 	
 	private static SpawnerMeta plugin;
     
@@ -45,6 +45,12 @@ public final class SpawnerMeta extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		if(Bukkit.getPluginManager().getPlugin("SpawnerLegacy") != null) {
+			loaded = false;
+			Bukkit.getPluginManager().disablePlugin(this);
+			return;
+		}
+		
 		if(loaded == true) {
 			Text.logLoad();
 			Utility.check(74188, s -> {

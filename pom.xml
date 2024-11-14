@@ -4,7 +4,7 @@
   
   <groupId>mc.rellox</groupId>
   <artifactId>SpawnerMeta</artifactId>
-  <version>24.6</version>
+  <version>24.7</version>
   <packaging>jar</packaging>
   
   <name>SpawnerMeta</name>
@@ -33,7 +33,7 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
-      <version>1.21-R0.1-SNAPSHOT</version>
+      <version>1.21.3-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -51,7 +51,7 @@
 	<dependency>
       <groupId>com.bgsoftware</groupId>
       <artifactId>WildStackerAPI</artifactId>
-      <version>2023.3</version>
+      <version>2024.3</version>
       <scope>provided</scope>
     </dependency>
 	<dependency>
