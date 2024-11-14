@@ -690,11 +690,11 @@ public final class Settings {
 	}
 	
 	public static boolean ignored(World world) {
-		return settings.world_ignored.contains(world.getName());
+		return world == null ? false : settings.world_ignored.contains(world.getName());
 	}
 	
 	public static boolean disabled(World world) {
-		return settings.world_disabled.contains(world.getName());
+		return world == null ? false : settings.world_disabled.contains(world.getName());
 	}
 	
 	public static boolean inactive(World world) {
