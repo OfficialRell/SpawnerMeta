@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -190,6 +191,51 @@ public final class Reflect {
 						.collect(Collectors.toList());
 			} catch (Exception e) {}
 			return new ArrayList<>();
+		}
+		
+		/**
+		 * Returns an value from the given class and name.
+		 * 
+		 * @param <E> - type
+		 * @param clazz - class
+		 * @param name - name of the constant
+		 * @return value from the given name or {@code null} if no value was found
+		 */
+		
+		@SuppressWarnings("unchecked")
+		public static <E> E fielded(Class<E> clazz, String name, E def) {
+			try {
+				return (E) RF.fetch(clazz, name, false);
+			} catch (Exception e) {}
+			return def;
+		}
+		
+		/**
+		 * Returns an value from the given class and name.
+		 * 
+		 * @param <E> - type
+		 * @param clazz - class
+		 * @param name - name of the constant
+		 * @return value from the given name or {@code null} if no value was found
+		 */
+		
+		public static <E> E fielded(Class<E> clazz, String name) {
+			return fielded(clazz, name, null);
+		}
+		
+		/**
+		 * @param <E> - type
+		 * @param clazz - class
+		 * @param array - array
+		 * @return valid value list from the given name array 
+		 */
+		
+		public static <E> E fielded(Class<E> clazz, String... array) {
+			return Stream.of(array)
+					.map(s -> fielded(clazz, s))
+					.filter(Objects::nonNull)
+					.findFirst()
+					.orElse(null);
 		}
 		
 		/**

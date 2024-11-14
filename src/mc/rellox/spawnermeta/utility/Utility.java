@@ -13,6 +13,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -151,6 +152,13 @@ public final class Utility {
 		}
 	}
 	
+	public static Entity create(Location location, EntityType type) {
+		Object entity = RF.order(location.getWorld(), "createEntity", Location.class, Class.class)
+				.invoke(location, type.getEntityClass());
+		if(Version.version.high(VersionType.v_20_3) == true) return (Entity) entity;
+		return RF.direct(entity, "getBukkitEntity", Entity.class);
+	}
+	
 	public static boolean isWindCharge(Entity entity) {
 		if(Version.version.high(VersionType.v_21_1) == false) return false;
 		return switch (entity.getType().name()) {
@@ -242,6 +250,11 @@ public final class Utility {
 	
 	@SuppressWarnings("deprecation")
 	public static final Enchantment enchantment_power = RF.enumerate(Enchantment::getByName, "ARROW_DAMAGE", "POWER");
+	
+	// Attributes
+
+	public static final Attribute attribute_damage = RF.fielded(Attribute.class, "GENERIC_ATTACK_DAMAGE", "ATTACK_DAMAGE");
+	public static final Attribute attribute_speed = RF.fielded(Attribute.class, "GENERIC_MOVEMENT_SPEED", "MOVEMENT_SPEED");
 	
 	// Version check
 

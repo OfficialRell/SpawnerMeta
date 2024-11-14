@@ -7,7 +7,6 @@ import java.util.function.BiConsumer;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.attribute.Attributable;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
@@ -29,6 +28,7 @@ import mc.rellox.spawnermeta.api.spawner.location.ISelector;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.utility.reflect.type.Invoker;
 import mc.rellox.spawnermeta.version.Version;
@@ -70,7 +70,8 @@ public final class SpawningManager {
 
 			Class<?> clazz = type.entity().getEntityClass();
 			if(LivingEntity.class.isAssignableFrom(clazz) == true
-					&& HookRegistry.WILD_STACKER.exists() == true) {
+					&& HookRegistry.WILD_STACKER.exists() == true
+					&& HookRegistry.WILD_STACKER.stacking(type, spawner.center()) == true) {
 				entities = HookRegistry.WILD_STACKER.combine(spawner, type, selector, count);
 			} else {
 				entities = new ArrayList<>(count);
@@ -138,7 +139,7 @@ public final class SpawningManager {
 			Settings s = Settings.settings;
 			if(s.entity_movement == false
 					&& entity instanceof Attributable le) {
-				AttributeInstance at = le.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+				AttributeInstance at = le.getAttribute(Utility.attribute_speed);
 				if(at != null) at.setBaseValue(0);
 			}
 			if(s.check_spawner_nerf == true && entity instanceof Mob mob) {
@@ -181,7 +182,7 @@ public final class SpawningManager {
 			Settings s = Settings.settings;
 			if(s.entity_movement == false
 					&& entity instanceof Attributable le) {
-				AttributeInstance at = le.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+				AttributeInstance at = le.getAttribute(Utility.attribute_speed);
 				if(at != null) at.setBaseValue(0);
 			}
 			if(s.check_spawner_nerf == true && entity instanceof Mob mob) {

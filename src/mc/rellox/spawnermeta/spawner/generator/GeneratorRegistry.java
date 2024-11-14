@@ -105,11 +105,11 @@ public final class GeneratorRegistry implements Listener {
 	}
 	
 	public static int active(World world) {
-		if(Settings.inactive(world) == true) return 0;
 		if(world == null) return SPAWNERS.values()
 				.stream()
 				.mapToInt(SpawnerWorld::active)
 				.sum();
+		if(Settings.inactive(world) == true) return 0;
 		return get(world).active();
 	}
 
