@@ -893,6 +893,8 @@ public class SettingsFile extends AbstractFile {
 					"  EXPERIENCE - experience points",
 					"  LEVELS - experience levels",
 					"  ECONOMY - vault economy",
+					"  FLARE_TOKENS - flare tokens",
+					"  PLAYER_POINTS - player points",
 					"  MATERIAL - items",
 					"Item format (only for MATERIAL price type):",
 					"item:",

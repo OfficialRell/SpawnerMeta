@@ -16,6 +16,7 @@ public class HookRegistry {
 	public static final HookShopGUI SHOP_GUI = new HookShopGUI();
 	public static final HookFlareTokens FLARE_TOKENS = new HookFlareTokens();
 	public static final HookSuperiorSkyblock2 SUPERIOR_SKYBLOCK_2 = new HookSuperiorSkyblock2();
+	public static final HookPlayerPoints PLAYER_POINTS = new HookPlayerPoints();
 
 	public static void load() {
 		try {
@@ -26,6 +27,7 @@ public class HookRegistry {
 			HOOKS.add(SHOP_GUI);
 			HOOKS.add(FLARE_TOKENS);
 			HOOKS.add(SUPERIOR_SKYBLOCK_2);
+			HOOKS.add(PLAYER_POINTS);
 			HOOKS.forEach(i -> {
 				try {
 					i.load();

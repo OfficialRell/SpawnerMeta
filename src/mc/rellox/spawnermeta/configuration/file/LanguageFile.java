@@ -132,6 +132,8 @@ public class LanguageFile extends AbstractFile {
 		put("Prices.type.economy.amount", "$%amount%");
 		put("Prices.type.flare-tokens.insufficient", "Insufficient tokens!");
 		put("Prices.type.flare-tokens.amount", "%amount% Tokens");
+		put("Prices.type.player-points.insufficient", "Insufficient player points!");
+		put("Prices.type.player-points.amount", "%amount% Player points");
 		put("Prices.insufficient", "<#800000>(!) <#ff8000>%insufficient% <#bfbfbf>[Missing %price%]");
 		put("Holograms.empty.single", "<#ff8000><Empty> <#bfffff-#00ffff>Spawner");
 		put("Holograms.empty.multiple", "<#ffff00>%stack% <#bfbfbf>× <#ff8000><Empty> <#bfffff-#00ffff>Spawner");

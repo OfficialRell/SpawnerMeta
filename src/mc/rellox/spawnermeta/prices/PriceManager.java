@@ -42,6 +42,8 @@ public final class PriceManager {
 					i, HookRegistry.ECONOMY.currency());
 			else if(type == PriceType.FLARE_TOKENS) price = i -> new PriceCurrency(PriceType.FLARE_TOKENS,
 					i, HookRegistry.FLARE_TOKENS.currency());
+			else if(type == PriceType.PLAYER_POINTS) price = i -> new PriceCurrency(PriceType.PLAYER_POINTS,
+					i, HookRegistry.PLAYER_POINTS.currency());
 			else {
 				ItemMatcher matcher = ItemMatcher.from(CF.s.file(), path + ".item");
 				price = i -> new PriceMaterial(i, matcher);

@@ -6,7 +6,8 @@ public enum PriceType {
 	LEVELS(),
 	MATERIAL(),
 	ECONOMY(),
-	FLARE_TOKENS();
+	FLARE_TOKENS(),
+	PLAYER_POINTS();
 	
 	public String key() {
 		return name().replace('_', '-').toLowerCase();
