@@ -77,6 +77,10 @@ public final class DataManager {
 	public static NamespacedKey typeKey() {
 		return key_type;
 	}
+	
+	public static NamespacedKey ownerKey() {
+		return key_owner;
+	}
 
 	public static ItemStack getSpawner(IVirtual spawner, int a) {
 		return getSpawners(spawner.getType(), spawner.getUpgradeLevels(), spawner.getCharges(), spawner.getSpawnable(),

@@ -618,7 +618,7 @@ public final class Settings {
 		if(ignore_natural == true
 				&& block.getState() instanceof CreatureSpawner spawner) {
 			PersistentDataContainer data = spawner.getPersistentDataContainer();
-			if(data.has(DataManager.typeKey()) == false) return true;
+			if(data.has(DataManager.ownerKey()) == false) return true;
 		}
 		return ignored(DataManager.getEntity(block));
 	}

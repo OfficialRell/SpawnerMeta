@@ -9,7 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Waterlogged;
 
-@FunctionalInterface
 public interface IMaterial {
 	
 	static IMaterial empty = block -> true;

@@ -110,7 +110,6 @@ public interface ILight {
 		return light >= minimum() && light <= maximum();
 	}
 	
-	@FunctionalInterface
 	interface LightFinder {
 		
 		static LightFinder of(boolean daylight) {
