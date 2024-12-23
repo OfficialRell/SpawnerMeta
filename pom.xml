@@ -4,7 +4,7 @@
   
   <groupId>mc.rellox</groupId>
   <artifactId>SpawnerMeta</artifactId>
-  <version>24.7</version>
+  <version>24.8</version>
   <packaging>jar</packaging>
   
   <name>SpawnerMeta</name>
@@ -26,6 +26,10 @@
     <repository>
       <id>bg-repo</id>
       <url>https://repo.bg-software.com/repository/api/</url>
+    </repository>
+    <repository>
+        <id>rosewood-repo</id>
+        <url>https://repo.rosewooddev.io/repository/public/</url>
     </repository>
   </repositories>
 	
@@ -65,6 +69,12 @@
       <artifactId>SuperiorSkyblockAPI</artifactId>
       <version>2023.3</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.black_ixx</groupId>
+        <artifactId>playerpoints</artifactId>
+        <version>3.2.7</version>
+    	<scope>provided</scope>
     </dependency>
   </dependencies>
   
