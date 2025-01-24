@@ -17,7 +17,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.configuration.IData;
@@ -41,22 +40,19 @@ public final class LocationRegistry implements Listener {
 	
 	public static void initialize() {
 		convert();
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				var it = LOCATIONS.values().iterator();
-				while(it.hasNext() == true) {
-					IPlayerData il = it.next();
-					if(il.using() == true) continue;
-					if(il instanceof LocationFile file) {
-						if(EXTERNA_DATA.isEmpty() == false) file.saveExternal();
-						file.cached = false;
-					}
-					il.infinite(false);
-					it.remove();
+		SpawnerMeta.scheduler().runTimer(() -> {
+			var it = LOCATIONS.values().iterator();
+			while(it.hasNext() == true) {
+				IPlayerData il = it.next();
+				if(il.using() == true) continue;
+				if(il instanceof LocationFile file) {
+					if(EXTERNA_DATA.isEmpty() == false) file.saveExternal();
+					file.cached = false;
 				}
+				il.infinite(false);
+				it.remove();
 			}
-		}.runTaskTimer(SpawnerMeta.instance(), 20 * 60, 20 * 60);
+		}, 20 * 60, 20 * 60);
 		Bukkit.getPluginManager().registerEvents(new LocationRegistry(), SpawnerMeta.instance());
 	}
 	
@@ -72,7 +68,7 @@ public final class LocationRegistry implements Listener {
 	}
 	
 	/**
-	 * @param playe - player
+	 * @param player - player
 	 * @return {@code true} if the player file exists
 	 */
 	
@@ -277,41 +273,38 @@ public final class LocationRegistry implements Listener {
 	}
 	
 	private static void convert() {
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				File f = new File(parent.getParentFile(), "locations.yml");
-				if(f.exists() == false) return;
-				var file = YamlConfiguration.loadConfiguration(f);
-				if(file == null) return;
-				ConfigurationSection cs = file.getConfigurationSection("Locations");
-				if(cs == null) return;
-				Set<String> keys = cs.getKeys(false);
-				keys.forEach(key -> {
-					ConfigurationSection cc = cs.getConfigurationSection(key);
-					if(cc == null) return;
-					UUID id;
-					try {
-						id = UUID.fromString(key);
-					} catch (Exception e) {
-						RF.debug(e);
-						return;
-					}
-					Set<String> ks = cc.getKeys(false);
-					LocationFile il = new LocationFile(id);
-					il.create();
-					ks.forEach(k -> {
-						List<String> list = cc.getStringList(k);
-						il.hold("Spawners." + k, list.stream()
-								.map(s -> s.replaceAll("\\[|\\]", ""))
-								.distinct()
-								.toList());
-					});
-					il.save();
-					f.delete();
+		SpawnerMeta.scheduler().runLater(() -> {
+			File f = new File(parent.getParentFile(), "locations.yml");
+			if(f.exists() == false) return;
+			var file = YamlConfiguration.loadConfiguration(f);
+			if(file == null) return;
+			ConfigurationSection cs = file.getConfigurationSection("Locations");
+			if(cs == null) return;
+			Set<String> keys = cs.getKeys(false);
+			keys.forEach(key -> {
+				ConfigurationSection cc = cs.getConfigurationSection(key);
+				if(cc == null) return;
+				UUID id;
+				try {
+					id = UUID.fromString(key);
+				} catch (Exception e) {
+					RF.debug(e);
+					return;
+				}
+				Set<String> ks = cc.getKeys(false);
+				LocationFile il = new LocationFile(id);
+				il.create();
+				ks.forEach(k -> {
+					List<String> list = cc.getStringList(k);
+					il.hold("Spawners." + k, list.stream()
+							.map(s -> s.replaceAll("\\[|\\]", ""))
+							.distinct()
+							.toList());
 				});
-			}
-		}.runTaskLater(SpawnerMeta.instance(), 20);
+				il.save();
+				f.delete();
+			});
+		}, 20);
 	}
 
 }

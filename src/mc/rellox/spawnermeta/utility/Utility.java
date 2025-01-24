@@ -21,7 +21,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
@@ -262,16 +261,13 @@ public final class Utility {
 	// Version check
 
 	public static void check(final int id, final Consumer<String> action) {
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				try(InputStream is = new URI("https://api.spigotmc.org/legacy/update.php?resource=" + id)
-						.toURL().openStream();
-						Scanner sc = new Scanner(is)) {
-					if(sc.hasNext() == true) action.accept(sc.next());
-				} catch(Exception x) {}
-			}
-		}.runTaskLaterAsynchronously(SpawnerMeta.instance(), 50);
+		SpawnerMeta.scheduler().runLaterAsync(() -> {
+			try(InputStream is = new URI("https://api.spigotmc.org/legacy/update.php?resource=" + id)
+					.toURL().openStream();
+				Scanner sc = new Scanner(is)) {
+				if(sc.hasNext() == true) action.accept(sc.next());
+			} catch(Exception x) {}
+		}, 50);
 	}
 
 }

@@ -1,12 +1,9 @@
 package mc.rellox.spawnermeta.spawner.generator;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
+import mc.rellox.spawnermeta.SpawnerMeta;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -28,8 +25,8 @@ public class SpawnerWorld {
 	
 	public SpawnerWorld(World world) {
 		this.world = world;
-		this.spawners = new HashMap<>();
-		this.queue = new LinkedList<>();
+		this.spawners = Collections.synchronizedMap(new HashMap<>());
+		this.queue = Collections.synchronizedList(new LinkedList<>());
 	}
 	
 	public Stream<IGenerator> stream() {
@@ -80,17 +77,23 @@ public class SpawnerWorld {
 		}
 		spawners.values().forEach(IGenerator::tick);
 	}
-	
+
 	public void reduce() {
-		Iterator<IGenerator> it = spawners.values().iterator();
-		while(it.hasNext() == true) {
-			IGenerator next = it.next();
-			if(next.active() == false || next.present() == false) {
-				next.clear();
-				it.remove();
-			}
-		}
+		List<Pos> toRemove = new ArrayList<>();
+
+		spawners.forEach((pos, generator) -> {
+			SpawnerMeta.scheduler().runAtLocation(generator.block().getLocation(), task -> {
+				if (!generator.active() || !generator.present()) {
+					generator.clear();
+					toRemove.add(pos); // Add the key (pos) to the list for removal to prevent IllegalStateException
+				}
+			});
+		});
+
+		// Remove invalid generators using their keys
+		toRemove.forEach(spawners::remove);
 	}
+
 	
 	public void put(Block block) {
 		put(new ActiveGenerator(ISpawner.of(block)));
