@@ -25,8 +25,8 @@ public class SpawnerWorld {
 	
 	public SpawnerWorld(World world) {
 		this.world = world;
-		this.spawners = new HashMap<>();
-		this.queue = new LinkedList<>();
+		this.spawners = Collections.synchronizedMap(new HashMap<>());
+		this.queue = Collections.synchronizedList(new LinkedList<>());
 	}
 	
 	public Stream<IGenerator> stream() {
