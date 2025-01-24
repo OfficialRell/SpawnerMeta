@@ -4,6 +4,7 @@ softdepend: [Vault, WildStacker, WildTools, ShopGUIPlus, SuperiorSkyblock2, Play
 api-version: 1.14
 version: 24.8
 author: Rellox
+folia-supported: true
 commands:
   spawnermeta:
     description: SpawnerMeta provided command.
