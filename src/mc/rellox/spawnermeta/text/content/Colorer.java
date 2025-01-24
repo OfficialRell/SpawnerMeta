@@ -21,7 +21,7 @@ public interface Colorer {
 	}
 	
 	static Colorer reset() {
-		return text -> "§r" + text;
+		return text -> "ï¿½r" + text;
 	}
 	
 	String color(String text);

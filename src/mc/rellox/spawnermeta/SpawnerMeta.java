@@ -2,6 +2,8 @@ package mc.rellox.spawnermeta;
 
 import java.util.List;
 
+import com.tcoded.folialib.FoliaLib;
+import com.tcoded.folialib.impl.PlatformScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -26,10 +28,14 @@ import mc.rellox.spawnermeta.version.Version;
 public final class SpawnerMeta extends JavaPlugin {
 	
 	public static final double PLUGIN_VERSION = 24.8;
-	
+
 	private static SpawnerMeta plugin;
-    
-    private static boolean loaded;
+
+	private static FoliaLib foliaLib;
+
+	private static PlatformScheduler scheduler;
+
+	private static boolean loaded;
     
     private APIInstance api;
     
@@ -39,6 +45,8 @@ public final class SpawnerMeta extends JavaPlugin {
 		
 		if(loaded == true) {
 			plugin = this;
+			foliaLib = new FoliaLib(this);
+			scheduler = foliaLib.getScheduler();
 			this.api = new APIRegistry();
 		}
     }
@@ -86,11 +94,27 @@ public final class SpawnerMeta extends JavaPlugin {
 	/**
 	 * @return Instance of this plugin
 	 */
-	
+
 	public static SpawnerMeta instance() {
 		return plugin;
 	}
-	
+
+	/**
+	 * @return Instance of FoliaLib
+	 */
+
+	public static FoliaLib foliaLib() {
+		return foliaLib;
+	}
+
+	/**
+	 * @return Instance of FoliaLib Scheduler
+	 */
+
+	public static PlatformScheduler scheduler() {
+		return scheduler;
+	}
+
 	/**
 	 * @return SpawnerMeta API
 	 */

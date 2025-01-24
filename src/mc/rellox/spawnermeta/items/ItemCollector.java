@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import mc.rellox.spawnermeta.utils.CancellableRunnable;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.configuration.Language;
@@ -55,14 +55,14 @@ public class ItemCollector implements Listener {
 	private static void run() {
 		if(running == true) return;
 		running = true;
-		new BukkitRunnable() {
+		SpawnerMeta.scheduler().runTimer(new CancellableRunnable() {
 			@Override
 			public void run() {
 				Iterator<ItemCollector> it = ITEMS.values().iterator();
 				while(it.hasNext() == true) if(it.next().tick() == false) it.remove();
 				if((running = !ITEMS.isEmpty()) == false) cancel();
 			}
-		}.runTaskTimer(SpawnerMeta.instance(), 1, 1);
+		}, 1, 1);
 	}
 	
 	private static void send(Player player, int ticks) {

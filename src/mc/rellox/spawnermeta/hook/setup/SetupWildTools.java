@@ -5,7 +5,6 @@ import java.util.List;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import com.bgsoftware.wildtools.api.hooks.DropsProvider;
 
@@ -17,18 +16,15 @@ import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 public class SetupWildTools {
 	
 	public static void load() {
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				var providers = HookRegistry.WILD_TOOLS.get().getProviders();
-				try {
-					RF.fetch(providers, "dropsProviders", List.class).clear();
-				} catch (Exception x) {
-					RF.debug(x);
-				}
-				providers.addDropsProvider(new SpawnerMetaDropsProvider());
+		SpawnerMeta.scheduler().runLater(() -> {
+			var providers = HookRegistry.WILD_TOOLS.get().getProviders();
+			try {
+				RF.fetch(providers, "dropsProviders", List.class).clear();
+			} catch (Exception x) {
+				RF.debug(x);
 			}
-		}.runTaskLater(SpawnerMeta.instance(), 1);
+			providers.addDropsProvider(new SpawnerMetaDropsProvider());
+		}, 1);
 	}
 	
 	private static class SpawnerMetaDropsProvider implements DropsProvider {
