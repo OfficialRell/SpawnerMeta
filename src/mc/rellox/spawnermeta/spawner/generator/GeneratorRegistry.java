@@ -217,7 +217,7 @@ public final class GeneratorRegistry implements Listener {
 			
 			get(world).unload(event.getChunk());
 		} catch (Exception e) {
-			if(e.getMessage().contains("Chunk not there when requested") == true) return;
+			if(e.getMessage() != null  && e.getMessage().contains("Chunk not there when requested") == true) return;
 			RF.debug(e);
 		}
 	}
