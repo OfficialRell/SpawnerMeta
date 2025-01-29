@@ -7,14 +7,9 @@ import com.bgsoftware.wildtools.api.WildToolsAPI;
 
 import mc.rellox.spawnermeta.hook.setup.SetupWildTools;
 
-public class HookWildTools implements HookInstance<WildTools> {
+public class HookWildTools implements HookInstance {
 	
 	private WildTools plugin;
-
-	@Override
-	public WildTools get() {
-		return plugin;
-	}
 
 	@Override
 	public boolean exists() {
@@ -31,7 +26,7 @@ public class HookWildTools implements HookInstance<WildTools> {
 		if(Bukkit.getPluginManager().getPlugin("WildTools") == null) return;
 		plugin = WildToolsAPI.getWildTools();
 		if(plugin == null) return;
-		SetupWildTools.load();
+		SetupWildTools.load(plugin);
 	}
 
 }

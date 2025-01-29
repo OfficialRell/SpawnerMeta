@@ -25,16 +25,11 @@ import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
-public class HookWildStacker implements HookInstance<WildStacker> {
+public class HookWildStacker implements HookInstance {
 	
 	private WildStacker plugin;
 	
 	private final Map<Block, StackedEntity> linked = new HashMap<>();
-
-	@Override
-	public WildStacker get() {
-		return plugin;
-	}
 
 	@Override
 	public boolean exists() {
@@ -73,16 +68,13 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 		EntityType et = type.entity();
 		Location at = block.getLocation().add(0.5, 0.5, 0.5);
 		StackedEntity link = linked.get(block);
-//		System.out.println();
 		if(link == null) {
-//			System.out.println("none linked");
 			Block other = linked.keySet().stream()
 					.filter(b -> b.getWorld().equals(block.getWorld()))
 					.filter(b -> b.getLocation().distanceSquared(at) <= 16)
 					.findFirst()
 					.orElse(null);
 			if(other != null) {
-//				System.out.println("- found other");
 				StackedEntity nearby = linked.get(other);
 				if(nearby.getLivingEntity().getType() == et)
 					linked.put(block, link = nearby);
@@ -90,8 +82,7 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 		}
 		x: if(link != null) {
 			LivingEntity le = link.getLivingEntity();
-			if(le.isDead() == true) {
-//				System.out.println("- linked dead");
+			if(le.isDead() == true || inside(block, le) == false) {
 				linked.values().removeIf(se -> se.getLivingEntity().isDead());
 				break x;
 			}
@@ -101,7 +92,6 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 			int s = link.getStackAmount(), m = link.getStackLimit();
 			if(s >= m) break x;
 			int t = s + count;
-//			System.out.println("- set linked to " + t);
 			if(t < m) link.setStackAmount(t, true);
 			else if(t == m) {
 				link.setStackAmount(t, true);
@@ -121,42 +111,36 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 		List<LivingEntity> near = block.getWorld()
 				.getNearbyEntities(at, 10, 10, 10, e -> e.getType() == et)
 				.stream()
+				.filter(e -> inside(block, e))
 				.map(LivingEntity.class::cast)
 				.collect(Collectors.toList());
 		if(link != null) near.remove(link.getLivingEntity());
-
-//		System.out.println(" - nearby entities: " + near.size());
 		
 		if(near.isEmpty() == true) {
-//			System.out.println("  - near empty, creating");
 			StackedEntity stacked = create(spawner, type, selector, count, affected);
+			if(stacked == null) return affected;
 			linked.put(block, stacked);
 		} else if(near.size() == 1) {
-//			System.out.println("  - only 1 near");
 			LivingEntity entity = near.get(0);
 			StackedEntity stacked = plugin.getSystemManager().getStackedEntity(entity);
 			affected.add(entity);
 			SpawningManager.particle(entity.getLocation());
 			int a = stacked.getStackAmount() + count;
 			if(a <= stacked.getStackLimit()) {
-//				System.out.println("   - stacking to it");
 				stacked.setStackAmount(a, true);
 				linked.put(block, stacked);
 			} else {
 				int f = a - stacked.getStackLimit();
-//				System.out.println("   - creating new: " + f);
 				stacked.setStackAmount(stacked.getStackLimit(), true);
 				stacked = create(spawner, type, selector, f, affected);
+				if(stacked == null) return affected;
 				linked.put(block, stacked);
 			}
 			modify(entity);
 		} else {
-//			System.out.println("  - many near");
 			int i = 0, l = count;
 			while(true) {
-//				System.out.println("  - loop" + l);
 				x: if(i >= near.size()) {
-//					System.out.println("   - create new: " + l);
 					StackedEntity stacked = create(spawner, type, selector, l, affected);
 					linked.put(block, stacked);
 					break;
@@ -169,7 +153,6 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 					affected.add(entity);
 					SpawningManager.particle(entity.getLocation());
 					if(f < 0) {
-//						System.out.println("   - stacking all");
 						stacked.setStackAmount(a, true);
 						linked.put(block, stacked);
 						break;
@@ -177,7 +160,6 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 						stacked.setStackAmount(m, true);
 						linked.remove(block);
 						l = f;
-//						System.out.println("   - stacking to limit, left: " + l);
 					}
 					modify(entity);
 				}
@@ -185,6 +167,11 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 			}
 		}
 		return affected;
+	}
+	
+	private boolean inside(Block block, Entity entity) {
+		return HookRegistry.PLOT_SQUARED.exists() == true
+				? HookRegistry.PLOT_SQUARED.inside(block, entity) : true;
 	}
 	
 	private void modify(Entity entity) {
@@ -195,6 +182,8 @@ public class HookWildStacker implements HookInstance<WildStacker> {
 	private StackedEntity create(ISpawner spawner, SpawnerType type, ISelector selector, int count,
 			List<Entity> affected) {
 		LivingEntity entity = (LivingEntity) SpawningManager.spawn(spawner, type, selector);
+		if(entity == null) return null;
+		
 		StackedEntity stacked = plugin.getSystemManager().getStackedEntity(entity);
 		stacked.setStackAmount(count, true);
 		affected.add(entity);

@@ -7,20 +7,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.bgsoftware.wildtools.api.WildTools;
 import com.bgsoftware.wildtools.api.hooks.DropsProvider;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
-import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class SetupWildTools {
 	
-	public static void load() {
+	public static void load(WildTools plugin) {
 		new BukkitRunnable() {
 			@Override
 			public void run() {
-				var providers = HookRegistry.WILD_TOOLS.get().getProviders();
+				var providers = plugin.getProviders();
 				try {
 					RF.fetch(providers, "dropsProviders", List.class).clear();
 				} catch (Exception x) {

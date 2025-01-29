@@ -5,15 +5,10 @@ import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public final class HookPlayerPoints implements HookInstance<PlayerPoints> {
+public final class HookPlayerPoints implements HookInstance {
 	
 	private PlayerPoints plugin;
 	private ICurrency currency;
-
-	@Override
-	public PlayerPoints get() {
-		return this.plugin;
-	}
 	
 	public ICurrency currency() {
 		return currency;

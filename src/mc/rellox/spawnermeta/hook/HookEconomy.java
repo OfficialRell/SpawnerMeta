@@ -6,15 +6,10 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 import net.milkbowl.vault.economy.Economy;
 
-public final class HookEconomy implements HookInstance<Economy> {
+public final class HookEconomy implements HookInstance {
 	
 	private Economy economy;
 	private ICurrency currency;
-
-	@Override
-	public Economy get() {
-		return this.economy;
-	}
 	
 	public ICurrency currency() {
 		return currency;

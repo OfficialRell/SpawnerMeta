@@ -6,15 +6,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
-public final class HookFlareTokens implements HookInstance<JavaPlugin> {
+public final class HookFlareTokens implements HookInstance {
 	
 	private JavaPlugin plugin;
 	private ICurrency currency;
-
-	@Override
-	public JavaPlugin get() {
-		return this.plugin;
-	}
 	
 	public ICurrency currency() {
 		return this.currency;
