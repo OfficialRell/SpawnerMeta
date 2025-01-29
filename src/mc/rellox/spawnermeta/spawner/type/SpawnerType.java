@@ -34,6 +34,7 @@ public enum SpawnerType {
 	COD(EntityType.COD, "Cod", Material.COD_SPAWN_EGG, EntityBox.single()),
 	COW(EntityType.COW, "Cow", Material.COW_SPAWN_EGG, EntityBox.box(1, 2, 1)),
 	CREEPER(EntityType.CREEPER, "Creeper", Material.CREEPER_SPAWN_EGG, EntityBox.box(1, 2, 1)),
+	CREAKING(_e("CREAKING"), "Creaking", _m("CREAKING_SPAWN_EGG"), EntityBox.box(1, 3, 1)),
 	DOLPHIN(EntityType.DOLPHIN, "Dolphin", Material.DOLPHIN_SPAWN_EGG, EntityBox.single()),
 	DONKEY(EntityType.DONKEY, "Donkey", Material.DONKEY_SPAWN_EGG, EntityBox.box(1, 2, 1)),
 	DROWNED(EntityType.DROWNED, "Drowned", Material.DROWNED_SPAWN_EGG, EntityBox.box(1, 2, 1)),
