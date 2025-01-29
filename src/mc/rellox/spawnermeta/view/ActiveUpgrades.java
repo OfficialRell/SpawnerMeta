@@ -446,12 +446,10 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	private int lowestCharges() {
 		Price c = Price.of(Group.charges, 0);
 		if(players.size() == 1) return c.balance(players.get(0));
-		int b = -1;
-		for(Player player : players) {
-			int a = c.balance(player);
-			if(b > a || b < 0) b = a;
-		}
-		return b;
+		return players.stream()
+				.mapToInt(c::balance)
+				.min()
+				.orElse(-1);
 	}
 	
 	private ItemStack charges() {
@@ -494,9 +492,15 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	}
 	
 	private String value(SpawnerType type, int level, int i) {
-		int value = Settings.settings.spawner_values.get(type)[i],
-				increase = Settings.settings.spawner_value_increase.get(type)[i];
-		for(int j = 1; j < level; j++) value += increase;
+		int value = switch(i) {
+		case 0 -> generator.cache().range();
+		case 1 -> generator.cache().delay();
+		case 2 -> generator.cache().amount();
+		default -> -1;
+		};
+		int l = generator.spawner().getUpgradeLevels()[i];
+		int increase = Settings.settings.spawner_value_increase.get(type)[i];
+		for(int j = l; j < level; j++) value += increase;
 		return convert(value, i);
 	}
 	

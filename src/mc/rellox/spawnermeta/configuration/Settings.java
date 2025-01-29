@@ -57,11 +57,17 @@ public final class Settings {
 	
 	public boolean debug;
 
+	// Global spawning
+	
 	public boolean spawning;
 	
-	public final TripleIntegerMap spawner_values;
+	// Spawner values
+	
+	public final TripleRangeMap spawner_values;
 	public final TripleIntegerMap spawner_value_increase;
 
+	// Intervals and ticking
+	
 	public int ticking_interval;
 	public int checking_interval;
 	public int validation_interval;
@@ -70,18 +76,27 @@ public final class Settings {
 	public boolean tick_until_zero;
 	public double delay_offset;
 	
+	// Reset spawners on unload
+	
 	public boolean reset_spawner_values;
+	
+	// Radii and selection
 	
 	public int radius_horizontal;
 	public int radius_vertical;
 	public Selection selection;
 	public boolean spawner_switching;
 	
+	// Empty spawners
+	
 	public boolean empty_enabled;
 	public boolean empty_destroy_eggs_removing;
 	public boolean empty_destroy_eggs_breaking;
 	public boolean empty_store_inside;
 	public boolean empty_verify_removing;
+	public boolean empty_remove_from_regular;
+	
+	// General spawner settings
 	
 	public boolean spawning_particles;
 	public boolean warning_particles;
@@ -93,12 +108,18 @@ public final class Settings {
 	public final Set<String> world_ignored;
 	public boolean ignore_natural;
 	
+	// Spawner reason
+	
 	public SpawnReason spawn_reason;
+	
+	// Misc
 	
 	public boolean allow_renaming;
 	
 	public IntSupplier slime_size;
 	public int slime_box;
+	
+	// Events
 	
 	public boolean cancel_spawning_event;
 	public boolean send_spawning_event;
@@ -106,18 +127,28 @@ public final class Settings {
 	public boolean ignore_break_event;
 	public boolean check_island_kick;
 	
+	// Instant kill
+	
 	public boolean instant_kill_enabled;
 	public boolean instant_kill_drop_xp;
 	public boolean instant_kill_death_animation;
+
+	// Redstone
 	
 	public int redstone_power_required;
 	public boolean redstone_power_ignore_natural;
 	
+	// Nearby
+	
 	public int nearby_limit;
 	public boolean nearby_reduce;
 	
+	// Items
+	
 	public int items_taking_ticks;
 	public int items_remind_ticks;
+	
+	// Holograms
 	
 	public boolean holograms_regular_enabled;
 	public boolean holograms_regular_show_natural;
@@ -126,6 +157,8 @@ public final class Settings {
 	public int holograms_warning_radius;
 	public double holograms_height;
 	
+	// Upgrades
+	
 	public boolean upgrade_interface_enabled;
 
 	public final TripleBooleanMap upgrades_upgradeable;
@@ -133,6 +166,8 @@ public final class Settings {
 	public final TripleIntegerMap upgrades_prices;
 	public final TripleIntegerMap upgrades_price_increase;
 	public IncreaseType upgrade_increase_type;
+	
+	// Charges
 
 	public final SingleIntegerMap charges_price;
 	public boolean charges_enabled;
@@ -142,6 +177,8 @@ public final class Settings {
 	public int charges_buy_second;
 	public boolean charges_ignore_levels;
 	
+	// Changing
+	
 	public final SinglePriceMap changing_price;
 	public boolean changing_enabled;
 	public final Map<SpawnerType, Material> changing_materials;
@@ -149,13 +186,18 @@ public final class Settings {
 	public final Set<SpawnerType> changing_deny_to;
 	public boolean changing_reset_regular;
 	public boolean changing_reset_empty;
+	
+	// Placing
 
 	public final SinglePriceMap placing_price;
 	public boolean placing_enabled;
+	
+	// Stacking
 
 	public final SinglePriceMap stacking_price;
 	public boolean stacking_stack_all;
 	public boolean stacking_enabled;
+	public final Set<SpawnerType> stacking_disabled_types;
 	public int stacking_limit_natural;
 	public int stacking_limit_owned;
 	public boolean stacking_ignore_limit;
@@ -166,6 +208,10 @@ public final class Settings {
 	public boolean stacking_permissions_natural;
 	public boolean stacking_permissions_owned;
 	public boolean stacking_permissions_not_owned;
+	
+	public int stacking_ticks;
+	
+	// Breaking
 
 	public final SinglePriceMap breaking_price;
 	public boolean unbreakable;
@@ -186,6 +232,8 @@ public final class Settings {
 	public int breaking_xp_on_failure;
 	public final Map<String, Double> chance_permissions;
 	public boolean breaking_show_owner;
+	
+	// Entity settings
 
 	public final Set<SpawnerType> silent_entities;
 	public boolean entity_target;
@@ -196,14 +244,20 @@ public final class Settings {
 	public boolean modify_stacked_entities;
 	public int safety_limit;
 	
+	// Chunks
+	
 	public boolean chunk_enabled;
 	public int chunk_limit;
 	public int chunk_entity_limit;
+	
+	// Spawner item
 	
 	public boolean item_show_header;
 	public boolean item_show_range;
 	public boolean item_show_delay;
 	public boolean item_show_amount;
+	
+	// Player, natural and owned spawner settings
 
 	public boolean owned_if_online;
 	public int owned_offline_time;
@@ -227,15 +281,21 @@ public final class Settings {
 	public boolean trusted_can_open;
 	public boolean trusted_can_upgrade;
 	
-	public int stacking_ticks;
+	// Spawnable amount
 
 	public boolean spawnable_enabled;
 	public final SingleIntegerMap spawnable_amount;
 	
+	// Explosions
+	
 	public final Map<ExplosionType, boolean[]> explosion_types;
+	
+	// Spawner view
 	
 	public boolean spawner_view_enabled;
 	public final List<SpawnerType> spawner_view_entities;
+	
+	// Commands
 	
 	public String command_view;
 	public final List<String> aliases_view;
@@ -248,13 +308,15 @@ public final class Settings {
 	public String command_trust;
 	public final List<String> aliases_trust;
 	
+	// Price formatting
+	
 	public boolean use_delimiter;
 	public char delimiter;
 	public boolean use_abbreviations;
 	public final List<String> abbreviations;
 	
 	private Settings() {
-		this.spawner_values = new TripleIntegerMap("Spawners.values");
+		this.spawner_values = new TripleRangeMap("Spawners.values");
 		this.spawner_value_increase = new TripleIntegerMap("Spawners.value-increase");
 		this.upgrades_upgradeable = new TripleBooleanMap("Modifiers.upgrades.upgradeable");
 		this.upgrades_levels = new TripleIntegerMap("Modifiers.upgrades.levels");
@@ -270,6 +332,7 @@ public final class Settings {
 		this.spawner_ignored = EnumSet.noneOf(SpawnerType.class);
 		this.world_disabled = new HashSet<>();
 		this.world_ignored = new HashSet<>();
+		this.stacking_disabled_types = EnumSet.noneOf(SpawnerType.class);
 		this.stacking_permissions = new HashMap<>(4);
 		this.chance_permissions = new HashMap<>(4);
 		this.ownership_permissions = new HashMap<>(4);
@@ -322,6 +385,7 @@ public final class Settings {
 		empty_destroy_eggs_breaking = file.getBoolean("Spawners.empty.destroy-eggs.when-breaking");
 		empty_store_inside = file.getBoolean("Spawners.empty.store-eggs-inside");
 		empty_verify_removing = file.getBoolean("Spawners.empty.egg-removing-verify");
+		empty_remove_from_regular = file.getBoolean("Spawners.empty.remove-from-regular");
 		
 		spawn_reason = RF.enumerate(SpawnReason.class, file.getString("Spawners.spawning-reason"),
 				SpawnReason.SPAWNER);
@@ -413,6 +477,9 @@ public final class Settings {
 		placing_price.load();
 		
 		stacking_enabled = file.getBoolean("Modifiers.stacking.enabled");
+		stacking_disabled_types.clear();
+		stacking_disabled_types.addAll(RF.enumerates(SpawnerType.class,
+				file.getStrings("Modifiers.stacking.disabled-types")));
 		stacking_stack_all = file.getBoolean("Modifiers.stacking.stack-all");
 		stacking_price.load();
 		stacking_limit_natural = file.getInteger("Modifiers.stacking.spawner-limit.natural");
@@ -739,6 +806,96 @@ public final class Settings {
 			return a == 0 ? is[i] : a;
 		}
 		
+	}
+	
+	public static class TripleRangeMap {
+		
+		private final String path;
+		private final IRange[] is;
+		private final Map<SpawnerType, IRange[]> map;
+		
+		public TripleRangeMap(String path) {
+			this.path = path;
+			this.is = new IRange[3];
+			this.map = new HashMap<>();
+		}
+		
+		public IRange[] get(SpawnerType type) {
+			return map.getOrDefault(type, is);
+		}
+		
+		public void load() {
+			map.clear();
+			is[0] = parse(CF.s.file.getString(path + ".DEFAULT.range"), 16);
+			is[1] = parse(CF.s.file.getString(path + ".DEFAULT.delay"), 500);
+			is[2] = parse(CF.s.file.getString(path + ".DEFAULT.amount"), 4);
+			Stream.of(SpawnerType.values())
+			.forEach(type -> {
+				IRange a0 = a(path + "." + type.name() + ".range", 0, 16);
+				IRange a1 = a(path + "." + type.name() + ".delay", 1, 500);
+				IRange a2 = a(path + "." + type.name() + ".amount", 2, 4);
+				if(a0 == is[0] && a1 == is[1] && a2 == is[2]) return;
+				IRange[] as = {a0, a1, a2};
+				map.put(type, as);
+			});
+		}
+		
+		private IRange parse(String s, int def) {
+			try {
+				if(s.indexOf('-') > 0) {
+					String[] ss = s.split("-");
+					int minimum = Integer.parseInt(ss[0]);
+					int maximum = Integer.parseInt(ss[1]);
+					if(minimum > maximum) {
+						Text.failure("Value maximum cannot be less than minimum (#0), using default!", s);
+						return new RangeConstant(def);
+					}
+					if(minimum <= 0 || maximum > 1_000_000) {
+						Text.failure("Spawner value out of range [1; 1 000 000] (#0), using default!", s);
+						return new RangeConstant(def);
+					}
+					if(minimum == maximum) return new RangeConstant(minimum);
+					return new RangeOf(minimum, maximum);
+				}
+				int value = Integer.parseInt(s);
+				if(value <= 0 || value > 1_000_000) {
+					Text.failure("Spawner value out of range [1; 1 000 000] (#0), using default!", s);
+					return new RangeConstant(def);
+				}
+				return new RangeConstant(value);
+			} catch (Exception e) {
+				Text.failure("Unable to parse spawner value (#0), using default!", s);
+				return new RangeConstant(def);
+			}
+		}
+		
+		private IRange a(String path, int i, int def) {
+			if(CF.s.exists(path) == false) return is[i];
+			String a = CF.s.file.getString(path);
+			return a == null || a.isEmpty() == true ? is[i] : parse(a, def);
+		}
+		
+	}
+	
+	public static interface IRange {
+		
+		int roll(int hash);
+		
+	}
+	
+	private static record RangeConstant(int roll) implements IRange {
+		@Override
+		public int roll(int hash) {
+			return roll;
+		}
+	}
+	
+	private static record RangeOf(int minimum, int maximum) implements IRange {
+		@Override
+		public int roll(int hash) {
+			int a = maximum - minimum + 1;
+			return (hash % a) + minimum;
+		}
 	}
 	
 	public static class TripleBooleanMap {

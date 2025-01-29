@@ -180,6 +180,7 @@ public class LanguageFile extends AbstractFile {
 		put("Spawners.stacking.stacked.infinite", "<#008000>(!) <#00ffff>Spawners have been stacked! <#ffff00>(%stack% Stacked)");
 		put("Spawners.stacking.stacked.finite", "<#008000>(!) <#00ffff>Spawners have been stacked! <#ffff00>(%stack%/%limit% Stacked)");
 		put("Spawners.stacking.unequal-spawner", "<#800000>(!) <#ff8000>Spawners must be the same to stack!");
+		put("Spawners.stacking.disabled-type", "<#800000>(!) <#ff8000>You cannot stack this spawner!");
 		put("Spawners.stacking.limit-reached", "<#800000>(!) <#ff8000>This spawner has reached its stacking limit!");
 		put("Spawners.stacking.nearby.none-match", "<#800000>(!) <#ff8000>Unable to find any nearby spawner to stack to that matches!");
 		put("Spawners.stacking.permission", "<#800000>(!) <#ff8000>You do not have a permission to stack this!");
