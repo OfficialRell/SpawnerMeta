@@ -13,6 +13,7 @@ import mc.rellox.spawnermeta.api.spawner.requirement.ErrorCounter;
 import mc.rellox.spawnermeta.api.spawner.requirement.IRequirements;
 import mc.rellox.spawnermeta.configuration.Configuration.CF;
 import mc.rellox.spawnermeta.configuration.Settings;
+import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.utility.region.EntityBox;
 
 public class ActiveFinder implements IFinder {
@@ -42,10 +43,14 @@ public class ActiveFinder implements IFinder {
 		int rx = Settings.settings.radius_horizontal;
 		int ry = Settings.settings.radius_vertical;
 		int qx = rx * 2 + 1, qy = ry * 2 + 1;
+		
 		errors = new ErrorCounter(qx * qy * qx);
+		
 		EntityBox box = generator.cache().type().box();
+		
 		List<Location> list = new ArrayList<>();
-		Block block = generator.spawner().block();
+		
+		Block block = generator.block();
 		if(loaded(block.getWorld(), block.getX(), block.getZ(), rx + box.maximum()) == false) {
 			errors.found = false;
 			return list;
@@ -62,6 +67,10 @@ public class ActiveFinder implements IFinder {
 				} while(++iz <= rx);
 			} while(++iy <= ry);
 		} while(++ix <= rx);
+		
+		if(HookRegistry.PLOT_SQUARED.exists() == true)
+			HookRegistry.PLOT_SQUARED.filter(generator, list);
+		
 		errors.found = list.isEmpty() == false;
 		return list;
 	}
