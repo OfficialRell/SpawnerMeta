@@ -13,6 +13,7 @@ import mc.rellox.spawnermeta.text.content.Content;
 public final class Text {
 	
 	public static final String infinity = "" + '\u221E';
+	public static final char color_symbol = ChatColor.COLOR_CHAR;
 	
 	public static void logLoad() {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta " + ChatColor.AQUA + "v"
@@ -60,8 +61,8 @@ public final class Text {
 	}
 
 	public static String color(String hex) {
-		String s = "§x";
-		for(char c : hex.toCharArray()) s += "§" + c;
+		String s = color_symbol + "x";
+		for(char c : hex.toCharArray()) s += color_symbol + "" + c;
 		return s;
 	}
 	
