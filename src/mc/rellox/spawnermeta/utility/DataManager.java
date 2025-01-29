@@ -243,7 +243,7 @@ public final class DataManager {
 		setOwner(block, player);
 		setNew(block);
 		setStack(block, 1);
-		int[] r = attributes(type, levels);
+		int[] r = attributes(block, type, levels);
 		setUpgradeLevels(block, levels);
 		setDelayConstant(block, r[1]);
 		setSpawnable(block, spawnable);
@@ -257,7 +257,7 @@ public final class DataManager {
 	
 	public static void updateValues(Block block) {
 		SpawnerType type = getType(block);
-		int[] l = getUpgradeLevels(block), r = attributes(type, l);
+		int[] l = getUpgradeLevels(block), r = attributes(block, type, l);
 		setUpgradeLevels(block, l);
 		setDelay(block, r[1]);
 		setDefault(block);
@@ -300,8 +300,13 @@ public final class DataManager {
 		return owner != null && player.getUniqueId().equals(owner) == false;
 	}
 	
-	private static int[] attributes(SpawnerType type, int[] l) {
-		int[] r = Settings.settings.spawner_values.get(type), n = Settings.settings.spawner_value_increase.get(type);
+	private static int[] attributes(Block block, SpawnerType type, int[] l) {
+		int hash = block.hashCode();
+		var vs = Settings.settings.spawner_values.get(type);
+		
+		int[] r = {vs[0].roll(hash), vs[1].roll(hash), vs[2].roll(hash)};
+		
+		int[] n = Settings.settings.spawner_value_increase.get(type);
 		for(int k = 0; k < 3; k++) for(int i = 1; i < l[k]; i++) r[k] += n[k];
 		return r;
 	}
@@ -518,8 +523,13 @@ public final class DataManager {
 	}
 
 	public static int[] getUpgradeAttributes(Block block) {
+		int hash = block.hashCode(); // seed for constant randomness
+		
 		SpawnerType type = getType(block);
-		var vs = Settings.settings.spawner_values.get(type);
+		
+		var svs = Settings.settings.spawner_values.get(type);
+		
+		int[] vs = {svs[0].roll(hash), svs[1].roll(hash), svs[2].roll(hash)};
 		var is = Settings.settings.spawner_value_increase.get(type);
 		var ls = getUpgradeLevels(block);
 		for(int i = 0; i < 3; i++)

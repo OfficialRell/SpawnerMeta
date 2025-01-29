@@ -1,10 +1,11 @@
 package mc.rellox.spawnermeta.spawner.generator;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.bukkit.Chunk;
@@ -82,14 +83,32 @@ public class SpawnerWorld {
 	}
 	
 	public void reduce() {
-		Iterator<IGenerator> it = spawners.values().iterator();
-		while(it.hasNext() == true) {
-			IGenerator next = it.next();
-			if(next.active() == false || next.present() == false) {
-				next.clear();
-				it.remove();
+		List<Pos> remove = new ArrayList<>();
+		
+		spawners.forEach((pos, generator) -> {
+			if(generator.active() == false || generator.present() == false) {
+				generator.clear();
+				remove.add(pos);
 			}
-		}
+		});
+
+		remove.forEach(spawners::remove);
+	}
+	
+	public int remove(boolean fully, Predicate<IGenerator> filter) {
+		List<Pos> remove = new ArrayList<>();
+		
+		spawners.forEach((pos, generator) -> {
+			if(generator.active() == true
+					&& filter.test(generator) == true) {
+				generator.remove(fully);
+				remove.add(pos);
+			}
+		});
+		
+		remove.forEach(spawners::remove);
+		
+		return remove.size();
 	}
 	
 	public void put(Block block) {

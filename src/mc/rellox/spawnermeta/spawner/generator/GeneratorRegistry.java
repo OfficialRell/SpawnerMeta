@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -176,6 +177,17 @@ public final class GeneratorRegistry implements Listener {
 		else block.setType(Material.AIR);
 	}
 	
+	public static int remove(World world, boolean fully, Predicate<IGenerator> filter) {
+		if(world != null) {
+			if(Settings.inactive(world) == true) return 0;
+			return get(world).remove(fully, filter);
+		}
+		return SPAWNERS.values()
+				.stream()
+				.mapToInt(sw -> sw.remove(fully, filter))
+				.sum();
+	}
+	
 	public static void clear() {
 		SPAWNERS.values().forEach(SpawnerWorld::clear);
 		SPAWNERS.clear();
@@ -227,7 +239,8 @@ public final class GeneratorRegistry implements Listener {
 			
 			get(world).unload(event.getChunk());
 		} catch (Exception e) {
-			if(e.getMessage().contains("Chunk not there when requested") == true) return;
+			String m = e.getMessage();
+			if(m != null && m.contains("Chunk not there when requested") == true) return;
 			RF.debug(e);
 		}
 	}

@@ -23,7 +23,7 @@ public abstract class AbstractHologram implements IHologram {
 	public AbstractHologram(IGenerator generator, boolean above, int radius) {
 		this.generator = generator;
 		String title = title().text();
-		Block block = generator.spawner().block();
+		Block block = generator.block();
 		this.hologram = modifier
 				.create(block.getLocation()
 						.add(0.5, 1 + (above ? 0.25 : 0)
@@ -44,8 +44,7 @@ public abstract class AbstractHologram implements IHologram {
 	
 	@Override
 	public void update() {
-		List<Player> list = generator.spawner().block()
-				.getWorld().getPlayers();
+		List<Player> list = generator.world().getPlayers();
 		for(Player player : list) {
 			if(box.in(player) == true) {
 				if(players.add(player) == true) show(player);

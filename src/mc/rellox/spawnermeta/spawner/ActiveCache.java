@@ -1,7 +1,10 @@
 package mc.rellox.spawnermeta.spawner;
 
+import java.util.UUID;
+
 import mc.rellox.spawnermeta.api.spawner.ICache;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 
 public class ActiveCache implements ICache {
@@ -14,6 +17,7 @@ public class ActiveCache implements ICache {
 	private int spawnable;
 	private boolean empty;
 	private boolean enabled;
+	private UUID owner;
 	private boolean natural;
 	private int[] attributes;
 	
@@ -29,7 +33,9 @@ public class ActiveCache implements ICache {
 		spawnable = spawner.getSpawnable();
 		empty = spawner.isEmpty();
 		enabled = spawner.isEnabled();
-		natural = spawner.isNatural();
+		owner = spawner.getOwnerID();
+		natural = owner == null;
+		
 		attributes = spawner.getUpgradeAttributes();
 	}
 
@@ -70,7 +76,12 @@ public class ActiveCache implements ICache {
 
 	@Override
 	public boolean owned() {
-		return natural == false;
+		return !natural;
+	}
+	
+	@Override
+	public UUID owner() {
+		return owner;
 	}
 
 	@Override
@@ -80,6 +91,8 @@ public class ActiveCache implements ICache {
 
 	@Override
 	public int delay() {
+		if(HookRegistry.SUPERIOR_SKYBLOCK_2.exists() == true)
+			return HookRegistry.SUPERIOR_SKYBLOCK_2.delay_upgrade(spawner.block(), attributes[1]);
 		return attributes[1];
 	}
 
