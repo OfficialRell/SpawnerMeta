@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -24,7 +25,6 @@ import mc.rellox.spawnermeta.events.EventRegistry;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 
-@SuppressWarnings("removal")
 public final class APIRegistry implements APIInstance {
 	
 	private boolean registered;
@@ -114,6 +114,16 @@ public final class APIRegistry implements APIInstance {
 	@Override
 	public List<IGenerator> getGenerators(World world) {
 		return GeneratorRegistry.list(world);
+	}
+	
+	@Override
+	public int remove(boolean fully, Predicate<IGenerator> filter) {
+		return GeneratorRegistry.remove(null, fully, filter);
+	}
+	
+	@Override
+	public int remove(World world, boolean fully, Predicate<IGenerator> filter) {
+		return GeneratorRegistry.remove(world, fully, filter);
 	}
 	
 	@Override

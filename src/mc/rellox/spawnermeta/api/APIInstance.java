@@ -3,12 +3,14 @@ package mc.rellox.spawnermeta.api;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.configuration.IData;
 import mc.rellox.spawnermeta.api.configuration.IPlayerData;
 import mc.rellox.spawnermeta.api.events.EventExecutor;
@@ -20,8 +22,17 @@ import mc.rellox.spawnermeta.api.spawner.SpawnerBuilder;
 import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 
-@SuppressWarnings("removal")
 public interface APIInstance {
+	
+	/**
+	 * Quick access to SpawnerMeta API instance.
+	 * 
+	 * @return SpawnerMeta API instance
+	 */
+	
+	static APIInstance api() {
+		return SpawnerMeta.instance().getAPI();
+	}
 	
 	/**
 	 * Registers an event of the speficied class type.
@@ -173,6 +184,29 @@ public interface APIInstance {
 	 */
 	
 	List<IGenerator> getGenerators(World world);
+	
+	/**
+	 * Removes matching generators in the specified world.
+	 * If fully is {@code true} then the block is set to air.
+	 * 
+	 * @param world - world
+	 * @param fully - fully remove ({@code true} = remove spawner block)
+	 * @param filter - filter
+	 * @return Removed generator count
+	 */
+	
+	int remove(World world, boolean fully, Predicate<IGenerator> filter);
+	
+	/**
+	 * Removes matching generators.
+	 * If fully is {@code true} then the block is set to air.
+	 * 
+	 * @param fully - fully remove ({@code true} = remove spawner block)
+	 * @param filter - filter
+	 * @return Removed generator count
+	 */
+	
+	int remove(boolean fully, Predicate<IGenerator> filter);
 	
 	/**
 	 * Returns spawner location file of the specified player. Never {@code null}.

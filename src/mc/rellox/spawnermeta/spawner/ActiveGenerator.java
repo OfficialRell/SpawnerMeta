@@ -12,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Damageable;
@@ -102,6 +103,11 @@ public class ActiveGenerator implements IGenerator {
 	@Override
 	public Block block() {
 		return spawner.block();
+	}
+	
+	@Override
+	public World world() {
+		return block().getWorld();
 	}
 	
 	@Override
@@ -214,6 +220,16 @@ public class ActiveGenerator implements IGenerator {
 			online = sub <= time;
 		}
 	}
+	
+	@Override
+	public int ticks() {
+		return ticks;
+	}
+	
+	@Override
+	public void ticks(int ticks) {
+		this.ticks = Math.max(0, ticks);
+	}
 
 	@Override
 	public void tick() {
@@ -234,7 +250,7 @@ public class ActiveGenerator implements IGenerator {
 			update();
 		}
 	}
-	
+
 	private void tick_untill_zero() {
 		if(Settings.settings.tick_until_zero == false || ticks <= 0) return;
 		ticks--;
