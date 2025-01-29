@@ -19,8 +19,6 @@ public abstract class Price {
 		return PriceManager.price(group, value);
 	}
 	
-	public abstract int balance(Player player);
-	
 	public final PriceType type;
 	public final int value;
 	
@@ -29,15 +27,54 @@ public abstract class Price {
 		this.value = value;
 	}
 	
+	/**
+	 * @param player - player
+	 * @return Balance the player has
+	 */
+	
+	public abstract int balance(Player player);
+	
+	/**
+	 * Checks if the player has this price.
+	 * 
+	 * @param player - player
+	 * @return {@code true} if player has this price
+	 */
+	
 	public abstract boolean has(Player player);
+	
+	/**
+	 * Removed this price from the player.
+	 * 
+	 * @param player - player
+	 */
 	
 	public abstract void remove(Player player);
 	
+	/**
+	 * @return Text of insufficient funds
+	 */
+	
 	public abstract Content insufficient();
+	
+	/**
+	 * @return Formatted price text
+	 */
 	
 	public abstract Content text();
 	
+	/**
+	 * @param player - player
+	 * @return Formatted requirement price text
+	 */
+	
 	public abstract Content requires(Player player);
+	
+	/**
+	 * Refunds this price to the player.
+	 * 
+	 * @param player - player
+	 */
 	
 	public abstract void refund(Player player);
 	
@@ -65,13 +102,15 @@ public abstract class Price {
 		
 		@Override
 		public Content text() {
-			return Language.get("Prices.type.experience.amount", "amount", Settings.settings.price(value));
+			return Language.get("Prices.type.experience.amount",
+					"amount", Settings.settings.price(value));
 		}
 		
 		@Override
 		public Content requires(Player player) {
 			int require = value - balance(player);
-			return Language.get("Prices.type.experience.amount", "amount", require);
+			return Language.get("Prices.type.experience.amount",
+					"amount", Settings.settings.price(require));
 		}
 
 		@Override
@@ -110,13 +149,15 @@ public abstract class Price {
 		
 		@Override
 		public Content text() {
-			return Language.get("Prices.type.levels.amount", "amount", Settings.settings.price(value));
+			return Language.get("Prices.type.levels.amount",
+					"amount", Settings.settings.price(value));
 		}
 		
 		@Override
 		public Content requires(Player player) {
 			int require = value - player.getLevel();
-			return Language.get("Prices.type.levels.amount", "amount", require);
+			return Language.get("Prices.type.levels.amount",
+					"amount", Settings.settings.price(require));
 		}
 
 		@Override
@@ -180,13 +221,15 @@ public abstract class Price {
 		@Override
 		public Content text() {
 			return Language.get("Prices.type.material.amount",
-					"amount", value, "material", Utility.displayName(matcher.refund()));
+					"amount", value,
+					"material", Utility.displayName(matcher.refund()));
 		}
 		
 		@Override
 		public Content requires(Player player) {
 			return Language.get("Prices.type.material.amount",
-					"amount", value - balance(player), "material", Utility.displayName(matcher.refund()));
+					"amount", value - balance(player),
+					"material", Utility.displayName(matcher.refund()));
 		}
 
 		@Override
@@ -205,55 +248,6 @@ public abstract class Price {
 		}
 		
 	}
-	
-//	public static class PriceEconomy extends Price {
-//		
-//		public PriceEconomy(int value) {
-//			super(PriceType.ECONOMY, value);
-//			if(SpawnerMeta.ECONOMY.exists() == false)
-//				throw new IllegalStateException("Cannot construct price of type ECONOMY,"
-//						+ " due to economy not being enabled");
-//		}
-//
-//		@Override
-//		public boolean has(Player player) {
-//			return Utils.op(player) == true || SpawnerMeta.ECONOMY.get().has(player, value) == true;
-//		}
-//		
-//		@Override
-//		public void remove(Player player) {
-//			if(Utils.op(player) == true) return;
-//			SpawnerMeta.ECONOMY.get().withdrawPlayer(player, value);
-//		}
-//		
-//		@Override
-//		public Content insufficient() {
-//			return Language.get("Prices.type.economy.insufficient");
-//		}
-//		
-//		@Override
-//		public Content text() {
-//			return Language.get("Prices.type.economy.amount", "amount", Settings.settings.price(value));
-//		}
-//		
-//		@Override
-//		public Content requires(Player player) {
-//			double require = value - balance(player);
-//			return Language.get("Prices.type.economy.amount", "amount", require);
-//		}
-//
-//		@Override
-//		public int balance(Player player) {
-//			return (int) (SpawnerMeta.ECONOMY.get().getBalance(player));
-//		}
-//		
-//		@Override
-//		public void refund(Player player) {
-//			SpawnerMeta.ECONOMY.get().depositPlayer(player, value);
-//			
-//		}
-//		
-//	}
 	
 	public static class PriceCurrency extends Price {
 		
@@ -288,9 +282,9 @@ public abstract class Price {
 		
 		@Override
 		public Content requires(Player player) {
-			double require = value - balance(player);
+			int require = value - balance(player);
 			return Language.get("Prices.type." + type.key() + ".amount",
-					"amount", require);
+					"amount", Settings.settings.price(require));
 		}
 
 		@Override

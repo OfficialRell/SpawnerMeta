@@ -31,9 +31,9 @@ public final class PriceManager {
 			String type_name = CF.s.file().getString(path + ".price-type");
 			PriceType type = PriceType.of(type_name);
 			if(type == null) type = PriceType.EXPERIENCE;
-			else if(type == PriceType.ECONOMY && HookRegistry.ECONOMY.get() == null)
+			else if(type == PriceType.ECONOMY && HookRegistry.ECONOMY.exists() == false)
 				type = PriceType.EXPERIENCE;
-			else if(type == PriceType.FLARE_TOKENS && HookRegistry.FLARE_TOKENS.get() == null)
+			else if(type == PriceType.FLARE_TOKENS && HookRegistry.FLARE_TOKENS.exists() == false)
 				type = PriceType.EXPERIENCE;
 			IPrice price;
 			if(type == PriceType.EXPERIENCE) price = PriceExperience::new;
