@@ -372,8 +372,20 @@ public class ActiveGenerator implements IGenerator {
 				});
 			}
 		}
-		if(call.bypass_checks == false && s.charges_enabled == true
-				&& cache.charges() < 1_000_000_000) spawner.setCharges(cache.charges() - 1);
+
+		if(call.bypass_checks == false && s.charges_enabled == true && s.charges_custom_required_enabled == false) {
+			spawner.setCharges(cache.charges() - 1);
+
+		} else if(call.bypass_checks == false && s.charges_enabled == true && s.charges_custom_required_enabled == true) {
+			if(call.bypass_checks == false && s.charges_enabled == true && s.charges_consume_required == false
+			&& cache.charges() < 1_000_000_000) {
+				spawner.setCharges(cache.charges() - 1);
+
+			} else if(call.bypass_checks == false && s.charges_enabled == true && s.charges_consume_required == true
+			&& cache.charges() < 1_000_000_000) {
+				spawner.setCharges(cache.charges() - s.charges_required.get(cache.type()));
+			}
+		}
 
 		if(spawned >= 0) {
 			spawner.setSpawnable(spawned);
@@ -490,10 +502,21 @@ public class ActiveGenerator implements IGenerator {
 			if(warnings.isEmpty() == true) warn(SpawnerWarning.UNKNOWN);
 		}
 		var s = Settings.settings;
-		if(s.charges_enabled == true && cache.charges() <= 0) {
+
+		 if(s.charges_enabled == true && s.charges_custom_required_enabled == false && cache.charges() <= 0) {
 			boolean ignore = s.charges_ignore_natural == true && cache.natural() == true;
 			if(ignore == false) warn(SpawnerWarning.CHARGES);
+		} else if(s.charges_enabled == true && s.charges_custom_required_enabled == true) {	
+			if(s.charges_enabled == true && cache.charges() <= s.charges_required.get(cache.type()) && s.charges_warning_mode == false) {
+				boolean ignore = s.charges_ignore_natural == true && cache.natural() == true;
+				if(ignore == false) warn(SpawnerWarning.CHARGES);
+			} else if(s.charges_enabled == true && cache.charges() < s.charges_required.get(cache.type()) && s.charges_warning_mode == true) {
+				boolean ignore = s.charges_ignore_natural == true && cache.natural() == true;
+				if(ignore == false) warn(SpawnerWarning.CHARGES);
+			}
 		}
+
+		
 		int power = s.redstone_power_required;
 		if(power > 0 && spawner.block().getBlockPower() < power
 				&& !(s.redstone_power_ignore_natural == true && cache.natural() == true))

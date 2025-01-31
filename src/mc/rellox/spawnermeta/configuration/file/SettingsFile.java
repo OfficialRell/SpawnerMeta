@@ -153,6 +153,10 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Modifiers.upgrades.price-increase-type", IncreaseType.ADDITION.name());
 		
 		file.addDefault("Modifiers.charges.enabled", false);
+		file.addDefault("Modifiers.charges.custom-required.enabled", false);
+		file.addDefault("Modifiers.charges.custom-required.warning-mode", false);
+		file.addDefault("Modifiers.charges.custom-required.consume-required", false);
+		file.addDefault("Modifiers.charges.custom-required.charges.DEFAULT", 1);
 		file.addDefault("Modifiers.charges.allow-stacking", false);
 		file.addDefault("Modifiers.charges.ignore-natural", true);
 		file.addDefault("Modifiers.charges.buy-amount.first", 16);
@@ -579,6 +583,36 @@ public class SettingsFile extends AbstractFile {
 					"Are charges enabled.",
 					"Charges define how many times a spawner can spawn,",
 					"  they are purchased by players in game.");
+			c.comment("Modifiers.charges.custom-required.enabled",
+				"Enable this option if you want spawners",
+				"to require a custom amount of charges.",
+				"",
+				"true == require custom charges || false == require default charges",
+				"with this option set to false, all spawners need at least 1 charge");
+			c.comment("Modifiers.charges.custom-required.warning-mode",
+			"Enable this option if you want spawners",
+			"to display a warning message when the required charge amount",
+			"is <= the amount of charges required in the 'charges' section below.",
+			"",
+			"true == < || false == <=",
+			"",
+			"Example: if set to true and COW: 10, and the spawner has 10 charges, it will not show the warning message.",
+			"Example: if set to false and COW: 10, and the spawner has 10 charges, it will show the warning message.");
+			c.comment("Modifiers.charges.custom-required.consume-required",
+			"Enable this option if you want spawners to consume the required amount of charges or just 1.",
+			"",
+			"true == consume required || false == consume only 1",
+			"",
+			"Example: if set to true and COW: 10, and the spawner has 10 charges, it will consume 10 charges.",
+			"Example: if set to false and COW: 10, and the spawner has 10 charges, it will consume 1 charge.");
+			c.comment("Modifiers.charges.custom-required.charges.DEFAULT",
+			"Amount of charges required for the spawner to function.",
+			"For specific entities:",
+			"  <entity>: <charges> ",
+			"Replace <entity> with the specific entity name.",
+			"Default: 13 charges required for all spawners.",
+			"If you want a mob to require charges, you must write the mob name in uppercase.",
+			"Example: COW: 10 (10 charges required for the cow spawner to function) ");
 			c.comment("Modifiers.charges.allow-stacking",
 					"Will spawners with different charge amount be stacked.",
 					"If true, players will be able stack spawners which",
