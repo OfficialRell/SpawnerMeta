@@ -171,10 +171,9 @@ public final class Settings {
 
 	public final SingleIntegerMap charges_price;
 	public boolean charges_enabled;
-	public boolean charges_custom_required_enabled;
-	public boolean charges_warning_mode;
-	public boolean charges_consume_required;
-	public final SingleIntegerMap charges_required;
+	public boolean charges_comparison;
+	public final SingleIntegerMap charges_consume;
+	public final SingleIntegerMap charges_requires_as_minimum;
 	public boolean charges_allow_stacking;
 	public boolean charges_ignore_natural;
 	public int charges_buy_first;
@@ -353,7 +352,8 @@ public final class Settings {
 		this.aliases_drops = new ArrayList<>();
 		this.aliases_locations = new ArrayList<>();
 		this.aliases_trust = new ArrayList<>();
-		this.charges_required = new SingleIntegerMap("Modifiers.charges.custom-required.charges");
+		this.charges_consume = new SingleIntegerMap("Modifiers.charges.consume");
+		this.charges_requires_as_minimum = new SingleIntegerMap("Modifiers.charges.requires-as-minimum");
 	}
 	
 	protected void reload0() {
@@ -452,10 +452,9 @@ public final class Settings {
 		upgrade_increase_type = IncreaseType.of(file.getString("Modifiers.upgrades.price-increase-type"));
 
 		charges_enabled = file.getBoolean("Modifiers.charges.enabled");
-		charges_custom_required_enabled = file.getBoolean("Modifiers.charges.custom-required.enabled");
-		charges_warning_mode = file.getBoolean("Modifiers.charges.custom-required.warning-mode");
-		charges_consume_required = file.getBoolean("Modifiers.charges.custom-required.consume-required");
-		charges_required.load();
+		charges_comparison = file.getBoolean("Modifiers.charges.comparison");
+		charges_consume.load();
+		charges_requires_as_minimum.load();
 		charges_allow_stacking = file.getBoolean("Modifiers.charges.allow-stacking");
 		charges_ignore_natural = file.getBoolean("Modifiers.charges.ignore-natural");
 		charges_price.load();
@@ -765,11 +764,16 @@ public final class Settings {
 		return charges_price.get(type) * generator.cache().stack() * (generator.spawner().getSpawnerLevel() + 1);
 	}
 	
-	public int charges_required(SpawnerType type, IGenerator generator) {
-		if(charges_ignore_levels == true) return charges_required.get(type) * generator.cache().stack();
-		return charges_required.get(type) * generator.cache().stack() * (generator.spawner().getSpawnerLevel() + 1);
+	public int charges_consume(SpawnerType type, IGenerator generator) {
+		if(charges_ignore_levels == true) return charges_consume.get(type) * generator.cache().stack();
+		return charges_consume.get(type) * generator.cache().stack() * (generator.spawner().getSpawnerLevel() + 1);
 	}
 
+	public int charges_requires_as_minimum(SpawnerType type, IGenerator generator) {
+		if(charges_ignore_levels == true) return charges_requires_as_minimum.get(type) * generator.cache().stack();
+		return charges_requires_as_minimum.get(type) * generator.cache().stack() * (generator.spawner().getSpawnerLevel() + 1);
+	}
+	
 	public static boolean ignored(World world) {
 		return world == null ? false : settings.world_ignored.contains(world.getName());
 	}
