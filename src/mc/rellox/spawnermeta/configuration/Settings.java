@@ -26,7 +26,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -753,8 +752,7 @@ public final class Settings {
 					"spawnable", spawnable_amount.get(type)).text());
 		}
 		meta.setLore(lore);
-		meta.addItemFlags(ItemFlag.values());
-		Utility.hideCustomFlags(meta);
+		Utility.hideFlags(meta);
 		item.setItemMeta(meta);
 		return item;
 	}

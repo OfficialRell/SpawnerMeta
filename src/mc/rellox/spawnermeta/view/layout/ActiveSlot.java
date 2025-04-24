@@ -4,7 +4,6 @@ import java.util.stream.IntStream;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.MemorySection;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 import mc.rellox.spawnermeta.api.view.layout.ISlot;
@@ -42,6 +41,7 @@ public record ActiveSlot(SlotField field, int[] slots, Material material, Materi
 		return IntStream.of(slots).anyMatch(s -> s == slot);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public ItemStack toItem(boolean denied) {
 		Material m = denied ? denier : material;
@@ -50,8 +50,7 @@ public record ActiveSlot(SlotField field, int[] slots, Material material, Materi
 		var meta = item.getItemMeta();
 		if(glint == true) {
 			meta.addEnchant(Utility.enchantment_power, 1, true);
-			meta.addItemFlags(ItemFlag.values());
-			Utility.hideCustomFlags(meta);
+			Utility.hideFlags(meta);
 		}
 		if(model > 0) meta.setCustomModelData(model);
 		item.setItemMeta(meta);

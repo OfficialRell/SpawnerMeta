@@ -7,7 +7,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -176,8 +175,7 @@ public class PrivateSell {
 					"price", c).text());
 			meta.setLore(lore);
 		}
-		meta.addItemFlags(ItemFlag.values());
-		Utility.hideCustomFlags(meta);
+		Utility.hideFlags(meta);
 		meta.addEnchant(Utility.enchantment_power, 1, true);
 		item.setItemMeta(meta);
 		return item;
@@ -187,8 +185,7 @@ public class PrivateSell {
 		ItemStack item = new ItemStack(group.close());
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(Language.get("Shop-sell.cancel").text());
-		meta.addItemFlags(ItemFlag.values());
-		Utility.hideCustomFlags(meta);
+		Utility.hideFlags(meta);
 		meta.addEnchant(Utility.enchantment_power, 1, true);
 		item.setItemMeta(meta);
 		return item;
@@ -222,8 +219,7 @@ public class PrivateSell {
 			for(Price c : cs) lore.add(Language.get("Shop-sell.items.selling.price",
 					"price", c).text());
 			meta.setLore(lore);
-			meta.addItemFlags(ItemFlag.values());
-			Utility.hideCustomFlags(meta);
+			Utility.hideFlags(meta);
 			clone.setItemMeta(meta);
 			return clone;
 		}

@@ -6,7 +6,6 @@ import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -54,8 +53,7 @@ public record BuyData(SpawnerType type, int value) {
 				"amount", ShopRegistry.third).text());
 		if(bs[3] == true) lore.add(Language.get("Shop-buy.items.spawner.purchase.all").text());
 		meta.setLore(lore);
-		meta.addItemFlags(ItemFlag.values());
-		Utility.hideCustomFlags(meta);
+		Utility.hideFlags(meta);
 		item.setItemMeta(meta);
 		return item;
 	}
