@@ -12,7 +12,6 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -171,11 +170,13 @@ public final class DataManager {
 		if(Settings.settings.spawnable_enabled == true) {
 			order.submit("SPAWNABLE", () -> Language.list("Spawner-item.spawnable", "spawnable", spawnable));
 		}
+		
+		order.submit("INFO", () -> Language.list("Spawner-item.info"));
 
 		meta.setLore(order.build());
 		
-		meta.addItemFlags(ItemFlag.values());
-		Utility.hideCustomFlags(meta);
+		Utility.hideFlags(meta);
+		
 		item.setItemMeta(meta);
 		modify(item, type, levels, charges, spawnable, empty);
 		List<ItemStack> list = new ArrayList<>(amount + 63 >> 6);
