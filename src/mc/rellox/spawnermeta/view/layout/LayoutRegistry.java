@@ -1,6 +1,7 @@
 package mc.rellox.spawnermeta.view.layout;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.bukkit.Material;
@@ -44,7 +45,7 @@ public final class LayoutRegistry {
 					SlotField.upgrade_delay, SlotField.upgrade_amount,
 					SlotField.upgrade_charges)
 			.map(LayoutRegistry::slot)
-			.filter(s -> s != null)
+			.filter(Objects::nonNull)
 			.forEach(s -> l.set(s.field(), s));
 			upgrades = l;
 		} catch (Exception e) {
@@ -68,7 +69,9 @@ public final class LayoutRegistry {
 		var f = CF.y;
 		var path = "Upgrade-layout.background.";
 		String name = f.getString(path + "material");
-		boolean empty = name != null && name.equalsIgnoreCase("EMPTY") == true;
+		boolean empty = name != null
+				&& (name.equalsIgnoreCase("EMPTY") == true
+				|| name.equalsIgnoreCase("AIR") == true);
 		var material = empty == true ? null : RF.enumerate(Material.class, name);
 		if(material == null && empty == false) throw new SlotBuildException("background material cannot be null");
 		boolean glint = f.getBoolean(path + "glint");
