@@ -134,118 +134,137 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			pause = now;
 			
 			int o = event.getSlot();
-			UpgradeType upgrade;
+			
 			if(layout.is(o, SlotField.upgrade_stats) == true) {
-				if(Settings.settings.spawner_switching == false) return;
-				
-				SpawnerSwitchEvent call = EventRegistry.call(new SpawnerSwitchEvent(player, generator, !enabled));
-				if(call.cancelled() == true) return;
-				
-				spawner.setEnabled(enabled = !enabled);
-				player.playSound(player.getEyeLocation(), enabled
-						? Sound.ENTITY_ITEM_FRAME_ADD_ITEM : Sound.ENTITY_ITEM_FRAME_REMOVE_ITEM, 2f, 1f);
-				update();
+				switch0(player);
 				return;
-			} else if(layout.is(o, SlotField.upgrade_range) == true) upgrade = UpgradeType.RANGE;
+			}
+			
+			if(layout.is(o, SlotField.upgrade_charges) == true){
+				charge0(event, player, m, o);
+				return;
+			}
+			
+			UpgradeType upgrade;
+			
+			if(layout.is(o, SlotField.upgrade_range) == true) upgrade = UpgradeType.RANGE;
 			else if(layout.is(o, SlotField.upgrade_delay) == true) upgrade = UpgradeType.DELAY;
 			else if(layout.is(o, SlotField.upgrade_amount) == true) upgrade = UpgradeType.AMOUNT;
-			else {
-				if(Settings.settings.charges_enabled == true
-						&& layout.is(o, SlotField.upgrade_charges) == true) {
-					if(Settings.settings.charges_ignore_natural == true
-							&& cache.natural() == true) return;
-					ClickType ct = event.getClick();
-					SpawnerType type = cache.type();
-					
-					int r = Settings.settings.charges_price(type, generator);
-					int a;
-					if(ct.isShiftClick() == true) {
-						a = lowestCharges() / r;
-						if(a <= 0) return;
-					} else if(ct.isLeftClick() == true) {
-						a = Settings.settings.charges_buy_first;
-					} else if(ct.isRightClick() == true) {
-						a = Settings.settings.charges_buy_second;
-					} else return;
-					Price price = Price.of(Group.charges, r * a);
-					
-					SpawnerChargeEvent call = EventRegistry.call(new SpawnerChargeEvent(player, generator, price, a));
-					if(call.cancelled() == true) return;
-					if(call.withdraw(player) == false) return;
-					
-					int charges = cache.charges() + call.charges;
-					spawner.setCharges(charges);
-					m.send(Language.list("Upgrade-GUI.charges.purchase", "charges", call.charges));
-					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
-					update();
-				}
-				return;
-			}
-			int i = upgrade.ordinal();
-			if(player.hasPermission("spawnermeta.upgrades.buy") == false) {
-				m.send(Language.list("Spawners.upgrades.permission.purchase"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return;
-			}
-			if(allowed(i) == false) {
-				m.send(Language.list("Upgrade-GUI.disabled-upgrade"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return;
-			}
-			if(Settings.settings.natural_can_upgrade == false && cache.natural() == true) {
-				if(player.hasPermission("spawnermeta.ownership.bypass.upgrading") == false) {
-					m.send(Language.list("Spawners.natural.upgrading.warning"));
-					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-					return;
-				}
-			}
-			x: if(Settings.settings.owned_can_upgrade == false) {
-				UUID owner = generator.spawner().getOwnerID();
-				if(owner != null && owner.equals(player.getUniqueId()) == false) {
-					if(player.hasPermission("spawnermeta.ownership.bypass.upgrading") == false) {
-						if(Settings.settings.trusted_can_upgrade == true
-								&& LocationRegistry.trusted(owner, player) == true) break x;
-						m.send(Language.list("Spawners.ownership.upgrading.warning"));
-						player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-						return;
-					}
-				}
-			}
-			SpawnerType type = cache.type();
-			int[] ls = spawner.getUpgradeLevels();
-			int[] ms = Settings.settings.upgrades_levels.get(type);
-			if(ls[i] < ms[i]) {
-				Price price = price(type, ls[i], i);
-				
-				SpawnerUpgradeEvent call = EventRegistry.call(
-						new SpawnerUpgradeEvent(player, generator, upgrade, ls[i] + 1, ms[i], price));
-				
-				if(price.has(player) == false) {
-					price = call.getUnsafePrice();
-					m.send(Language.list("Prices.insufficient", 
-							"insufficient", price.insufficient(), "price", price.requires(player)));
-					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-					return;
-				}
-				if(call.cancelled() == true || call.withdraw(player) == false) return;
-				
-				int u = call.upgrade_level;
-				ls[i] = u < 1 ? 1 : u > ms[i] ? ms[i] : u;
-				
-				spawner.setUpgradeLevels(ls);
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
-				UpgradeType ut = UpgradeType.of(i);
-				m.send(Language.list("Upgrade-GUI.purchase." + ut.lower(),
-						"level", Utility.roman(ls[i])));
-				DustOptions d = new DustOptions(ut.color, 2f);
-				player.spawnParticle(Utility.particle_redstone, Utility.center(spawner.block()), 50, 0.25, 0.25, 0.25, 0, d);
-				
-				update();
-			} else player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			else return;
+			
+			upgrade0(player, m, upgrade);
 		} catch(Exception e) {
 			player.sendMessage(ChatColor.DARK_RED + "This upgrade inventory is invalid, closing!");
 			player.closeInventory();
 		}
+	}
+
+	private void upgrade0(Player player, Messagable m, UpgradeType upgrade) {
+		int i = upgrade.ordinal();
+		if(player.hasPermission("spawnermeta.upgrades.buy") == false) {
+			m.send(Language.list("Spawners.upgrades.permission.purchase"));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return;
+		}
+		if(allowed(i) == false) {
+			m.send(Language.list("Upgrade-GUI.disabled-upgrade"));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return;
+		}
+		if(Settings.settings.natural_can_upgrade == false && cache.natural() == true) {
+			if(player.hasPermission("spawnermeta.ownership.bypass.upgrading") == false) {
+				m.send(Language.list("Spawners.natural.upgrading.warning"));
+				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+				return;
+			}
+		}
+		x: if(Settings.settings.owned_can_upgrade == false) {
+			UUID owner = generator.spawner().getOwnerID();
+			if(owner != null && owner.equals(player.getUniqueId()) == false) {
+				if(player.hasPermission("spawnermeta.ownership.bypass.upgrading") == false) {
+					if(Settings.settings.trusted_can_upgrade == true
+							&& LocationRegistry.trusted(owner, player) == true) break x;
+					m.send(Language.list("Spawners.ownership.upgrading.warning"));
+					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+					return;
+				}
+			}
+		}
+		SpawnerType type = cache.type();
+		int[] ls = spawner.getUpgradeLevels();
+		int[] ms = Settings.settings.upgrades_levels.get(type);
+		if(ls[i] < ms[i]) {
+			Price price = price(type, ls[i], i);
+			
+			SpawnerUpgradeEvent call = EventRegistry.call(
+					new SpawnerUpgradeEvent(player, generator, upgrade, ls[i] + 1, ms[i], price));
+			
+			if(price.has(player) == false) {
+				price = call.getUnsafePrice();
+				m.send(Language.list("Prices.insufficient", 
+						"insufficient", price.insufficient(), "price", price.requires(player)));
+				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+				return;
+			}
+			if(call.cancelled() == true || call.withdraw(player) == false) return;
+			
+			int u = call.upgrade_level;
+			ls[i] = u < 1 ? 1 : u > ms[i] ? ms[i] : u;
+			
+			spawner.setUpgradeLevels(ls);
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
+			UpgradeType ut = UpgradeType.of(i);
+			m.send(Language.list("Upgrade-GUI.purchase." + ut.lower(),
+					"level", Utility.roman(ls[i])));
+			DustOptions d = new DustOptions(ut.color, 2f);
+			player.spawnParticle(Utility.particle_redstone, Utility.center(spawner.block()), 50, 0.25, 0.25, 0.25, 0, d);
+			
+			update();
+		} else player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+	}
+
+	private void charge0(InventoryClickEvent event, Player player, Messagable m, int o) {
+		if(Settings.settings.charges_enabled == true
+				&& layout.is(o, SlotField.upgrade_charges) == true) {
+			if(Settings.settings.charges_ignore_natural == true
+					&& cache.natural() == true) return;
+			ClickType ct = event.getClick();
+			SpawnerType type = cache.type();
+			
+			int r = Settings.settings.charges_price(type, generator);
+			int a;
+			if(ct.isShiftClick() == true) {
+				a = lowestCharges() / r;
+				if(a <= 0) return;
+			} else if(ct.isLeftClick() == true) {
+				a = Settings.settings.charges_buy_first;
+			} else if(ct.isRightClick() == true) {
+				a = Settings.settings.charges_buy_second;
+			} else return;
+			Price price = Price.of(Group.charges, r * a);
+			
+			SpawnerChargeEvent call = EventRegistry.call(new SpawnerChargeEvent(player, generator, price, a));
+			if(call.cancelled() == true) return;
+			if(call.withdraw(player) == false) return;
+			
+			int charges = cache.charges() + call.charges;
+			spawner.setCharges(charges);
+			m.send(Language.list("Upgrade-GUI.charges.purchase", "charges", call.charges));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
+			update();
+		}
+	}
+
+	private void switch0(Player player) {
+		if(Settings.settings.spawner_switching == false) return;
+		
+		SpawnerSwitchEvent call = EventRegistry.call(new SpawnerSwitchEvent(player, generator, !enabled));
+		if(call.cancelled() == true) return;
+		
+		spawner.setEnabled(enabled = !enabled);
+		player.playSound(player.getEyeLocation(), enabled
+				? Sound.ENTITY_ITEM_FRAME_ADD_ITEM : Sound.ENTITY_ITEM_FRAME_REMOVE_ITEM, 2f, 1f);
+		update();
 	}
 	
 	@EventHandler
