@@ -12,6 +12,8 @@ import com.bgsoftware.wildtools.api.hooks.DropsProvider;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
+import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class SetupWildTools {
@@ -40,7 +42,14 @@ public class SetupWildTools {
 		
 		@Override
 		public List<ItemStack> getBlockDrops(Player player, Block block) {
-			return ISpawner.of(block).toItems();
+			// Obtain spawner items
+			List<ItemStack> items = ISpawner.of(block).toItems();
+			
+			// Correctly removing the spawner and its location from the registry
+			LocationRegistry.remove(block);
+			GeneratorRegistry.delete(block);
+			
+			return items;
 		}
 	}
 }
