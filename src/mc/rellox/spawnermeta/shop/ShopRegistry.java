@@ -30,7 +30,7 @@ public final class ShopRegistry {
 			SpawnerType.AXOLOTL, SpawnerType.BAT, SpawnerType.BEE, SpawnerType.CAT,
 			SpawnerType.CHICKEN, SpawnerType.COD,
 			SpawnerType.COW, SpawnerType.DOLPHIN, SpawnerType.DONKEY,
-			SpawnerType.ENDERMITE, SpawnerType.FOX,
+			SpawnerType.ENDERMITE, SpawnerType.FOX, SpawnerType.FROG,
 			SpawnerType.GLOW_SQUID, SpawnerType.GOAT, SpawnerType.HOGLIN,
 			SpawnerType.HORSE, SpawnerType.LLAMA,
 			SpawnerType.MULE, SpawnerType.MUSHROOM_COW, SpawnerType.OCELOT,
