@@ -38,6 +38,7 @@ import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.items.ItemMatcher;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
+import mc.rellox.spawnermeta.spawner.generator.SpawningManager.SpawnerMetaSpawnEvent;
 import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Messagable;
@@ -162,8 +163,9 @@ public class EventListeners implements Listener {
 	
 	@EventHandler(priority = EventPriority.LOW)
 	private void onSpawn(SpawnerSpawnEvent event) {
+		if(event instanceof SpawnerMetaSpawnEvent) return;
+		
 		Entity entity = event.getEntity();
-
 		
 		World world = entity.getWorld();
 		if(Settings.disabled(world) == true) {

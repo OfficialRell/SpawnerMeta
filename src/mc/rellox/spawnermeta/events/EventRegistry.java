@@ -72,6 +72,7 @@ import mc.rellox.spawnermeta.prices.Group;
 import mc.rellox.spawnermeta.prices.Price;
 import mc.rellox.spawnermeta.spawner.ActiveVirtual;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
+import mc.rellox.spawnermeta.spawner.generator.SpawningManager;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.utility.DataManager;
@@ -207,6 +208,7 @@ public final class EventRegistry {
 		spawner.update();
 		
 		generator.refresh();
+		SpawningManager.unlink(generator.block());
 	}
 
 	protected static void changing_empty(Player player, Messagable m, IGenerator generator, ItemStack item,
@@ -270,6 +272,7 @@ public final class EventRegistry {
 		spawner.update();
 		
 		generator.refresh();
+		SpawningManager.unlink(generator.block());
 	}
 	
 	protected static boolean remove_eggs_from_regular(PlayerInteractEvent event, Player player, Messagable m, ItemStack item, IGenerator generator) {
