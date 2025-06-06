@@ -1,6 +1,11 @@
 package mc.rellox.spawnermeta.spawner.generator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
@@ -78,22 +83,35 @@ public class SpawnerWorld {
 		spawners.values().forEach(IGenerator::tick);
 	}
 
-	public void reduce() {
-		List<Pos> toRemove = new ArrayList<>();
+  public void reduce() {
+    List<Pos> toRemove = new ArrayList<>();
 
-		spawners.forEach((pos, generator) -> {
-			SpawnerMeta.scheduler().runAtLocation(generator.block().getLocation(), task -> {
-				if (!generator.active() || !generator.present()) {
-					generator.clear();
-					toRemove.add(pos); // Add the key (pos) to the list for removal to prevent IllegalStateException
-				}
-			});
-		});
+    spawners.forEach((pos, generator) -> {
+      SpawnerMeta.scheduler().runAtLocation(generator.block().getLocation(), task -> {
+        if (!generator.active() || !generator.present()) {
+          generator.clear();
+          toRemove.add(pos);
+        }
+      });
+    });
 
-		// Remove invalid generators using their keys
-		toRemove.forEach(spawners::remove);
-	}
+    toRemove.forEach(spawners::remove);
+  }
 
+  public int remove(boolean fully, Predicate<IGenerator> filter) {
+    List<Pos> toRemove = new ArrayList<>();
+
+    spawners.forEach((pos, generator) -> {
+      if (generator.active() && filter.test(generator)) {
+        generator.remove(fully);
+        toRemove.add(pos);
+      }
+    });
+
+    toRemove.forEach(spawners::remove);
+
+    return toRemove.size();
+  }
 	
 	public void put(Block block) {
 		put(new ActiveGenerator(ISpawner.of(block)));

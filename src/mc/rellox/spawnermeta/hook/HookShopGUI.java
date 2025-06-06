@@ -1,18 +1,14 @@
 package mc.rellox.spawnermeta.hook;
 
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 
 import mc.rellox.spawnermeta.hook.setup.SetupShopGUI;
 import net.brcdev.shopgui.ShopGuiPlugin;
 
-public class HookShopGUI implements HookInstance<ShopGuiPlugin> {
+public class HookShopGUI implements HookInstance {
 	
 	private ShopGuiPlugin plugin;
-
-	@Override
-	public ShopGuiPlugin get() {
-		return plugin;
-	}
 
 	@Override
 	public boolean exists() {
@@ -26,8 +22,9 @@ public class HookShopGUI implements HookInstance<ShopGuiPlugin> {
 
 	@Override
 	public void load() {
-		plugin = (ShopGuiPlugin) Bukkit.getPluginManager().getPlugin("ShopGUIPlus");
+		Plugin plugin = Bukkit.getPluginManager().getPlugin("ShopGUIPlus");
 		if(plugin == null) return;
+		this.plugin = (ShopGuiPlugin) plugin;
 		SetupShopGUI.load();
 	}
 

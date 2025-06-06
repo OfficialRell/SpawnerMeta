@@ -1,5 +1,7 @@
 package mc.rellox.spawnermeta.shop;
 
+import java.util.stream.Stream;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -63,7 +65,9 @@ public class ShopSelection implements Listener {
 		ItemStack item = new ItemStack(m);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(Language.get("Shop-select.buy-shop").text());
-		meta.addItemFlags(ItemFlag.values());
+		meta.addItemFlags(Stream.of(ItemFlag.values())
+				.filter(i -> i.ordinal() < 8)
+				.toArray(ItemFlag[]::new));
 		meta.addEnchant(Utility.enchantment_power, 1, true);
 		item.setItemMeta(meta);
 		return item;
@@ -73,7 +77,9 @@ public class ShopSelection implements Listener {
 		ItemStack item = new ItemStack(m);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(Language.get("Shop-select.sell-shop").text());
-		meta.addItemFlags(ItemFlag.values());
+		meta.addItemFlags(Stream.of(ItemFlag.values())
+				.filter(i -> i.ordinal() < 8)
+				.toArray(ItemFlag[]::new));
 		meta.addEnchant(Utility.enchantment_power, 1, true);
 		item.setItemMeta(meta);
 		return item;

@@ -20,6 +20,7 @@ import mc.rellox.spawnermeta.text.content.ContentParser;
 import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
+@SuppressWarnings("deprecation")
 public final class ItemMatcher {
 	
 	public static final ItemMatcher DEFAULT = new ItemMatcher(Material.GOLD_INGOT);

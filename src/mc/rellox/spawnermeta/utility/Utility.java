@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,12 +20,12 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
-import mc.rellox.spawnermeta.utility.reflect.type.Accessor;
 import mc.rellox.spawnermeta.version.Version;
 import mc.rellox.spawnermeta.version.Version.VersionType;
 
@@ -144,14 +145,12 @@ public final class Utility {
 		}
 	}
 	
-	public static void hideCustomFlags(ItemMeta meta) {
+	public static void hideFlags(ItemMeta meta) {
 		try {
-			Accessor<Integer> a = RF.access(meta, "hideFlag", int.class, false);
-			int h = a.get(0);
-			a.set(h | 64);
-		} catch (Exception e) {
-			RF.debug(new RuntimeException("Unable to apply hidden item flag"));
-		}
+			meta.addItemFlags(Stream.of(ItemFlag.values())
+					.filter(i -> i.ordinal() < 8)
+					.toArray(ItemFlag[]::new));
+		} catch (Exception e) {}
 	}
 	
 	public static Entity create(Location location, EntityType type) {

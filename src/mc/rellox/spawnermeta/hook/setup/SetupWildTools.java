@@ -6,18 +6,20 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import com.bgsoftware.wildtools.api.WildTools;
 import com.bgsoftware.wildtools.api.hooks.DropsProvider;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
-import mc.rellox.spawnermeta.hook.HookRegistry;
+import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
+import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class SetupWildTools {
 	
-	public static void load() {
+	public static void load(WildTools plugin) {
 		SpawnerMeta.scheduler().runLater(() -> {
-			var providers = HookRegistry.WILD_TOOLS.get().getProviders();
+			var providers = plugin.getProviders();
 			try {
 				RF.fetch(providers, "dropsProviders", List.class).clear();
 			} catch (Exception x) {
@@ -36,7 +38,14 @@ public class SetupWildTools {
 		
 		@Override
 		public List<ItemStack> getBlockDrops(Player player, Block block) {
-			return ISpawner.of(block).toItems();
+			// Obtain spawner items
+			List<ItemStack> items = ISpawner.of(block).toItems();
+
+			// Correctly removing the spawner and its location from the registry
+			LocationRegistry.remove(block);
+			GeneratorRegistry.delete(block);
+
+			return items;
 		}
 	}
 }

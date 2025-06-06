@@ -71,6 +71,7 @@ import mc.rellox.spawnermeta.prices.Group;
 import mc.rellox.spawnermeta.prices.Price;
 import mc.rellox.spawnermeta.spawner.ActiveVirtual;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
+import mc.rellox.spawnermeta.spawner.generator.SpawningManager;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.utility.DataManager;
@@ -206,6 +207,7 @@ public final class EventRegistry {
 		spawner.update();
 		
 		generator.refresh();
+		SpawningManager.unlink(generator.block());
 	}
 
 	protected static void changing_empty(Player player, Messagable m, IGenerator generator, ItemStack item,
@@ -269,27 +271,23 @@ public final class EventRegistry {
 		spawner.update();
 		
 		generator.refresh();
+		SpawningManager.unlink(generator.block());
 	}
 	
-	protected static boolean remove_eggs_empty(PlayerInteractEvent event, Player player, Messagable m, ItemStack item, IGenerator generator) {
-		if(generator.cache().empty() == false) return true;
+	protected static boolean remove_eggs_from_regular(PlayerInteractEvent event, Player player, Messagable m, ItemStack item, IGenerator generator) {
+		if(generator.cache().empty() == true) return true;
+		if(Settings.settings.empty_remove_from_regular == false) return true;
 		if(item != null && item.getType() == Material.SPAWNER) return true;
+		
 		event.setCancelled(true);
+		
 		if(Settings.settings.empty_enabled == false) {
 			m.send(Language.list("Spawners.empty.disabled"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return false;
 		}
-		SpawnerType type = generator.cache().type();
-		if(player.isSneaking() == false) {
-			if(type == SpawnerType.EMPTY) {
-				m.send(Language.list("Spawners.empty.try-open"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return false;
-			}
-			return true;
-		}
-		if(type == SpawnerType.EMPTY) return true;
+		if(player.isSneaking() == false) return true;
+		
 		x: if(Settings.settings.owned_can_change == false) {
 			UUID owner = generator.spawner().getOwnerID();
 			if(owner != null && owner.equals(player.getUniqueId()) == false) {
@@ -322,18 +320,101 @@ public final class EventRegistry {
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 2f, 0f);
 			return false;
 		}
-		remove_eggs(player, generator);
+
+		remove_eggs(player, generator, false);
+		
+		return false;
+	}
+	
+	protected static boolean remove_eggs_empty(PlayerInteractEvent event, Player player, Messagable m, ItemStack item, IGenerator generator) {
+		ICache cache = generator.cache();
+		
+		if(cache.empty() == false) return true;
+		if(item != null && item.getType() == Material.SPAWNER) return true;
+		
+		event.setCancelled(true);
+		
+		if(Settings.settings.empty_enabled == false) {
+			m.send(Language.list("Spawners.empty.disabled"));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return false;
+		}
+		
+		SpawnerType type = cache.type();
+		if(player.isSneaking() == false) {
+			if(type == SpawnerType.EMPTY) {
+				m.send(Language.list("Spawners.empty.try-open"));
+				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+				return false;
+			}
+			return true;
+		}
+		if(type == SpawnerType.EMPTY) return true;
+		
+		x: if(Settings.settings.owned_can_change == false) {
+			UUID owner = cache.owner();
+			if(owner != null && owner.equals(player.getUniqueId()) == false) {
+				if(player.hasPermission("spawnermeta.ownership.bypass.changing") == false) {
+					if(Settings.settings.trusted_can_change == true
+							&& LocationRegistry.trusted(owner, player) == true) break x;
+					m.send(Language.list("Spawners.ownership.changing.warning"));
+					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+					return false;
+				}
+			}
+		}
+		
+		boolean b = Utility.nulled(player.getInventory().getItemInMainHand()) == false;
+		if(b == true) {
+			m.send(Language.list("Spawners.empty.hand-full"));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return false;
+		}
+		
+		if(Settings.settings.empty_verify_removing == true) {
+			Block block = generator.block();
+			verify = block;
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					if(block.equals(verify) == true) {
+						verify = null;
+						player.spawnParticle(Utility.particle_redstone, Utility.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
+								new DustOptions(Color.MAROON, 2f));
+					}
+				}
+			}.runTaskLater(SpawnerMeta.instance(), 20);
+			m.send(Language.list("Spawners.empty.verify-removing.first"));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 2f, 0f);
+			return false;
+		}
+		remove_eggs(player, generator, true);
 		return false;
 	}
 
 	protected static void stack_nearby(PlayerInteractEvent event, Player player, Messagable m, Block block) {
 		if(Settings.settings.stacking_nearby_enabled == false) return;
+		
 		ItemStack item = event.getItem();
 		if(item == null || item.getType() != Material.SPAWNER
 				|| player.isSneaking() == false) return;
 		event.setCancelled(true);
-		IVirtual data = IVirtual.of(item);
-		if(data == null) return;
+		
+		IVirtual virtual = IVirtual.of(item);
+		if(virtual == null) return;
+		
+		// check before stacking() to save performance
+		if(player.hasPermission("spawnermeta.stacking") == false) {
+			m.send(Language.list("Spawners.stacking.permission"));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return;
+		}
+		if(Settings.settings.stacking_disabled_types.contains(virtual.getType()) == true) {
+			m.send(Language.list("Spawners.stacking.disabled-type"));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return;
+		}
+		
 		final int r = Settings.settings.stacking_nearby_radius;
 		Block valid = null;
 		int x = -r, y, z;
@@ -346,7 +427,7 @@ public final class EventRegistry {
 					if(rel.getType() != Material.SPAWNER) continue;
 					IVirtual of = IVirtual.of(rel);
 					if(of == null) continue;
-					if(data.exact(of) == true) {
+					if(virtual.exact(of) == true) {
 						valid = rel;
 						break f;
 					}
@@ -358,6 +439,7 @@ public final class EventRegistry {
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
+		
 		IGenerator generator = GeneratorRegistry.get(valid);
 		stacking(player, m, generator, item, false);
 	}
@@ -365,13 +447,21 @@ public final class EventRegistry {
 	protected static void verify_removing(PlayerInteractEvent event, Player player, Messagable m) {
 		if(Settings.settings.empty_verify_removing == false) return;
 		Block block = event.getClickedBlock();
+		
 		if(player.isSneaking() == false || block.getType() != Material.SPAWNER) return;
+		
 		IGenerator generator = GeneratorRegistry.get(block);
-		ISpawner spawner = getAPI().getSpawner(block);
-		SpawnerType type = spawner.getType();
-		if(type == SpawnerType.EMPTY || spawner.isEmpty() == false) return;
+		if(generator == null) return;
+		
+		SpawnerType type = generator.cache().type();
+		if(type == SpawnerType.EMPTY) return;
+		
+		boolean empty = generator.cache().empty();
+		if(Settings.settings.empty_remove_from_regular == false && empty == false) return;
+		
 		boolean b = Utility.nulled(player.getInventory().getItemInMainHand()) == false;
 		if(b == false && Utility.op(player) == true) event.setCancelled(true);
+		
 		if(verify == null) {
 			m.send(Language.list("Spawners.empty.verify-removing.try-again"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
@@ -382,7 +472,7 @@ public final class EventRegistry {
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
-		remove_eggs(player, generator);
+		remove_eggs(player, generator, empty);
 	}
 
 	protected static boolean stacking(Player player, Messagable m, IGenerator generator, ItemStack item, boolean direct) {
@@ -402,10 +492,17 @@ public final class EventRegistry {
 			if(time >= b - tt) return false;
 			time = b;
 		}
+		
 		IVirtual virtual = IVirtual.of(item);
 		if(virtual == null) return false;
+		
 		if(player.hasPermission("spawnermeta.stacking") == false) {
 			m.send(Language.list("Spawners.stacking.permission"));
+			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+			return false;
+		}
+		if(s.stacking_disabled_types.contains(virtual.getType()) == true) {
+			m.send(Language.list("Spawners.stacking.disabled-type"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return false;
 		}
@@ -504,9 +601,14 @@ public final class EventRegistry {
 		SpawnerType type = generator.cache().type();
 		if(type.disabled() == true) return;
 		event.setCancelled(false);
+		
+		if(HookRegistry.PLOT_SQUARED.exists() == true
+				&& HookRegistry.PLOT_SQUARED.modifiable(generator, player) == false) return;
+		
 		ItemStack item = event.getItem();
 		
 		if(EventRegistry.remove_eggs_empty(event, player, m, item, generator) == false) return;
+		if(EventRegistry.remove_eggs_from_regular(event, player, m, item, generator) == false) return;
 		
 		if(item != null) {
 			if(player.isSneaking() == true) {
@@ -552,7 +654,7 @@ public final class EventRegistry {
 		event.setCancelled(true);
 	}
 
-	protected static void remove_eggs(Player player, IGenerator generator) {
+	protected static void remove_eggs(Player player, IGenerator generator, boolean empty) {
 		ISpawner spawner = generator.spawner();
 		
 		ItemStack refund = null;
@@ -570,6 +672,7 @@ public final class EventRegistry {
 		player.spawnParticle(Utility.particle_firework, spawner.center(), 25, 0.3, 0.3, 0.3, 0.1);
 		
 		spawner.setType(SpawnerType.EMPTY);
+		if(empty == false) spawner.setEmpty();
 		if(Settings.settings.changing_reset_empty == true) spawner.resetUpgradeLevels();
 		spawner.update();
 		

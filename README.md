@@ -8,7 +8,7 @@ This plugin implements fully customizable and upgradeable spawners.
 <dependency>
   <groupId>mc.rellox</groupId>
   <artifactId>SpawnerMeta</artifactId>
-  <version>24.8</version>
+  <version>25.1</version>
   <scope>provided</scope>
 </dependency>
 
@@ -23,10 +23,11 @@ This plugin implements fully customizable and upgradeable spawners.
 Getting plugin API:
 ```java
 SpawnerMeta sm = (SpawnerMeta) Bukkit.getPluginManager().getPlugin("SpawnerMeta");
-```
-Getting API instance:
-```java
 APIInstance api = sm.getAPI();
+```
+Getting API directly:
+```java
+APIInstance api = APIInstance.api();
 ```
 Registering event listeners:
 ```java

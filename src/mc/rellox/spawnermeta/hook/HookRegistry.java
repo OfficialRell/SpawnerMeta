@@ -8,7 +8,7 @@ import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class HookRegistry {
 
-	private static final List<HookInstance<?>> HOOKS = new ArrayList<>();
+	private static final List<HookInstance> HOOKS = new ArrayList<>();
 
 	public static final HookEconomy ECONOMY = new HookEconomy();
 	public static final HookWildStacker WILD_STACKER = new HookWildStacker();
@@ -17,6 +17,7 @@ public class HookRegistry {
 	public static final HookFlareTokens FLARE_TOKENS = new HookFlareTokens();
 	public static final HookSuperiorSkyblock2 SUPERIOR_SKYBLOCK_2 = new HookSuperiorSkyblock2();
 	public static final HookPlayerPoints PLAYER_POINTS = new HookPlayerPoints();
+	public static final HookPlotSquared PLOT_SQUARED = new HookPlotSquared();
 
 	public static void load() {
 		try {
@@ -28,6 +29,8 @@ public class HookRegistry {
 			HOOKS.add(FLARE_TOKENS);
 			HOOKS.add(SUPERIOR_SKYBLOCK_2);
 			HOOKS.add(PLAYER_POINTS);
+			HOOKS.add(PLOT_SQUARED);
+			
 			HOOKS.forEach(i -> {
 				try {
 					i.load();

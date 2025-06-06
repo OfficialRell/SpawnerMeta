@@ -48,6 +48,7 @@ public class RequirementFile extends AbstractFile {
 		put(SpawnerType.COD, "", water, "");
 		put(SpawnerType.COW, "9+", air, grass);
 		put(SpawnerType.CREEPER, "-4", air, solid, true);
+		put(SpawnerType.CREAKING, "-9", air, solid, true);
 		put(SpawnerType.DOLPHIN, "", water, "");
 		put(SpawnerType.DONKEY, "9+", air, grass);
 		put(SpawnerType.DROWNED, "-4", water, "", true);

@@ -161,8 +161,7 @@ public final class SpawningManager {
 			RF.access(o, "spawnedViaMobSpawner", boolean.class, false).set(true);
 			RF.access(o, "spawnReason", SpawnReason.class, false).set(SpawnReason.SPAWNER);
 			if(s.send_spawning_event == true) {
-				SpawnerSpawnEvent event = new SpawnerSpawnEvent(entity,
-						(CreatureSpawner) spawner.block().getState());
+				SpawnerMetaSpawnEvent event = new SpawnerMetaSpawnEvent(entity, spawner);
 				entity.getServer().getPluginManager().callEvent(event);
 			}
 			if(s.silent_entities.contains(spawner.getType()) == true)
@@ -211,6 +210,17 @@ public final class SpawningManager {
 	public static void unlink(Block block) {
 		if(HookRegistry.WILD_STACKER.exists() == false) return;
 		HookRegistry.WILD_STACKER.unlink(block);
+	}
+	
+	public static class SpawnerMetaSpawnEvent extends SpawnerSpawnEvent {
+		
+		public final ISpawner spawner;
+
+		public SpawnerMetaSpawnEvent(Entity spawnee, ISpawner spawner) {
+			super(spawnee, (CreatureSpawner) spawner.block().getState());
+			this.spawner = spawner;
+		}
+		
 	}
 
 }

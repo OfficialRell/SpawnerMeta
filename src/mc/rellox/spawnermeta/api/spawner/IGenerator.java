@@ -1,6 +1,7 @@
 package mc.rellox.spawnermeta.api.spawner;
 
 import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -20,6 +21,12 @@ public interface IGenerator {
 	 */
 	
 	Block block();
+	
+	/**
+	 * @return World the generator is in
+	 */
+	
+	World world();
 	
 	/**
 	 * @return Spawner cache
@@ -48,6 +55,21 @@ public interface IGenerator {
 	 */
 	
 	void remove(boolean fully);
+	
+	/**
+	 * @return Current spawner ticks
+	 */
+	
+	int ticks();
+	
+	/**
+	 * Sets the generator ticks. <br>
+	 * This will not take ticking interval into consideration.
+	 * 
+	 * @param ticks - new spawner ticks
+	 */
+	
+	void ticks(int ticks);
 	
 	/**
 	 * Ticks this spawner.

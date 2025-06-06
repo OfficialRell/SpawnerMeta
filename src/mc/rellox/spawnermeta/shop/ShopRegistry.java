@@ -26,6 +26,33 @@ import mc.rellox.spawnermeta.version.Version.VersionType;
 
 public final class ShopRegistry {
 	
+	private static final SpawnerType[] FRIENDLY_TYPES = {
+			SpawnerType.AXOLOTL, SpawnerType.BAT, SpawnerType.BEE, SpawnerType.CAT,
+			SpawnerType.CHICKEN, SpawnerType.COD,
+			SpawnerType.COW, SpawnerType.DOLPHIN, SpawnerType.DONKEY,
+			SpawnerType.ENDERMITE, SpawnerType.FOX, SpawnerType.FROG,
+			SpawnerType.GLOW_SQUID, SpawnerType.GOAT, SpawnerType.HOGLIN,
+			SpawnerType.HORSE, SpawnerType.LLAMA,
+			SpawnerType.MULE, SpawnerType.MUSHROOM_COW, SpawnerType.OCELOT,
+			SpawnerType.PANDA, SpawnerType.PARROT, SpawnerType.PIG,
+			SpawnerType.POLAR_BEAR, SpawnerType.PUFFERFISH, SpawnerType.RABBIT,
+			SpawnerType.SALMON, SpawnerType.SHEEP, SpawnerType.SNIFFER, SpawnerType.SILVERFISH,
+			SpawnerType.SQUID, SpawnerType.STRIDER, SpawnerType.TROPICAL_FISH,
+			SpawnerType.TURTLE, SpawnerType.WOLF, SpawnerType.ZOGLIN
+	};
+	private static final SpawnerType[] HOSTILE_TYPES = {
+			SpawnerType.BLAZE, SpawnerType.CAVE_SPIDER, SpawnerType.CREEPER,
+			SpawnerType.CREAKING, SpawnerType.DROWNED, SpawnerType.ENDERMAN, SpawnerType.EVOKER,
+			SpawnerType.GHAST, SpawnerType.GUARDIAN, SpawnerType.HUSK,
+			SpawnerType.IRON_GOLEM, SpawnerType.MAGMA_CUBE, SpawnerType.PHANTOM,
+			SpawnerType.PIG_ZOMBIE,
+			SpawnerType.PIGLIN, SpawnerType.PIGLIN_BRUTE, SpawnerType.PILLAGER,
+			SpawnerType.RAVAGER, SpawnerType.SHULKER, SpawnerType.SKELETON,
+			SpawnerType.SLIME, SpawnerType.SPIDER, SpawnerType.STRAY,
+			SpawnerType.VEX, SpawnerType.VINDICATOR, SpawnerType.WITCH,
+			SpawnerType.WITHER_SKELETON, SpawnerType.ZOMBIE, SpawnerType.ZOMBIFIED_PIGLIN
+	};
+	
 	private static File lf;
 	private static FileConfiguration file;
 	
@@ -286,25 +313,14 @@ public final class ShopRegistry {
 			} catch(IOException e) {}
 			file = YamlConfiguration.loadConfiguration(lf);
 		}
+		
 		Map<Integer, SpawnerType[]> map = new HashMap<>();
-		map.put(500, new SpawnerType[] {
-				SpawnerType.AXOLOTL, SpawnerType.BAT, SpawnerType.BEE, SpawnerType.CAT, SpawnerType.CHICKEN, SpawnerType.COD,
-				SpawnerType.COW, SpawnerType.DOLPHIN, SpawnerType.DONKEY, SpawnerType.ENDERMITE, SpawnerType.FOX,
-				SpawnerType.GLOW_SQUID, SpawnerType.GOAT, SpawnerType.HOGLIN, SpawnerType.HORSE, SpawnerType.LLAMA,
-				SpawnerType.MULE, SpawnerType.MUSHROOM_COW, SpawnerType.OCELOT, SpawnerType.PANDA, SpawnerType.PARROT, SpawnerType.PIG,
-				SpawnerType.POLAR_BEAR, SpawnerType.PUFFERFISH, SpawnerType.RABBIT, SpawnerType.SALMON, SpawnerType.SHEEP, SpawnerType.SILVERFISH,
-				SpawnerType.SQUID, SpawnerType.STRIDER, SpawnerType.TROPICAL_FISH, SpawnerType.TURTLE, SpawnerType.WOLF, SpawnerType.ZOGLIN
-		});
-		map.put(1000, new SpawnerType[] {
-				SpawnerType.BLAZE, SpawnerType.CAVE_SPIDER, SpawnerType.CREEPER, SpawnerType.DROWNED, SpawnerType.ENDERMAN, SpawnerType.EVOKER,
-				SpawnerType.GHAST, SpawnerType.GUARDIAN, SpawnerType.HUSK, SpawnerType.IRON_GOLEM, SpawnerType.MAGMA_CUBE, SpawnerType.PHANTOM,
-				SpawnerType.PIG_ZOMBIE,
-				SpawnerType.PIGLIN, SpawnerType.PIGLIN_BRUTE, SpawnerType.PILLAGER, SpawnerType.RAVAGER, SpawnerType.SHULKER, SpawnerType.SKELETON,
-				SpawnerType.SLIME, SpawnerType.SPIDER, SpawnerType.STRAY, SpawnerType.VEX, SpawnerType.VINDICATOR, SpawnerType.WITCH,
-				SpawnerType.WITHER_SKELETON, SpawnerType.ZOMBIE, SpawnerType.ZOMBIFIED_PIGLIN
-		});
+		map.put(500, FRIENDLY_TYPES);
+		map.put(1000, HOSTILE_TYPES);
 		map.forEach((i, ts) -> {
 			for(SpawnerType t : ts) {
+				if(t.exists() == false) continue;
+				
 				String old_path = "Shop." + t.name();
 				String new_path = "Shop.Buy." + t.name();
 				if(file.isBoolean(old_path + ".Toggle") == true) {
@@ -320,6 +336,11 @@ public final class ShopRegistry {
 				file.set("Shop." + t.name(), null);
 			}
 		});
+
+		String path_empty = "Shop.Buy." + SpawnerType.EMPTY.name();
+		file.addDefault(path_empty + ".Toggle", false);
+		file.addDefault(path_empty + ".Cost", 1000);
+		
 		file.addDefault("Settings.Buy.Enabled", true);
 		if(file.isInt("Rows") == true) {
 			int r = file.getInt("Rows");
@@ -365,24 +386,11 @@ public final class ShopRegistry {
 		file.addDefault("Settings.Buy.Items.Previous", Material.SPECTRAL_ARROW.name());
 		file.addDefault("Settings.Buy.Items.Page", Material.PAPER.name());
 		
-		map.clear();
-		map.put(250, new SpawnerType[] {
-				SpawnerType.AXOLOTL, SpawnerType.BAT, SpawnerType.BEE, SpawnerType.CAT, SpawnerType.CHICKEN, SpawnerType.COD,
-				SpawnerType.COW, SpawnerType.DOLPHIN, SpawnerType.DONKEY, SpawnerType.ENDERMITE, SpawnerType.FOX,
-				SpawnerType.GLOW_SQUID, SpawnerType.GOAT, SpawnerType.HOGLIN, SpawnerType.HORSE, SpawnerType.LLAMA,
-				SpawnerType.MULE, SpawnerType.MUSHROOM_COW, SpawnerType.OCELOT, SpawnerType.PANDA, SpawnerType.PARROT, SpawnerType.PIG,
-				SpawnerType.POLAR_BEAR, SpawnerType.PUFFERFISH, SpawnerType.RABBIT, SpawnerType.SALMON, SpawnerType.SHEEP, SpawnerType.SILVERFISH,
-				SpawnerType.SQUID, SpawnerType.STRIDER, SpawnerType.TROPICAL_FISH, SpawnerType.TURTLE, SpawnerType.WOLF, SpawnerType.ZOGLIN
-		});
-		map.put(500, new SpawnerType[] {
-				SpawnerType.BLAZE, SpawnerType.CAVE_SPIDER, SpawnerType.CREEPER, SpawnerType.DROWNED, SpawnerType.ENDERMAN, SpawnerType.EVOKER,
-				SpawnerType.GHAST, SpawnerType.GUARDIAN, SpawnerType.HUSK, SpawnerType.IRON_GOLEM, SpawnerType.MAGMA_CUBE, SpawnerType.PHANTOM,
-				SpawnerType.PIG_ZOMBIE,
-				SpawnerType.PIGLIN, SpawnerType.PIGLIN_BRUTE, SpawnerType.PILLAGER, SpawnerType.RAVAGER, SpawnerType.SHULKER, SpawnerType.SKELETON,
-				SpawnerType.SLIME, SpawnerType.SPIDER, SpawnerType.STRAY, SpawnerType.VEX, SpawnerType.VINDICATOR, SpawnerType.WITCH,
-				SpawnerType.WITHER_SKELETON, SpawnerType.ZOMBIE, SpawnerType.ZOMBIFIED_PIGLIN
-		});
 		file.addDefault("Settings.Buy.Order", new ArrayList<>());
+		
+		map.clear();
+		map.put(250, FRIENDLY_TYPES);
+		map.put(500, HOSTILE_TYPES);
 		map.forEach((i, ts) -> {
 			String path;
 			for(SpawnerType t : ts) {
@@ -392,6 +400,11 @@ public final class ShopRegistry {
 				file.addDefault(path + ".Upgrades", 0.5);
 			}
 		});
+		
+		path_empty = "Shop.Sell." + SpawnerType.EMPTY;
+		file.addDefault(path_empty + ".Toggle", false);
+		file.addDefault(path_empty + ".Refund", 500);
+		
 		file.addDefault("Settings.Sell.Enabled", false);
 		file.addDefault("Settings.Sell.Filler", Material.LIME_STAINED_GLASS_PANE.name());
 		file.addDefault("Settings.Sell.Sell", Material.EMERALD.name());
@@ -400,8 +413,10 @@ public final class ShopRegistry {
 		file.addDefault("Settings.Selection.Filler", Material.LIGHT_BLUE_STAINED_GLASS_PANE.name());
 		file.addDefault("Settings.Selection.Buy", Material.GOLD_BLOCK.name());
 		file.addDefault("Settings.Selection.Sell", Material.EMERALD_BLOCK.name());
+		
 		file.addDefault("Permissions.buy", new ArrayList<>());
 		file.addDefault("Permissions.sell", new ArrayList<>());
+		
 		file.options().copyDefaults(true);
 		
 		Commenter c = commenter();

@@ -62,6 +62,7 @@ public final class LocationRegistry implements Listener {
 	
 	public static void clear() {
 		LOCATIONS.values().forEach(il -> {
+			if(il.using() == false) return;
 			if(il instanceof LocationFile file) file.update();
 		});
 		LOCATIONS.clear();

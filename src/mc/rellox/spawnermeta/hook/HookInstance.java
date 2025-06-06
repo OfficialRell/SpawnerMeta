@@ -1,8 +1,6 @@
 package mc.rellox.spawnermeta.hook;
 
-public interface HookInstance<T> {
-	
-	T get();
+public interface HookInstance {
 	
 	boolean exists();
 	

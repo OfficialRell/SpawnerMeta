@@ -47,7 +47,9 @@ public class LanguageFile extends AbstractFile {
 		put("Upgrade-GUI.purchase.range", "<#00ff00>(!) <#80ff00>Upgraded <#00ffff-#008080><!italic>range <#80ff00>to level %level%");
 		put("Upgrade-GUI.purchase.delay", "<#00ff00>(!) <#80ff00>Upgraded <#ffff00-#ff8000><!italic>delay <#80ff00>to level %level%");
 		put("Upgrade-GUI.purchase.amount", "<#00ff00>(!) <#80ff00>Upgraded <#ff00ff-#800080><!italic>amount <#80ff00>to level %level%");
+		
 		put("Upgrade-GUI.name", "Spawner");
+		
 		put("Upgrade-GUI.items.upgrade.name.range", "<#00ffff-#008080>-= Range %level% =-");
 		put("Upgrade-GUI.items.upgrade.name.delay", "<#ffff00-#ff8000>-= Delay %level% =-");
 		put("Upgrade-GUI.items.upgrade.name.amount", "<#ff00ff-#800080>-= Amount %level% =-");
@@ -66,6 +68,7 @@ public class LanguageFile extends AbstractFile {
 		put("Upgrade-GUI.items.upgrade.next.amount", "<#bfbfbf>Next amount: <#ff80ff-#ff00ff><!italic>%value% Entities");
 		put("Upgrade-GUI.items.upgrade.maximum-reached", "<#008000>Maximum level has been reached!");
 		put("Upgrade-GUI.items.upgrade.price", "<#ffffff>Price: <#00bf00><!italic>%price%");
+		
 		put("Upgrade-GUI.items.disabled-upgrade.name.range", "<#00ffff-#008080>-= Range =-");
 		put("Upgrade-GUI.items.disabled-upgrade.name.delay", "<#ffff00-#ff8000>-= Delay =-");
 		put("Upgrade-GUI.items.disabled-upgrade.name.amount", "<#ff00ff-#800080>-= Amount =-");
@@ -73,6 +76,7 @@ public class LanguageFile extends AbstractFile {
 		put("Upgrade-GUI.items.disabled-upgrade.current.range", "<#bfbfbf><!italic>Current range: <#80ffff-#00ffff>%value% Blocks");
 		put("Upgrade-GUI.items.disabled-upgrade.current.delay", "<#bfbfbf><!italic>Current delay: <#ffff80-#ffff00>%value% Seconds");
 		put("Upgrade-GUI.items.disabled-upgrade.current.amount", "<#bfbfbf><!italic>Current amount: <#ff80ff-#ff00ff>%value% Entities");
+		
 		put("Upgrade-GUI.items.stats.name", "<#bfffff-#00ffff>-= %type% Spawner =-");
 		put("Upgrade-GUI.items.stats.disabled", "<#ff0000>DISABLED <#bfbfbf><!italic>(Click to enable)");
 		put("Upgrade-GUI.items.stats.enabled", "<#00ff00>ENABLED <#bfbfbf><!italic>(Click to disable)");
@@ -92,12 +96,15 @@ public class LanguageFile extends AbstractFile {
 				"<#ffbf00>Unable to spawn because the owner",
 				"  <#ffbf00>of this spawner is offline!"));
 		put("Upgrade-GUI.items.stats.lore", List.of());
+		
 		put("Upgrade-GUI.items.charges.name", "<#ff0080-#ff0000>Spawning Charges: <#00ffff>%charges%");
 		put("Upgrade-GUI.items.charges.purchase.first", "<#bfbfbf>Left-Click to purchase <#ffff00>%charges% charges <#808080><!italic>(%price%)");
 		put("Upgrade-GUI.items.charges.purchase.second", "<#bfbfbf>Right-Click to purchase <#ff8000>%charges% charges <#808080><!italic>(%price%)");
 		put("Upgrade-GUI.items.charges.purchase.all", "<#bfbfbf>Shift-Click to purchase <#ff0000>%charges% charges <#808080><!italic>(%price%)");
+		
 		put("Upgrade-GUI.charges.purchase", "<#00ff00>(!) <#00ffff>You bought %charges% spawner charges");
 		put("Upgrade-GUI.disabled-upgrade", "<#800000>(!) <#ff8000>You cannot upgrade this!");
+		
 		put("Spawner-item.regular.name", "<#bfffff-#00ffff>Spawner <#ffff00-#ffaa00>(%type%)");
 		put("Spawner-item.empty.name", "<#ff8000><Empty> <#bfffff-#00ffff>Spawner");
 		put("Spawner-item.empty-stored.name", "<#ff8000><Empty : %type%> <#bfffff-#00ffff>Spawner");
@@ -108,6 +115,7 @@ public class LanguageFile extends AbstractFile {
 		put("Spawner-item.charges", "<#ff0080-#ff0000>Charges: <#00ffff>%charges%");
 		put("Spawner-item.spawnable", "<#ffff00-#ff8000>Spawnable Entities: <#00ffff>%spawnable%");
 		put("Spawner-item.info", List.of());
+		
 		put("Spawner-view.name", "<#000000>All Spawners");
 		put("Spawner-view.items.name", "<#ffff00>-=[ <#00ffff>%type% Spawner<#ffff00> ]=-");
 		put("Spawner-view.items.header.range", "<#00ffff-#008080><!italic>Range:");
@@ -122,7 +130,8 @@ public class LanguageFile extends AbstractFile {
 		put("Spawner-view.items.page.previous", "<#ff8000>Previous Page");
 		put("Spawner-view.items.page.previous", "<#ff8000>Previous Page");
 		put("Spawner-view.permission", "<#ff8000>Previous Page");
-		put("Prices.experience.insufficient", "Not enough experience!");
+		
+		put("Prices.type.experience.insufficient", "Not enough experience!");
 		put("Prices.type.experience.amount", "%amount% Experience");
 		put("Prices.type.levels.insufficient", "Not enough experience levels!");
 		put("Prices.type.levels.amount", "%amount% Experience Levels");
@@ -135,11 +144,13 @@ public class LanguageFile extends AbstractFile {
 		put("Prices.type.player-points.insufficient", "Insufficient player points!");
 		put("Prices.type.player-points.amount", "%amount% Player points");
 		put("Prices.insufficient", "<#800000>(!) <#ff8000>%insufficient% <#bfbfbf>[Missing %price%]");
+		
 		put("Holograms.empty.single", "<#ff8000><Empty> <#bfffff-#00ffff>Spawner");
 		put("Holograms.empty.multiple", "<#ffff00>%stack% <#bfbfbf>× <#ff8000><Empty> <#bfffff-#00ffff>Spawner");
 		put("Holograms.regular.single", "<#bfffff-#00ffff>%name% Spawner");
 		put("Holograms.regular.multiple", "<#ffff00>%stack% <#bfbfbf>× <#bfffff-#00ffff>%name% Spawner");
 		put("Holograms.warning", "<#ffff00>( <#800000>!!! <#ffff00>)");
+		
 		put("Shop-buy.name", "<#000000>Spawner Shop <#808080>(<#ff8000>%page_current%<#808080>/<#ff8000>%page_total%<#808080>)");
 		put("Shop-buy.items.page.current", "<#00ffff>Page %page%");
 		put("Shop-buy.items.page.next", "<#ff8000>Next Page");
@@ -153,6 +164,7 @@ public class LanguageFile extends AbstractFile {
 		put("Shop-buy.purchase.success", "<#008000>(!) <#00ffff>Purchased <#ffff00-#ffaa00>%amount% × %type%<#00ffff> Spawner(s)!");
 		put("Shop-buy.permission.opening", "<#800000>(!) <#ff8000>You do not have a permission to open this!");
 		put("Shop-buy.permission.purchase", "<#800000>(!) <#ff8000>You do not have a permission to purchase this!");
+		
 		put("Shop-sell.name", "<#000000>Spawners Selling");
 		put("Shop-sell.accept", "<#00ff00>Sell");
 		put("Shop-sell.cancel", "<#ff0000>Close");
@@ -164,26 +176,36 @@ public class LanguageFile extends AbstractFile {
 		put("Shop-sell.disabled", "<#800000>(!) <#008080>Spawner shop has been disabled!");
 		put("Shop-sell.permission.opening", "<#800000>(!) <#ff8000>You do not have a permission to open this!");
 		put("Shop-sell.permission.selling", "<#800000>(!) <#ff8000>You do not have a permission to sell this!");
+		
 		put("Shop-select.name", "<#000000>Spawners Selling");
 		put("Shop-select.buy-shop", "<#00ffff>Click to purchase spawners");
 		put("Shop-select.sell-shop", "<#00ffff>Click to sell spawners");
+		
 		put("Shop-select.permission.opening", "<#800000>(!) <#ff8000>You do not have a permission to open this!");
+		
 		put("Inventory.insufficient-space", "<#800000>(!) <#ff8000>You do not have enough space in your inventory!");
+		
 		put("Items.spawner-drop.alert", "<#00ffff>You have <#ffff00>%seconds% seconds <#00ffff>to take your spawner items! <#ffffff>(click or /spawnerdrops)");
 		put("Items.spawner-drop.cleared", "<#800000>(!) <#ff8000>Your spawner drops disappeared, was not taken in time!");
 		put("Items.spawner-drop.try-breaking", "<#800000>(!) <#ff8000>Cannot break spawners while you have not taken previously dropped items!");
 		put("Items.spawner-drop.empty", "<#800000>(!) <#ff8000>No items to give!");
+		
 		put("Spawners.placing.permission", "<#800000>(!) <#ff8000>You do not have a permission to place this!");
+		
 		put("Spawners.breaking.success", "<#00ff00>(!) <#00ffff>Spawner successfully mined!");
 		put("Spawners.breaking.failure", "<#800000>(!) <#008080>Spawner failed to mine!");
 		put("Spawners.breaking.permission", "<#800000>(!) <#ff8000>You do not have a permission to break this!");
+		
 		put("Spawners.stacking.stacked.infinite", "<#008000>(!) <#00ffff>Spawners have been stacked! <#ffff00>(%stack% Stacked)");
 		put("Spawners.stacking.stacked.finite", "<#008000>(!) <#00ffff>Spawners have been stacked! <#ffff00>(%stack%/%limit% Stacked)");
 		put("Spawners.stacking.unequal-spawner", "<#800000>(!) <#ff8000>Spawners must be the same to stack!");
+		put("Spawners.stacking.disabled-type", "<#800000>(!) <#ff8000>You cannot stack this spawner!");
 		put("Spawners.stacking.limit-reached", "<#800000>(!) <#ff8000>This spawner has reached its stacking limit!");
 		put("Spawners.stacking.nearby.none-match", "<#800000>(!) <#ff8000>Unable to find any nearby spawner to stack to that matches!");
 		put("Spawners.stacking.permission", "<#800000>(!) <#ff8000>You do not have a permission to stack this!");
+		
 		put("Spawners.chunks.limit-reached", "<#800000>(!) <#ff8000>This chunk has reached its spawner limit!");
+		
 		put("Spawners.ownership.limit.place", "<#008000>(!) <#00ffff>Spawner placed <#ff8000>(<#ffff00>%placed%<#ff8000>/<#ffff00>%limit%<#ff8000>)");
 		put("Spawners.ownership.limit.reached", "<#800000>(!) <#ff8000>You have reach your spawner limit! <#bfbfbf>(%limit%)");
 		put("Spawners.ownership.stacking.warning", "<#800000>(!) <#ff8000>You cannot stack a spawner that you do not own!");
@@ -192,34 +214,43 @@ public class LanguageFile extends AbstractFile {
 		put("Spawners.ownership.opening.warning", "<#800000>(!) <#ff8000>You cannot open a spawner that you do not own!");
 		put("Spawners.ownership.changing.warning", "<#800000>(!) <#ff8000>You cannot change a spawner that you do not own!");
 		put("Spawners.ownership.show-owner", "<#008000>(!) <#ffff00>This spawner is owner by <#00ffff>%player%");
+		
 		put("Spawners.natural.changing.warning", "<#800000>(!) <#ff8000>You cannot change a natural spawner!");
 		put("Spawners.natural.breaking.warning", "<#800000>(!) <#ff8000>You cannot break a natural spawner!");
 		put("Spawners.natural.stacking.warning", "<#800000>(!) <#ff8000>You cannot stack a natural spawner!");
 		put("Spawners.natural.opening.warning", "<#800000>(!) <#ff8000>You cannot open a natural spawner!");
 		put("Spawners.natural.upgrading.warning", "<#800000>(!) <#ff8000>You cannot upgrade a natural spawner!");
+		
 		put("Spawners.changing.type-changed", "<#008000>(!) <#00ffff>Spawner type set to <#ffff00>%type%");
 		put("Spawners.changing.same-type", "<#800000>(!) <#ff8000>You cannot set the same entity type!");
 		put("Spawners.changing.dany.from", "<#800000>(!) <#ff8000>You cannot change this entity type spawner!");
 		put("Spawners.changing.dany.to", "<#800000>(!) <#ff8000>You cannot set this entity type!");
 		put("Spawners.changing.permission", "<#800000>(!) <#ff8000>You do not have a permission to use this!");
 		put("Spawners.changing.eggs.insufficient", "<#800000>(!) <#ff8000>Not enough spawn eggs <#bfbfbf>(Requires %required%)");
+		
 		put("Spawners.charges.lose-by-stacking", "<#800000>(!) <#ff8000>Lost <#ffff00>%charges% charge(s) <#ff8000>when stacking!");
+		
 		put("Spawners.upgrades.disabled", "<#800000>(!) <#ff8000>You cannot upgrade this!");
 		put("Spawners.upgrades.permission.opening", "<#800000>(!) <#ff8000>You do not have a permission to open this!");
 		put("Spawners.upgrades.permission.purchase", "<#800000>(!) <#ff8000>You do not have a permission to upgrade this!");
+		
 		put("Spawners.empty.disabled", "<#800000>(!) <#008080>Empty spawners are disabled!");
 		put("Spawners.empty.try-open", "<#800000>(!) <#008080>Cannot open empty spawners!");
 		put("Spawners.empty.hand-full", "<#800000>(!) <#008080>You must have an empty hand to remove spawner egg(s)!");
 		put("Spawners.empty.verify-removing.first", "<#ff8000>(!) <#ffff00>Left click to verify removing eggs from this spawner!");
 		put("Spawners.empty.verify-removing.try-again", "<#800000>(!) <#008080>You first have to sneak and right click the empty spawner!");
+		
 		put("Spawners.view.empty", "<#800000>(!) <#008080>Nothing to view!");
 		put("Spawners.view.disabled", "<#800000>(!) <#008080>Spawner viewing is disabled!");
+		
 		put("Spawners.give.success", "<#008000>(!) <#008080>Added <#00ffff>%amount% <#008080>× <#00ffff>%type% Spawner <#008080>to your inventory!");
 		put("Spawners.give.success-single", "<#008000>(!) <#008080>Added <#00ffff>%type% Spawner <#008080>to your inventory!");
+		
 		put("Locations.header", "<#00ffff>You have placed %count% spawner(s) at:");
 		put("Locations.world", "  <#808080>(%world%)");
 		put("Locations.position", "<#ff0080>%index%. <#c4c4c4>%x%, %y%, %z%");
 		put("Locations.none-owned", "<#ff8000>You do not own any spawners!");
+		
 		put("Trusted.help.primary",
 				List.of("<#00ff80>Usage: <#80ffff>/spawnertrust",
 						"  <#80ffff>add [player] <#cccccc>- add trusted player",
