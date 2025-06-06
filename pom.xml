@@ -94,6 +94,12 @@
       <version>7.3.10</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>com.github.technicallycoded</groupId>
+      <artifactId>FoliaLib</artifactId>
+      <version>0.4.3</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
   
   <dependencyManagement>
@@ -115,9 +121,9 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
-		  <source>16</source>
-		  <target>16</target>
-		  <encoding>ISO-8859-1</encoding>
+        <source>16</source>
+        <target>16</target>
+        <encoding>ISO-8859-1</encoding>
         </configuration>
       </plugin>
       <plugin>
@@ -132,6 +138,14 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <relocations>
+            <relocation>
+              <pattern>com.tcoded.folialib</pattern>
+              <shadedPattern>mc.rellox.spawnermeta.lib.folialib</shadedPattern>
+            </relocation>
+          </relocations>
+        </configuration>
       </plugin>
     </plugins>
   </build>
