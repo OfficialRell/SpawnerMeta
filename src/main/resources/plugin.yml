@@ -1,0 +1,100 @@
+name: SpawnerMeta
+main: mc.rellox.spawnermeta.SpawnerMeta
+softdepend: [Vault, WildStacker, WildTools, ShopGUIPlus, SuperiorSkyblock2, PlayerPoints, PlotSquared, WorldEdit]
+api-version: 1.14
+version: 25.1
+author: Rellox
+folia-supported: true
+commands:
+  spawnermeta:
+    description: SpawnerMeta provided command.
+    permission: spawnermeta.sm
+    aliases: [sm]
+permissions:
+  spawnermeta.sm:
+     description: Allow players to manipulate with this plugin
+     default: op
+  spawnermeta.command.view:
+     description: Allow to open spawner view
+     default: true
+  spawnermeta.command.shop:
+     description: Allow to open spawners shop
+     default: true
+  spawnermeta.command.drops:
+     description: Allow to get spawner drops
+     default: true
+  spawnermeta.command.locations:
+     description: Allow to view spawner locations
+     default: true
+  spawnermeta.command.trust:
+     description: Allow to manipulate with spawner trusted players
+     default: true
+  spawnermeta.eggs:
+     description: Allow players to use eggs to change spawner type
+     default: op
+  spawnermeta.stacking:
+     description: Allow players to stack spawners
+     default: true
+  spawnermeta.place:
+     description: Allow players to place spawners
+     default: true
+  spawnermeta.break:
+     description: Allow players to break spawners
+     default: true
+  spawnermeta.breaking.bypass.silktouch:
+     description: Allow players to bypass silk touch requirement
+     default: false
+  spawnermeta.unbreakable.bypass:
+     description: Allow players to bypass unbreakable spawners
+     default: false
+  spawnermeta.upgrades.open:
+     description: Allow players to open spawner upgrades
+     default: true
+  spawnermeta.upgrades.buy:
+     description: Allow players to upgrade spawners
+     default: true
+  spawnermeta.shop.buy.open:
+     description: Allow players to open spawner buy shop
+     default: true
+  spawnermeta.shop.buy.purchase:
+     description: Allow players to purchase spawners
+     default: true
+  spawnermeta.shop.sell.open:
+     description: Allow players to open spawner sell shop
+     default: true
+  spawnermeta.shop.selection.open:
+     description: Allow players to open spawner shop selector
+     default: true
+  spawnermeta.ownership.bypass.limit:
+     description: Allow players to bypass spawner owning limit
+     default: false
+  spawnermeta.ownership.bypass.breaking:
+     description: Allow players to bypass owned spawner breaking canceling
+     default: false
+  spawnermeta.ownership.bypass.stacking:
+     description: Allow players to bypass owned spawner stacking canceling
+     default: false
+  spawnermeta.ownership.bypass.changing:
+     description: Allow players to bypass owned spawner changing with an egg canceling
+     default: false
+  spawnermeta.ownership.bypass.interact:
+     description: Allow players to bypass owned spawner upgrade opening canceling
+     default: false
+  spawnermeta.ownership.bypass.upgrading:
+     description: Allow players to bypass owned spawner upgrading canceling
+     default: false
+  spawnermeta.natural.bypass.breaking:
+     description: Allow players to bypass natural spawner breaking canceling
+     default: false
+  spawnermeta.natural.bypass.stacking:
+     description: Allow players to bypass natural spawner stacking canceling
+     default: false
+  spawnermeta.natural.bypass.changing:
+     description: Allow players to bypass natural spawner changing with an egg canceling
+     default: false
+  spawnermeta.natural.bypass.interact:
+     description: Allow players to bypass natural spawner upgrade opening canceling
+     default: false
+  spawnermeta.natural.bypass.upgrading:
+     description: Allow players to bypass natural spawner upgrading canceling
+     default: false
