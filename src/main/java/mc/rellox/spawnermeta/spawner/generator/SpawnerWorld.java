@@ -82,29 +82,41 @@ public class SpawnerWorld {
   public void reduce() {
     List<Pos> toRemove = new ArrayList<>();
 
-    spawners.forEach((pos, generator) -> {
-      SpawnerMeta.scheduler().runAtLocation(generator.block().getLocation(), task -> {
-        if (!generator.active() || !generator.present()) {
-          generator.clear();
-          toRemove.add(pos);
-        }
-      });
+    Map<Pos, IGenerator> spawnersCopy;
+    synchronized (spawners) {
+      spawnersCopy = new HashMap<>(spawners);
+    }
+
+    spawnersCopy.forEach((pos, generator) -> {
+      if (!generator.active() || !generator.present()) {
+        generator.clear();
+        toRemove.add(pos);
+      }
     });
 
-    toRemove.forEach(spawners::remove);
+    synchronized (spawners) {
+      toRemove.forEach(spawners::remove);
+    }
   }
 
   public int remove(boolean fully, Predicate<IGenerator> filter) {
     List<Pos> toRemove = new ArrayList<>();
 
-    spawners.forEach((pos, generator) -> {
+    Map<Pos, IGenerator> spawnersCopy;
+    synchronized (spawners) {
+      spawnersCopy = new HashMap<>(spawners);
+    }
+
+    spawnersCopy.forEach((pos, generator) -> {
       if (generator.active() && filter.test(generator)) {
         generator.remove(fully);
         toRemove.add(pos);
       }
     });
 
-    toRemove.forEach(spawners::remove);
+    synchronized (spawners) {
+      toRemove.forEach(spawners::remove);
+    }
 
     return toRemove.size();
   }
