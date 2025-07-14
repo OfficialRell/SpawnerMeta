@@ -5,17 +5,17 @@ This plugin implements fully customizable and upgradeable spawners.
 ## Using with Maven
 
 ```
-<dependency>
-  <groupId>mc.rellox</groupId>
-  <artifactId>SpawnerMeta</artifactId>
-  <version>25.1</version>
-  <scope>provided</scope>
-</dependency>
-
 <repository>
   <id>jitpack.io</id>
   <url>https://jitpack.io</url>
 </repository>
+
+<dependency>
+  <groupId>com.github.OfficialRell</groupId>
+  <artifactId>spawnermeta</artifactId>
+  <version>25.2</version>
+  <scope>provided</scope>
+</dependency>
 ```
 
 ## API usage
