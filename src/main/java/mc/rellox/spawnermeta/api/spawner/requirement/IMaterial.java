@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import mc.rellox.spawnermeta.SpawnerMeta;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Waterlogged;

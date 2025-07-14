@@ -31,11 +31,12 @@ public final class SpawnerMeta extends JavaPlugin {
 	public static final double PLUGIN_VERSION = 25.1;
 	
 	private static SpawnerMeta plugin;
-    
-    private static boolean loaded;
-    
-    private FoliaLib folia;
-    private PlatformScheduler scheduler;
+
+	private static FoliaLib foliaLib;
+
+	private static PlatformScheduler scheduler;
+
+	private static boolean loaded;
     
     private APIInstance api;
     
@@ -45,6 +46,8 @@ public final class SpawnerMeta extends JavaPlugin {
 		
 		if(loaded == true) {
 			plugin = this;
+			foliaLib = new FoliaLib(this);
+			scheduler = foliaLib.getScheduler();
 			this.api = new APIRegistry();
 		}
     }
@@ -56,9 +59,6 @@ public final class SpawnerMeta extends JavaPlugin {
 			Bukkit.getPluginManager().disablePlugin(this);
 			return;
 		}
-		
-		folia = new FoliaLib(this);
-		scheduler = folia.getScheduler();
 		
 		if(loaded == true) {
 			Text.logLoad();
@@ -95,25 +95,33 @@ public final class SpawnerMeta extends JavaPlugin {
 	/**
 	 * @return Instance of this plugin
 	 */
-	
+
 	public static SpawnerMeta instance() {
 		return plugin;
 	}
-	
+
+	/**
+	 * @return Instance of FoliaLib
+	 */
+
+	public static FoliaLib foliaLib() {
+		return foliaLib;
+	}
+
+	/**
+	 * @return Instance of FoliaLib Scheduler
+	 */
+
+	public static PlatformScheduler scheduler() {
+		return scheduler;
+	}
+
 	/**
 	 * @return SpawnerMeta API
 	 */
 	
 	public APIInstance getAPI() {
 		return api;
-	}
-	
-	/**
-	 * @return Task scheduler
-	 */
-	
-	public PlatformScheduler scheduler() {
-		return scheduler;
 	}
 	
 	@Override
