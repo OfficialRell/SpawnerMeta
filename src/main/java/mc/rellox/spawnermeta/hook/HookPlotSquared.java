@@ -12,12 +12,14 @@ import org.bukkit.entity.Player;
 
 import com.google.common.eventbus.Subscribe;
 import com.plotsquared.core.PlotAPI;
+import com.plotsquared.core.PlotSquared;
 import com.plotsquared.core.events.PlotDeleteEvent;
 import com.plotsquared.core.plot.Plot;
 import com.plotsquared.core.util.query.PlotQuery;
 import com.sk89q.worldedit.math.BlockVector3;
 
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
+import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
 
 public class HookPlotSquared implements HookInstance {
@@ -42,6 +44,8 @@ public class HookPlotSquared implements HookInstance {
 	}
 	
 	public void filter(IGenerator generator, List<Location> locations) {
+		if(check(generator.world()) == true) return;
+		
 		UUID owner = generator.cache().owner();
 		if(owner == null) return;
 		
@@ -58,6 +62,8 @@ public class HookPlotSquared implements HookInstance {
 	}
 	
 	public boolean modifiable(IGenerator generator, Player player) {
+		if(check(generator.world()) == true) return true;
+		
 		UUID owner = generator.cache().owner();
 		if(owner == null || owner.equals(player.getUniqueId()) == true) return true;
 		Block block = generator.block();
@@ -74,7 +80,13 @@ public class HookPlotSquared implements HookInstance {
 		GeneratorRegistry.remove(world, true, g -> in(plot, g.block()));
 	}
 	
+	public boolean isPlotWorld(World world) {
+		return PlotSquared.platform().plotAreaManager().hasPlotArea(world.getName());
+	}
+	
 	public boolean inside(Block block, Entity entity) {
+		if(check(block.getWorld()) == true) return true;
+		
 		Plot plot = Plot.getPlot(com.plotsquared.core.location.Location.at(
 				block.getWorld().getName(),
 				block.getX(), block.getY(), block.getZ()));
@@ -83,6 +95,11 @@ public class HookPlotSquared implements HookInstance {
 		return plot.getRegions().stream().anyMatch(region -> {
 			return region.contains(BlockVector3.at(at.getX(), at.getY(), at.getZ()));
 		});
+	}
+	
+	private boolean check(World world) {
+		return Settings.settings.hooks_plot_squared_use_plot_filter == false
+				|| isPlotWorld(world) == false;
 	}
 	
 	private boolean in(Plot plot, Block block) {
