@@ -1,4 +1,4 @@
-package mc.rellox.spawnermeta.utils;
+package mc.rellox.spawnermeta.utility;
 
 import com.tcoded.folialib.wrapper.task.WrappedTask;
 

@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.tcoded.folialib.wrapper.task.WrappedTask;
-import mc.rellox.spawnermeta.utils.CancellableRunnable;
+import mc.rellox.spawnermeta.utility.CancellableRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;

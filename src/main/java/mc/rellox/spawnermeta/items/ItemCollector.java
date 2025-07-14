@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import mc.rellox.spawnermeta.utils.CancellableRunnable;
+import mc.rellox.spawnermeta.utility.CancellableRunnable;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
