@@ -2,7 +2,7 @@ name: SpawnerMeta
 main: mc.rellox.spawnermeta.SpawnerMeta
 softdepend: [Vault, WildStacker, WildTools, ShopGUIPlus, SuperiorSkyblock2, PlayerPoints, PlotSquared, WorldEdit]
 api-version: 1.14
-version: 25.1
+version: 25.2
 author: Rellox
 folia-supported: true
 commands:

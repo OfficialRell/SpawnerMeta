@@ -28,14 +28,14 @@ import mc.rellox.spawnermeta.version.Version;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 25.1;
+	public static final double PLUGIN_VERSION = 25.2;
 	
 	private static SpawnerMeta plugin;
     
     private static boolean loaded;
     
-    private FoliaLib folia;
-    private PlatformScheduler scheduler;
+    private static FoliaLib folia;
+    private static PlatformScheduler scheduler;
     
     private APIInstance api;
     
@@ -109,10 +109,18 @@ public final class SpawnerMeta extends JavaPlugin {
 	}
 	
 	/**
+	 * @return SpawnerMeta API
+	 */
+	
+	public static APIInstance API() {
+		return plugin.api;
+	}
+	
+	/**
 	 * @return Task scheduler
 	 */
 	
-	public PlatformScheduler scheduler() {
+	public static PlatformScheduler scheduler() {
 		return scheduler;
 	}
 	
