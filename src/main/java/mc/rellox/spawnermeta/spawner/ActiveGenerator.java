@@ -266,13 +266,24 @@ public class ActiveGenerator implements IGenerator {
 		if(--checking < 0) checking = Settings.settings.checking_interval - 1;
 		if(cache.enabled() == false || cache.type() == SpawnerType.EMPTY) return false;
 		if(checking != 0) return rotating;
+		
+		boolean rotate = rotating;
+		
 		if(box.any(spawner.world().getPlayers()) == true) {
-			if(rotating == false) spawner.setRotating(rotating = true);
-			return true;
+			rotate = true;
+//			if(rotating == false) spawner.setRotating(rotating = true);
+//			return true;
 		} else {
-			if(rotating == true) spawner.setRotating(rotating = false);
+			rotate = false;
+//			if(rotating == true) spawner.setRotating(rotating = false);
 		}
-		return false;
+		
+		if(Settings.settings.redstone_power_disable_with_power == true
+				&& rotate == true)
+			rotate = !block().isBlockPowered();
+		
+		if(rotate != rotating) spawner.setRotating(rotating = rotate);
+		return rotating;
 	}
 
 	@Override
@@ -505,10 +516,12 @@ public class ActiveGenerator implements IGenerator {
 		}
 		
 
-		int power = s.redstone_power_required;
-		if(power > 0 && spawner.block().getBlockPower() < power
-				&& !(s.redstone_power_ignore_natural == true && cache.natural() == true))
-			warn(SpawnerWarning.POWER);
+		if(s.redstone_power_disable_with_power == false) {
+			int power = s.redstone_power_required;
+			if(power > 0 && spawner.block().getBlockPower() < power
+					&& !(s.redstone_power_ignore_natural == true && cache.natural() == true))
+				warn(SpawnerWarning.POWER);
+		}
 	}
 	
 	@Override
