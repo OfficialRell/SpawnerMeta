@@ -174,8 +174,8 @@ public final class DataManager {
 		order.submit("INFO", () -> Language.list("Spawner-item.info"));
 
 		meta.setLore(order.build());
-		
-		Utility.hideFlags(meta);
+
+		meta.addItemFlags(Utility.ITEM_FLAGS);
 		
 		item.setItemMeta(meta);
 		modify(item, type, levels, charges, spawnable, empty);

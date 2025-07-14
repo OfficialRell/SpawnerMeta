@@ -48,11 +48,9 @@ public record ActiveSlot(SlotField field, int[] slots, Material material, Materi
 		if(m == null) return null;
 		var item = new ItemStack(m);
 		var meta = item.getItemMeta();
-		if(glint == true) {
-			meta.addEnchant(Utility.enchantment_power, 1, true);
-			Utility.hideFlags(meta);
-		}
+		if(glint == true) meta.addEnchant(Utility.enchantment_power, 1, true);
 		if(model > 0) meta.setCustomModelData(model);
+		meta.addItemFlags(Utility.ITEM_FLAGS);
 		item.setItemMeta(meta);
 		return item;
 	}

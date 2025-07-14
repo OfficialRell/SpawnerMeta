@@ -175,7 +175,7 @@ public class PrivateSell {
 					"price", c).text());
 			meta.setLore(lore);
 		}
-		Utility.hideFlags(meta);
+		meta.addItemFlags(Utility.ITEM_FLAGS);
 		meta.addEnchant(Utility.enchantment_power, 1, true);
 		item.setItemMeta(meta);
 		return item;
@@ -185,7 +185,7 @@ public class PrivateSell {
 		ItemStack item = new ItemStack(group.close());
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(Language.get("Shop-sell.cancel").text());
-		Utility.hideFlags(meta);
+		meta.addItemFlags(Utility.ITEM_FLAGS);
 		meta.addEnchant(Utility.enchantment_power, 1, true);
 		item.setItemMeta(meta);
 		return item;
@@ -219,7 +219,7 @@ public class PrivateSell {
 			for(Price c : cs) lore.add(Language.get("Shop-sell.items.selling.price",
 					"price", c).text());
 			meta.setLore(lore);
-			Utility.hideFlags(meta);
+			meta.addItemFlags(Utility.ITEM_FLAGS);
 			clone.setItemMeta(meta);
 			return clone;
 		}

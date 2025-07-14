@@ -23,8 +23,9 @@ public record ActiveBackground(SlotField field, Material material, boolean glint
 		if(material == null) return null;
 		var item = new ItemStack(material);
 		var meta = item.getItemMeta();
-		if(glint == true) Utility.hideFlags(meta);
+		if(glint == true) meta.addEnchant(Utility.enchantment_power, 1, true);
 		if(model > 0) meta.setCustomModelData(model);
+		meta.addItemFlags(Utility.ITEM_FLAGS);
 		meta.setDisplayName(" ");
 		item.setItemMeta(meta);
 		return item;

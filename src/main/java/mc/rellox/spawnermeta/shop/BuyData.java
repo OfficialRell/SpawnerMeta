@@ -53,7 +53,7 @@ public record BuyData(SpawnerType type, int value) {
 				"amount", ShopRegistry.third).text());
 		if(bs[3] == true) lore.add(Language.get("Shop-buy.items.spawner.purchase.all").text());
 		meta.setLore(lore);
-		Utility.hideFlags(meta);
+		meta.addItemFlags(Utility.ITEM_FLAGS);
 		item.setItemMeta(meta);
 		return item;
 	}
