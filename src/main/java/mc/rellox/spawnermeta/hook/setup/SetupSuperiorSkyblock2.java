@@ -6,7 +6,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import com.bgsoftware.superiorskyblock.api.events.IslandKickEvent;
 import com.bgsoftware.superiorskyblock.api.wrappers.SuperiorPlayer;
@@ -20,14 +19,12 @@ import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public class SetupSuperiorSkyblock2 implements Listener {
 	
+	@SuppressWarnings("deprecation")
 	public static void load() {
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				if(Settings.settings.check_island_kick == false) return;
-				Bukkit.getPluginManager().registerEvents(new SetupSuperiorSkyblock2(), SpawnerMeta.instance());
-			}
-		}.runTaskLater(SpawnerMeta.instance(), 1);
+		SpawnerMeta.scheduler().runNextTick(taks -> {
+			if(Settings.settings.check_island_kick == false) return;
+			Bukkit.getPluginManager().registerEvents(new SetupSuperiorSkyblock2(), SpawnerMeta.instance());
+		});
 	}
 	
 	@EventHandler

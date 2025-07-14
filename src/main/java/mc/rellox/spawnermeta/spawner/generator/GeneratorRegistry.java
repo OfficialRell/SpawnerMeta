@@ -21,7 +21,8 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
-import org.bukkit.scheduler.BukkitRunnable;
+
+import com.tcoded.folialib.wrapper.task.WrappedTask;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
@@ -32,7 +33,8 @@ public final class GeneratorRegistry implements Listener {
 	
 	private static final Map<World, SpawnerWorld> SPAWNERS = new HashMap<>();
 	
-	private static BukkitRunnable active, offline_task;
+	private static WrappedTask active_task;
+	private static WrappedTask offline_task;
 	
 	public static void initialize() {
 		Bukkit.getPluginManager().registerEvents(new GeneratorRegistry(), SpawnerMeta.instance());
@@ -40,47 +42,37 @@ public final class GeneratorRegistry implements Listener {
 		retime(true);
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static void retime(boolean first) {
-		if(active != null) active.cancel();
-		active = runnable();
-		active.runTaskTimer(SpawnerMeta.instance(), first ? 20 : 5, Settings.settings.ticking_interval);
+		if(active_task != null) active_task.cancel();
+		int[] t = {0};
+		final int f = Math.max(100, Settings.settings.check_present_interval / Settings.settings.ticking_interval);
+		active_task = SpawnerMeta.scheduler().runTimer(() -> {
+			SPAWNERS.values().forEach(SpawnerWorld::tick);
+			if(++t[0] > f) {
+				t[0] = 0;
+				SPAWNERS.values().forEach(SpawnerWorld::reduce);
+			}
+		}, first ? 20 : 5, Settings.settings.ticking_interval);
 		offline();
 	}
 	
-	private static BukkitRunnable runnable() {
-		return new BukkitRunnable() {
-			int t = 0;
-			final int f = Math.max(100, Settings.settings.check_present_interval / Settings.settings.ticking_interval);
-			@Override
-			public void run() {
-				SPAWNERS.values().forEach(SpawnerWorld::tick);
-				if(++t > f) {
-					t = 0;
-					SPAWNERS.values().forEach(SpawnerWorld::reduce);
-				}
-			}
-		};
-	}
-	
+	@SuppressWarnings("deprecation")
 	private static void offline() {
 		if(offline_task != null && offline_task.isCancelled() == false) offline_task.cancel();
 		if(Settings.settings.owned_offline_time <= 0) return;
-		(offline_task = new BukkitRunnable() {
-			@Override
-			public void run() {
-				SPAWNERS.values().forEach(SpawnerWorld::control);
-			}
-		}).runTaskTimer(SpawnerMeta.instance(), 20 * 60, 20 * 60);
+		
+		offline_task = SpawnerMeta.scheduler().runTimer(() -> {
+			SPAWNERS.values().forEach(SpawnerWorld::control);
+		}, 20 * 60, 20 * 60);
 	}
 	
+	@SuppressWarnings("deprecation")
 	private static void control() {
 		try {
-			new BukkitRunnable() {
-				@Override
-				public void run() {
-					SPAWNERS.values().forEach(SpawnerWorld::control);
-				}
-			}.runTaskLater(SpawnerMeta.instance(), 5);
+			SpawnerMeta.scheduler().runLater(() -> {
+				SPAWNERS.values().forEach(SpawnerWorld::control);
+			}, 5);
 		} catch (Exception e) {}
 	}
 	

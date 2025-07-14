@@ -42,7 +42,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
@@ -275,6 +274,7 @@ public final class EventRegistry {
 		SpawningManager.unlink(generator.block());
 	}
 	
+	@SuppressWarnings("deprecation")
 	protected static boolean remove_eggs_from_regular(PlayerInteractEvent event, Player player, Messagable m, ItemStack item, IGenerator generator) {
 		if(generator.cache().empty() == true) return true;
 		if(Settings.settings.empty_remove_from_regular == false) return true;
@@ -310,16 +310,13 @@ public final class EventRegistry {
 		if(Settings.settings.empty_verify_removing == true) {
 			Block block = generator.block();
 			verify = block;
-			new BukkitRunnable() {
-				@Override
-				public void run() {
-					if(block.equals(verify) == true) {
-						verify = null;
-						player.spawnParticle(Utility.particle_redstone, Utility.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
-								new DustOptions(Color.MAROON, 2f));
-					}
+			SpawnerMeta.scheduler().runAtLocationLater(block.getLocation(), () -> {
+				if(block.equals(verify) == true) {
+					verify = null;
+					player.spawnParticle(Utility.particle_redstone, Utility.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
+							new DustOptions(Color.MAROON, 2f));
 				}
-			}.runTaskLater(SpawnerMeta.instance(), 20);
+			}, 20);
 			m.send(Language.list("Spawners.empty.verify-removing.first"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 2f, 0f);
 			return false;
@@ -330,6 +327,7 @@ public final class EventRegistry {
 		return false;
 	}
 	
+	@SuppressWarnings("deprecation")
 	protected static boolean remove_eggs_empty(PlayerInteractEvent event, Player player, Messagable m, ItemStack item, IGenerator generator) {
 		ICache cache = generator.cache();
 		
@@ -378,16 +376,13 @@ public final class EventRegistry {
 		if(Settings.settings.empty_verify_removing == true) {
 			Block block = generator.block();
 			verify = block;
-			new BukkitRunnable() {
-				@Override
-				public void run() {
-					if(block.equals(verify) == true) {
-						verify = null;
-						player.spawnParticle(Utility.particle_redstone, Utility.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
-								new DustOptions(Color.MAROON, 2f));
-					}
+			SpawnerMeta.scheduler().runAtLocationLater(block.getLocation(), () -> {
+				if(block.equals(verify) == true) {
+					verify = null;
+					player.spawnParticle(Utility.particle_redstone, Utility.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
+							new DustOptions(Color.MAROON, 2f));
 				}
-			}.runTaskLater(SpawnerMeta.instance(), 20);
+			}, 20);
 			m.send(Language.list("Spawners.empty.verify-removing.first"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 2f, 0f);
 			return false;
@@ -1021,6 +1016,7 @@ public final class EventRegistry {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	protected static void place(BlockPlaceEvent event, Block block) {
 		ItemStack item = event.getItemInHand().clone();
 		IVirtual temp = IVirtual.of(item, true), data;
@@ -1088,13 +1084,10 @@ public final class EventRegistry {
 			return;
 		}
 		event.setCancelled(false);
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				if(block.getType() != Material.SPAWNER) return;
-				place(block, player, data);
-			}
-		}.runTaskLater(SpawnerMeta.instance(), 1);
+		SpawnerMeta.scheduler().runAtLocation(block.getLocation(), task -> {
+			if(block.getType() != Material.SPAWNER) return;
+			place(block, player, data);
+		});
 	}
 	
 	public static int spawnersInChunk(Block block) {

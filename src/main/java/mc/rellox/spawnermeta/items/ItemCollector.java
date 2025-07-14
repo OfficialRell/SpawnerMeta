@@ -13,7 +13,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.configuration.Language;
@@ -52,17 +51,15 @@ public class ItemCollector implements Listener {
 		run();
 	}
 	
+	@SuppressWarnings("deprecation")
 	private static void run() {
 		if(running == true) return;
 		running = true;
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				Iterator<ItemCollector> it = ITEMS.values().iterator();
-				while(it.hasNext() == true) if(it.next().tick() == false) it.remove();
-				if((running = !ITEMS.isEmpty()) == false) cancel();
-			}
-		}.runTaskTimer(SpawnerMeta.instance(), 1, 1);
+		SpawnerMeta.scheduler().runTimer(task -> {
+			Iterator<ItemCollector> it = ITEMS.values().iterator();
+			while(it.hasNext() == true) if(it.next().tick() == false) it.remove();
+			if((running = !ITEMS.isEmpty()) == false) task.cancel();
+		}, 1, 1);
 	}
 	
 	private static void send(Player player, int ticks) {

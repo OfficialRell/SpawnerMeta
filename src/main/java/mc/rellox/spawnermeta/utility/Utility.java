@@ -3,6 +3,7 @@ package mc.rellox.spawnermeta.utility;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.function.Consumer;
@@ -22,8 +23,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
@@ -126,7 +125,9 @@ public final class Utility {
 			} else if(Version.version == VersionType.v_21_1) {
 				a = "w";
 			} else if(Version.version == VersionType.v_21_2
-					|| Version.version == VersionType.v_21_3) {
+					|| Version.version == VersionType.v_21_3
+					|| Version.version == VersionType.v_21_4
+					|| Version.version == VersionType.v_21_5) {
 				a = "y";
 			} else {
 				a = "getName";
@@ -146,13 +147,24 @@ public final class Utility {
 		}
 	}
 	
-	public static void hideFlags(ItemMeta meta) {
-		try {
-			meta.addItemFlags(Stream.of(ItemFlag.values())
-					.filter(i -> i.ordinal() < 8)
-					.toArray(ItemFlag[]::new));
-		} catch (Exception e) {}
-	}
+	// array of item flags to apply to items
+	public static final ItemFlag[] ITEM_FLAGS = Stream.of(
+			"HIDE_ENCHANTS", "HIDE_ADDITIONAL_TOOLTIP", "HIDE_ENTITY_DATA",
+			"HIDE_ATTRIBUTES", "HIDE_DYE", "HIDE_ARMOR_TRIM", "HIDE_ENCHANTMENTS",
+			"HIDE_ATTRIBUTE_MODIFIERS", "HIDE_MAP_ID", "HIDE_TRIM", "HIDE_BUCKET_ENTITY_DATA",
+			"HIDE_BLOCK_ENTITY_DATA"
+			)
+			.map(name -> RF.enumerate(ItemFlag.class, name))
+			.filter(Objects::nonNull)
+			.toArray(ItemFlag[]::new);
+	
+//	public static void hideFlags(ItemMeta meta) {
+//		try {
+//			meta.addItemFlags(Stream.of(ItemFlag.values())
+//					.filter(i -> i.ordinal() < 8 || i.ordinal() > 16)
+//					.toArray(ItemFlag[]::new));
+//		} catch (Exception e) {}
+//	}
 	
 	public static Entity create(Location location, EntityType type) {
 		Object entity = RF.order(location.getWorld(), "createEntity", Location.class, Class.class)
@@ -260,17 +272,15 @@ public final class Utility {
 	
 	// Version check
 
+	@SuppressWarnings("deprecation")
 	public static void check(final int id, final Consumer<String> action) {
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				try(InputStream is = new URI("https://api.spigotmc.org/legacy/update.php?resource=" + id)
-						.toURL().openStream();
-						Scanner sc = new Scanner(is)) {
-					if(sc.hasNext() == true) action.accept(sc.next());
-				} catch(Exception x) {}
-			}
-		}.runTaskLaterAsynchronously(SpawnerMeta.instance(), 50);
+		SpawnerMeta.scheduler().runLaterAsync(() -> {
+			try(InputStream is = new URI("https://api.spigotmc.org/legacy/update.php?resource=" + id)
+					.toURL().openStream();
+					Scanner sc = new Scanner(is)) {
+				if(sc.hasNext() == true) action.accept(sc.next());
+			} catch(Exception x) {}
+		}, 50);
 	}
 
 }

@@ -29,7 +29,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
@@ -184,18 +183,16 @@ public class EventListeners implements Listener {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGH)
 	private void onJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				if(player.isOnline() == false) return;
-				var il = LocationRegistry.raw(player);
-				if(il == null) return;
-				il.stored().forEach(item -> ItemMatcher.add(player, item));
-			}
-		}.runTaskLater(SpawnerMeta.instance(), 10);
+		SpawnerMeta.scheduler().runLater(() -> {
+			if(player.isOnline() == false) return;
+			var il = LocationRegistry.raw(player);
+			if(il == null) return;
+			il.stored().forEach(item -> ItemMatcher.add(player, item));
+		}, 10);
 	}
 	
 	protected static IGenerator fetch(Block block) {
