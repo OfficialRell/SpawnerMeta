@@ -267,20 +267,11 @@ public class ActiveGenerator implements IGenerator {
 		if(cache.enabled() == false || cache.type() == SpawnerType.EMPTY) return false;
 		if(checking != 0) return rotating;
 		
-		boolean rotate = rotating;
-		
-		if(box.any(spawner.world().getPlayers()) == true) {
-			rotate = true;
-//			if(rotating == false) spawner.setRotating(rotating = true);
-//			return true;
-		} else {
-			rotate = false;
-//			if(rotating == true) spawner.setRotating(rotating = false);
-		}
+		boolean rotate = box.any(spawner.world().getPlayers()) == true;
 		
 		if(Settings.settings.redstone_power_disable_with_power == true
 				&& rotate == true)
-			rotate = !block().isBlockPowered();
+			rotate = block().getBlockPower() <= 0;
 		
 		if(rotate != rotating) spawner.setRotating(rotating = rotate);
 		return rotating;
@@ -514,7 +505,6 @@ public class ActiveGenerator implements IGenerator {
 				warn(SpawnerWarning.CHARGES);
 			}
 		}
-		
 
 		if(s.redstone_power_disable_with_power == false) {
 			int power = s.redstone_power_required;
