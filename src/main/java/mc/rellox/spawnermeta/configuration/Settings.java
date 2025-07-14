@@ -136,6 +136,7 @@ public final class Settings {
 	
 	public int redstone_power_required;
 	public boolean redstone_power_ignore_natural;
+	public boolean redstone_power_disable_with_power;
 	
 	// Nearby
 	
@@ -317,6 +318,10 @@ public final class Settings {
 	public boolean use_abbreviations;
 	public final List<String> abbreviations;
 	
+	// Hook settings
+	
+	public boolean hooks_plot_squared_use_plot_filter;
+	
 	private Settings() {
 		this.spawner_values = new TripleRangeMap("Spawners.values");
 		this.spawner_value_increase = new TripleIntegerMap("Spawners.value-increase");
@@ -427,6 +432,7 @@ public final class Settings {
 		
 		redstone_power_required = file.getInteger("Spawners.redstone-power.required", 0, 15);
 		redstone_power_ignore_natural = file.getBoolean("Spawners.redstone-power.ignore-natural");
+		redstone_power_disable_with_power = file.getBoolean("Spawners.redstone-power.disable-with-power");
 		
 		allow_renaming = file.getBoolean("Spawners.allow-renaming");
 		
@@ -637,6 +643,8 @@ public final class Settings {
 		use_abbreviations = file.getBoolean("Prices.format.use-abbreviations");
 		abbreviations.clear();
 		abbreviations.addAll(file.getStrings("Prices.format.abbreviations"));
+		
+		hooks_plot_squared_use_plot_filter = file.getBoolean("Hooks.plot-squared.use-plot-filter");
 	}
 	
 	public boolean disabled(SpawnerType type) {
@@ -764,7 +772,7 @@ public final class Settings {
 					"spawnable", spawnable_amount.get(type)).text());
 		}
 		meta.setLore(lore);
-		Utility.hideFlags(meta);
+		meta.addItemFlags(Utility.ITEM_FLAGS);
 		item.setItemMeta(meta);
 		return item;
 	}

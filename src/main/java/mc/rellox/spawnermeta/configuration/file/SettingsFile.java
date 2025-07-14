@@ -124,6 +124,7 @@ public class SettingsFile extends AbstractFile {
 		
 		file.addDefault("Spawners.redstone-power.required", 0);
 		file.addDefault("Spawners.redstone-power.ignore-natural", true);
+		file.addDefault("Spawners.redstone-power.disable-with-power", false);
 		
 		file.addDefault("Spawners.default-slime-size", 0);
 		
@@ -304,6 +305,8 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Prices.format.delimiter", ",");
 		file.addDefault("Prices.format.use-abbreviations", false);
 		file.addDefault("Prices.format.abbreviations", List.of("k", "m", "b", "t"));
+		
+		file.addDefault("Hooks.plot-squared.use-plot-filter", true);
 		
 		file.set("Configuration-version", version);
 
@@ -497,6 +500,7 @@ public class SettingsFile extends AbstractFile {
 					"  32 block radius.");
 			c.comment("Spawners.instant-kill.death-animation",
 					"Should the death animation be displayed.");
+			
 			c.comment("Spawners.redstone-power.required",
 					"The required redstone power for this spawner",
 					"  to spawn. [0-15]",
@@ -504,6 +508,11 @@ public class SettingsFile extends AbstractFile {
 			c.comment("Spawners.redstone-power.ignore-natural",
 					"If true then natural spawners will not",
 					"  require redstone power to spawn.");
+			c.comment("Spawners.redstone-power.disable-with-power",
+					"In enabled then player will be able to disable",
+					"  spawner with redstone power (level, redstone block).",
+					"When enabled will ignore the 'required' value.");
+			
 			c.comment("Spawners.default-slime-size",
 					"What size slimes and magma cubes spawners will spawn.",
 					"If the value is 0 then the size will vary (1, 2 or 4).");
@@ -968,6 +977,11 @@ public class SettingsFile extends AbstractFile {
 					"- ...",
 					"You can change and extend this list.",
 					"Note, that the list order matters.");
+			
+			c.comment("Hooks.plot-squared.use-plot-filter",
+					"If true then the plugin will only allow players",
+					"  to interact with spawners if they are a part of a plot,",
+					"  and will only spawn entities inside the plot.");
 			
 			c.comment("Configuration-version", "Version of this configuration file.",
 					"Should not be changed.");
