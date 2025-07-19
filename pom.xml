@@ -75,12 +75,12 @@
       <version>2024.1</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>com.bgsoftware</groupId>
-      <artifactId>SuperiorSkyblockAPI</artifactId>
-      <version>2023.3</version>
-      <scope>provided</scope>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>com.bgsoftware</groupId>-->
+<!--      <artifactId>SuperiorSkyblockAPI</artifactId>-->
+<!--      <version>2025.1</version>-->
+<!--      <scope>provided</scope>-->
+<!--    </dependency> -->
     <dependency>
       <groupId>org.black_ixx</groupId>
       <artifactId>playerpoints</artifactId>
