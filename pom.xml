@@ -49,7 +49,7 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
-      <version>1.21.7-R0.1-SNAPSHOT</version>
+      <version>1.21.8-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -63,29 +63,28 @@
       <artifactId>VaultAPI</artifactId>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>com.bgsoftware</groupId>
-      <artifactId>WildStackerAPI</artifactId>
-      <version>2024.3</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.bgsoftware</groupId>
-      <artifactId>WildToolsAPI</artifactId>
-      <version>2024.1</version>
-      <scope>provided</scope>
-    </dependency>
-<!--    <dependency>-->
-<!--      <groupId>com.bgsoftware</groupId>-->
-<!--      <artifactId>SuperiorSkyblockAPI</artifactId>-->
-<!--      <version>2025.1</version>-->
-<!--      <scope>provided</scope>-->
-<!--    </dependency> -->
+      <dependency>
+        <groupId>com.bgsoftware</groupId>
+        <artifactId>SuperiorSkyblockAPI</artifactId>
+        <version>2025.1</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.bgsoftware</groupId>
+        <artifactId>WildToolsAPI</artifactId>
+        <version>latest</version>
+      </dependency>
+      <dependency>
+        <groupId>com.bgsoftware</groupId>
+        <artifactId>SuperiorSkyblockAPI</artifactId>
+        <version>2025.1</version>
+        <scope>provided</scope>
+      </dependency>
     <dependency>
       <groupId>org.black_ixx</groupId>
       <artifactId>playerpoints</artifactId>
       <version>3.2.7</version>
-         <scope>provided</scope>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.intellectualsites.plotsquared</groupId>
