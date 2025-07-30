@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import mc.rellox.spawnermeta.SpawnerMeta;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -197,7 +198,11 @@ public record ActiveSpawner(Block block) implements ISpawner {
 
 	@Override
 	public void setDelay(int t) {
-		DataManager.setDelay(block, t + 1);
+		if (SpawnerMeta.foliaLib().getScheduler().isOwnedByCurrentRegion(block())) {
+			DataManager.setDelay(block, t + 1);
+		} else {
+			SpawnerMeta.scheduler().runAtLocation(block.getLocation(), task -> DataManager.setDelay(block, t + 1));
+		}
 	}
 	
 	@Override

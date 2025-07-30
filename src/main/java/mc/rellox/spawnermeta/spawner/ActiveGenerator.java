@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import mc.rellox.spawnermeta.SpawnerMeta;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -233,22 +234,24 @@ public class ActiveGenerator implements IGenerator {
 
 	@Override
 	public void tick() {
-		if(--validation < 0) validation = Settings.settings.validation_interval - 1;
-		if(active == false) return;
-		holograms();
-		if(check() == false) {
-			tick_untill_zero();
-			return;
-		}
-		if(cache.type() == SpawnerType.EMPTY) return;
-		if(online == false || validate() == false) {
-			if(validation == 0) spawner.setDelay(delay);
-			return;
-		}
-		if(--ticks <= 0) {
-			spawn();
-			update();
-		}
+		SpawnerMeta.scheduler().runAtLocation(spawner.block().getLocation(), task -> {
+			if(--validation < 0) validation = Settings.settings.validation_interval - 1;
+			if(active == false) return;
+			holograms();
+			if(check() == false) {
+				tick_untill_zero();
+				return;
+			}
+			if(cache.type() == SpawnerType.EMPTY) return;
+			if(online == false || validate() == false) {
+				if(validation == 0) spawner.setDelay(delay);
+				return;
+			}
+			if(--ticks <= 0) {
+				spawn();
+				update();
+			}
+		});
 	}
 
 	private void tick_untill_zero() {

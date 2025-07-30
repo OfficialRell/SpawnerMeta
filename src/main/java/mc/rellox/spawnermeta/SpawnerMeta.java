@@ -115,11 +115,19 @@ public final class SpawnerMeta extends JavaPlugin {
 	public static APIInstance API() {
 		return plugin.api;
 	}
-	
+
+	/**
+	 * @return FoliaLib
+	 */
+
+	public static FoliaLib foliaLib() {
+		return folia;
+	}
+
 	/**
 	 * @return Task scheduler
 	 */
-	
+
 	public static PlatformScheduler scheduler() {
 		return scheduler;
 	}

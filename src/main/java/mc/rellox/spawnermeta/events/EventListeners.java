@@ -187,7 +187,7 @@ public class EventListeners implements Listener {
 	@EventHandler(priority = EventPriority.HIGH)
 	private void onJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
-		SpawnerMeta.scheduler().runLater(() -> {
+		SpawnerMeta.scheduler().runAtEntityLater(player, () -> {
 			if(player.isOnline() == false) return;
 			var il = LocationRegistry.raw(player);
 			if(il == null) return;
