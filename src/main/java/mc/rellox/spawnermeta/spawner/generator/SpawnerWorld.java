@@ -1,10 +1,6 @@
 package mc.rellox.spawnermeta.spawner.generator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -29,8 +25,8 @@ public class SpawnerWorld {
 	
 	public SpawnerWorld(World world) {
 		this.world = world;
-		this.spawners = new HashMap<>();
-		this.queue = new LinkedList<>();
+		this.spawners = Collections.synchronizedMap(new HashMap<>());
+		this.queue = Collections.synchronizedList(new LinkedList<>());
 	}
 	
 	public Stream<IGenerator> stream() {
@@ -81,34 +77,47 @@ public class SpawnerWorld {
 		}
 		spawners.values().forEach(IGenerator::tick);
 	}
-	
+
 	public void reduce() {
-		List<Pos> remove = new ArrayList<>();
-		
-		spawners.forEach((pos, generator) -> {
-			if(generator.active() == false || generator.present() == false) {
+		List<Pos> toRemove = new ArrayList<>();
+
+		Map<Pos, IGenerator> spawnersCopy;
+		synchronized (spawners) {
+			spawnersCopy = new HashMap<>(spawners);
+		}
+
+		spawnersCopy.forEach((pos, generator) -> {
+			if (!generator.active() || !generator.present()) {
 				generator.clear();
-				remove.add(pos);
+				toRemove.add(pos);
 			}
 		});
 
-		remove.forEach(spawners::remove);
+		synchronized (spawners) {
+			toRemove.forEach(spawners::remove);
+		}
 	}
-	
+
 	public int remove(boolean fully, Predicate<IGenerator> filter) {
-		List<Pos> remove = new ArrayList<>();
-		
-		spawners.forEach((pos, generator) -> {
-			if(generator.active() == true
-					&& filter.test(generator) == true) {
+		List<Pos> toRemove = new ArrayList<>();
+
+		Map<Pos, IGenerator> spawnersCopy;
+		synchronized (spawners) {
+			spawnersCopy = new HashMap<>(spawners);
+		}
+
+		spawnersCopy.forEach((pos, generator) -> {
+			if (generator.active() && filter.test(generator)) {
 				generator.remove(fully);
-				remove.add(pos);
+				toRemove.add(pos);
 			}
 		});
-		
-		remove.forEach(spawners::remove);
-		
-		return remove.size();
+
+		synchronized (spawners) {
+			toRemove.forEach(spawners::remove);
+		}
+
+		return toRemove.size();
 	}
 	
 	public void put(Block block) {
