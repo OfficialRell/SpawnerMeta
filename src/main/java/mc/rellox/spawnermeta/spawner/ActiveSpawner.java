@@ -196,12 +196,14 @@ public record ActiveSpawner(Block block) implements ISpawner {
 		DataManager.setCharges(block(), a);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void setDelay(int t) {
-		if (SpawnerMeta.foliaLib().getScheduler().isOwnedByCurrentRegion(block())) {
+		if (SpawnerMeta.scheduler().isOwnedByCurrentRegion(block())) {
 			DataManager.setDelay(block, t + 1);
 		} else {
-			SpawnerMeta.scheduler().runAtLocation(block.getLocation(), task -> DataManager.setDelay(block, t + 1));
+			SpawnerMeta.scheduler().runAtLocation(block.getLocation(),
+					task -> DataManager.setDelay(block, t + 1));
 		}
 	}
 	

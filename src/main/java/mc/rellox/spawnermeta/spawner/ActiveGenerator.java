@@ -232,6 +232,7 @@ public class ActiveGenerator implements IGenerator {
 		this.ticks = Math.max(0, ticks);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void tick() {
 		SpawnerMeta.scheduler().runAtLocation(spawner.block().getLocation(), task -> {
