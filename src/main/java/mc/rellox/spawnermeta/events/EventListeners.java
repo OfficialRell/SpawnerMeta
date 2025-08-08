@@ -20,6 +20,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
@@ -46,7 +47,7 @@ import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 public class EventListeners implements Listener {
 	
 	private static final List<RegistryAbstract> REGISTRIES =
-			List.of(new RegistryAI(), new RegistryLinking(), new RegistrySpawnerRename());
+			List.of(new RegistryTarget(), new RegistryLinking(), new RegistrySpawnerRename());
 	
 	public static void initialize() {
 		Bukkit.getPluginManager().registerEvents(new EventListeners(), SpawnerMeta.instance());
@@ -226,7 +227,7 @@ public class EventListeners implements Listener {
 		
 	}
 	
-	private static final class RegistryAI extends RegistryAbstract {
+	private static final class RegistryTarget extends RegistryAbstract {
 		
 		@Override
 		public void update() {
@@ -239,6 +240,14 @@ public class EventListeners implements Listener {
 			Entity entity = event.getEntity();
 			if(DataManager.isSpawned(entity) == false) return;
 			event.setCancelled(true);
+		}
+
+		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+		private void onPlayerDamage(EntityDamageByEntityEvent event) {
+			if(event.getEntity() instanceof Player) {
+				if(DataManager.isSpawned(event.getDamager()) == false) return;
+				event.setCancelled(true);
+			}
 		}
 		
 	}
