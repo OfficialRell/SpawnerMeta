@@ -18,7 +18,9 @@ public final class Version {
 		if(server.contains("v1_21_R5")
 				|| bukkit.startsWith("1.21.6-R0.1")
 				|| bukkit.startsWith("1.21.7-R0.1")
-				|| bukkit.startsWith("1.21.8-R0.1")) version = VersionType.v_21_5;
+				|| bukkit.startsWith("1.21.8-R0.1")
+                || bukkit.startsWith("1.21.9-R0.1")
+                || bukkit.startsWith("1.21.10-R0.1")) version = VersionType.v_21_5;
 		else if(server.contains("v1_21_R4")
 				|| bukkit.startsWith("1.21.5-R0.1")) version = VersionType.v_21_4;
 		else if(server.contains("v1_21_R3")
