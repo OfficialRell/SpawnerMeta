@@ -4,7 +4,7 @@
   
   <groupId>mc.rellox</groupId>
   <artifactId>SpawnerMeta</artifactId>
-  <version>25.3</version>
+  <version>25.4</version>
   <packaging>jar</packaging>
   
   <name>SpawnerMeta</name>
@@ -49,7 +49,7 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
-      <version>1.21.8-R0.1-SNAPSHOT</version>
+      <version>1.21.10-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
