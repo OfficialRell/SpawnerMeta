@@ -32,6 +32,7 @@ public enum SpawnerType {
 	CHEST_BOAT(_e("CHEST_BOAT"), "Boat with Chest", null, EntityBox.box(2, 1, 2)),
 	CHICKEN(EntityType.CHICKEN, "Chicken", Material.CHICKEN_SPAWN_EGG, EntityBox.single()),
 	COD(EntityType.COD, "Cod", Material.COD_SPAWN_EGG, EntityBox.single()),
+	COPPER_GOLEM(_e("COPPER_GOLEM"), "Copper Golem", _m("COPPER_GOLEM_SPAWN_EGG"), EntityBox.single()),
 	COW(EntityType.COW, "Cow", Material.COW_SPAWN_EGG, EntityBox.box(1, 2, 1)),
 	CREEPER(EntityType.CREEPER, "Creeper", Material.CREEPER_SPAWN_EGG, EntityBox.box(1, 2, 1)),
 	CREAKING(_e("CREAKING"), "Creaking", _m("CREAKING_SPAWN_EGG"), EntityBox.box(1, 3, 1)),

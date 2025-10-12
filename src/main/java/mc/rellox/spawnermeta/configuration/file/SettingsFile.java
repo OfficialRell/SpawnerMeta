@@ -509,7 +509,7 @@ public class SettingsFile extends AbstractFile {
 					"If true then natural spawners will not",
 					"  require redstone power to spawn.");
 			c.comment("Spawners.redstone-power.disable-with-power",
-					"In enabled then player will be able to disable",
+					"If enabled then player will be able to disable",
 					"  spawner with redstone power (level, redstone block).",
 					"When enabled will ignore the 'required' value.");
 			
