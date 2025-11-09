@@ -32,29 +32,39 @@ public class SpawnerWorld {
 	public Stream<IGenerator> stream() {
 		return spawners.values().stream();
 	}
-	
-	public void load() {
-		Stream.of(world.getLoadedChunks()).forEach(this::load);
-	}
-	
-	public void load(Chunk chunk) {
-		Stream.of(chunk.getTileEntities())
-		.filter(CreatureSpawner.class::isInstance)
-		.map(BlockState::getBlock)
-		.filter(block -> Settings.settings.ignored(block) == false)
-		.map(ISpawner::of)
-		.map(ActiveGenerator::new)
-		.forEach(queue::add);
+
+    public void load() {
+        for (Chunk chunk : world.getLoadedChunks()) {
+            load(chunk);
+        }
+    }
+
+    public void load(Chunk chunk) {
+		BlockState[] tileEntities = chunk.getTileEntities();
+		for (BlockState state : tileEntities) {
+			if (state instanceof CreatureSpawner) {
+				Block block = state.getBlock();
+				if (!Settings.settings.ignored(block)) {
+					ISpawner spawner = ISpawner.of(block);
+					IGenerator generator = new ActiveGenerator(spawner);
+					queue.add(generator);
+				}
+			}
+		}
 	}
 	
 	public void unload(Chunk chunk) {
-		spawners.values().stream()
-		.filter(g -> g.in(chunk))
-		.forEach(g -> g.remove(false));
+		for (IGenerator generator : spawners.values()) {
+			if (generator.in(chunk)) {
+				generator.remove(false);
+			}
+		}
 	}
 
 	public void clear() {
-		spawners.values().forEach(IGenerator::clear);
+		for (IGenerator generator : spawners.values()) {
+			generator.clear();
+		}
 		spawners.clear();
 	}
 	
@@ -63,19 +73,27 @@ public class SpawnerWorld {
 	}
 	
 	public void update() {
-		spawners.values().forEach(IGenerator::update);
+		for (IGenerator generator : spawners.values()) {
+			generator.update();
+		}
 	}
 	
 	public void control() {
-		spawners.values().forEach(IGenerator::control);
+		for (IGenerator generator : spawners.values()) {
+			generator.control();
+		}
 	}
 	
 	public void tick() {
-		if(queue.isEmpty() == false) {
-			queue.forEach(this::put);
+		if(!queue.isEmpty()) {
+			for (IGenerator generator : queue) {
+				put(generator);
+			}
 			queue.clear();
 		}
-		spawners.values().forEach(IGenerator::tick);
+		for (IGenerator generator : spawners.values()) {
+			generator.tick();
+		}
 	}
 
 	public void reduce() {
@@ -86,15 +104,19 @@ public class SpawnerWorld {
 			spawnersCopy = new HashMap<>(spawners);
 		}
 
-		spawnersCopy.forEach((pos, generator) -> {
+		for (Map.Entry<Pos, IGenerator> entry : spawnersCopy.entrySet()) {
+			Pos pos = entry.getKey();
+			IGenerator generator = entry.getValue();
 			if (!generator.active() || !generator.present()) {
 				generator.clear();
 				toRemove.add(pos);
 			}
-		});
+		}
 
 		synchronized (spawners) {
-			toRemove.forEach(spawners::remove);
+			for (Pos pos : toRemove) {
+				spawners.remove(pos);
+			}
 		}
 	}
 
@@ -106,15 +128,19 @@ public class SpawnerWorld {
 			spawnersCopy = new HashMap<>(spawners);
 		}
 
-		spawnersCopy.forEach((pos, generator) -> {
+		for (Map.Entry<Pos, IGenerator> entry : spawnersCopy.entrySet()) {
+			Pos pos = entry.getKey();
+			IGenerator generator = entry.getValue();
 			if (generator.active() && filter.test(generator)) {
 				generator.remove(fully);
 				toRemove.add(pos);
 			}
-		});
+		}
 
 		synchronized (spawners) {
-			toRemove.forEach(spawners::remove);
+			for (Pos pos : toRemove) {
+				spawners.remove(pos);
+			}
 		}
 
 		return toRemove.size();
@@ -133,7 +159,7 @@ public class SpawnerWorld {
 		IGenerator generator = spawners.get(Pos.of(block));
 		if(generator == null) {
 			if(block.getType() == Material.SPAWNER) put(block);
-		} else if(generator.active() == false) return null;
+		} else if(!generator.active()) return null;
 		return generator;
 	}
 	
