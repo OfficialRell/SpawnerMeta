@@ -70,7 +70,13 @@ public interface IGenerator {
 	 */
 	
 	void ticks(int ticks);
-	
+
+    /**
+     * Ticks this spawner in the right region.
+     */
+
+    void tickFolia();
+
 	/**
 	 * Ticks this spawner.
 	 */

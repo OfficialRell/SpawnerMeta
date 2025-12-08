@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.utility.adapter.ChunkTileEntities;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
@@ -76,7 +77,11 @@ public class SpawnerWorld {
 			queue.forEach(this::put);
 			queue.clear();
 		}
-		spawners.values().forEach(IGenerator::tick);
+        if (SpawnerMeta.foliaLib().isFolia()) {
+            spawners.values().forEach(IGenerator::tickFolia);
+        } else {
+            spawners.values().forEach(IGenerator::tick);
+        }
 	}
 
 	public void reduce() {

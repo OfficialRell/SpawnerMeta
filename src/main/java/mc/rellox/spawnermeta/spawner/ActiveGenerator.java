@@ -232,27 +232,30 @@ public class ActiveGenerator implements IGenerator {
 		this.ticks = Math.max(0, ticks);
 	}
 
+    @Override
+    public void tickFolia() {
+        SpawnerMeta.scheduler().runAtLocation(spawner.block().getLocation(), task -> this.tick());
+    }
+
 	@SuppressWarnings("deprecation")
 	@Override
 	public void tick() {
-		SpawnerMeta.scheduler().runAtLocation(spawner.block().getLocation(), task -> {
-			if(--validation < 0) validation = Settings.settings.validation_interval - 1;
-			if(active == false) return;
-			holograms();
-			if(check() == false) {
-				tick_untill_zero();
-				return;
-			}
-			if(cache.type() == SpawnerType.EMPTY) return;
-			if(online == false || validate() == false) {
-				if(validation == 0) spawner.setDelay(delay);
-				return;
-			}
-			if(--ticks <= 0) {
-				spawn();
-				update();
-			}
-		});
+        if(--validation < 0) validation = Settings.settings.validation_interval - 1;
+        if(active == false) return;
+        holograms();
+        if(check() == false) {
+            tick_untill_zero();
+            return;
+        }
+        if(cache.type() == SpawnerType.EMPTY) return;
+        if(online == false || validate() == false) {
+            if(validation == 0) spawner.setDelay(delay);
+            return;
+        }
+        if(--ticks <= 0) {
+            spawn();
+            update();
+        }
 	}
 
 	private void tick_untill_zero() {
