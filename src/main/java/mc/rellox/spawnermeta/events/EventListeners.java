@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
+import mc.rellox.spawnermeta.utility.adapter.ChunkTileEntities;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -262,7 +263,7 @@ public class EventListeners implements Listener {
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		private void onUnloadLink(ChunkUnloadEvent event) {
-			Stream.of(event.getChunk().getTileEntities())
+			Stream.of(ChunkTileEntities.getTileEntities(event.getChunk()))
 				.filter(CreatureSpawner.class::isInstance)
 				.map(BlockState::getBlock)
 				.forEach(HookRegistry.WILD_STACKER::unlink);

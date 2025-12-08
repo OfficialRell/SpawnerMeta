@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import mc.rellox.spawnermeta.utility.adapter.BlockSnapshot;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -658,7 +659,7 @@ public final class DataManager {
 	private static CreatureSpawner cast(Block block) {
 		try {
 			if(block.equals(last) == true) return spawner;
-			if(block.getState() instanceof CreatureSpawner cs) {
+			if(BlockSnapshot.getBlockState(block) instanceof CreatureSpawner cs) {
 				last = block;
 				return spawner = cs;
 			}

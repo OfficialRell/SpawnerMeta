@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import mc.rellox.spawnermeta.utility.adapter.ChunkTileEntities;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -38,7 +39,7 @@ public class SpawnerWorld {
 	}
 	
 	public void load(Chunk chunk) {
-		Stream.of(chunk.getTileEntities())
+		Stream.of(ChunkTileEntities.getTileEntities(chunk))
 		.filter(CreatureSpawner.class::isInstance)
 		.map(BlockState::getBlock)
 		.filter(block -> Settings.settings.ignored(block) == false)

@@ -17,6 +17,7 @@ import java.util.function.IntSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import mc.rellox.spawnermeta.utility.adapter.BlockSnapshot;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -698,7 +699,7 @@ public final class Settings {
 	
 	public boolean ignored(Block block) {
 		if(ignore_natural == true
-				&& block.getState() instanceof CreatureSpawner spawner) {
+				&& BlockSnapshot.getBlockState(block) instanceof CreatureSpawner spawner) {
 			PersistentDataContainer data = spawner.getPersistentDataContainer();
 			if(data.has(DataManager.ownerKey()) == false) {
 				spawner.setSpawnCount(4);
