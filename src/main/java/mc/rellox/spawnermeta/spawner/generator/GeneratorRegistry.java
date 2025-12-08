@@ -226,10 +226,10 @@ public final class GeneratorRegistry implements Listener {
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	private void onChunkUnload(ChunkUnloadEvent event) {
 		try {
-			World world = event.getWorld();
+			final World world = event.getWorld();
 			if(Settings.inactive(world) == true) return;
 			
-			get(world).unload(event.getChunk());
+			get(world).unload(world, event.getChunk());
 		} catch (Exception e) {
 			String m = e.getMessage();
 			if(m != null && m.contains("Chunk not there when requested") == true) return;

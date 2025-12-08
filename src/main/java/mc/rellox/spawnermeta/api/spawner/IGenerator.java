@@ -192,16 +192,31 @@ public interface IGenerator {
 	default Pos position() {
 		return Pos.of(spawner().block());
 	}
-	
+
 	/**
 	 * @param chunk - chunk
 	 * @return {@code true} if this spawner is in the specified chunk
 	 */
-	
+
 	default boolean in(Chunk chunk) {
 		Block block = block();
 		if(block.getWorld().equals(chunk.getWorld()) == false) return false;
 		return chunk.getX() == (block.getX() >> 4) && chunk.getZ() == (block.getZ() >> 4);
 	}
+
+    /**
+     * This is preferred for tight loops to avoid calling API methods every time
+     *
+     * @param world - world
+     * @param x - chunk x
+     * @param z - chunk z
+     * @return {@code true} if this spawner is in the specified chunk
+     */
+
+    default boolean in(World world, int x, int z) {
+        Block block = block();
+        if (!block.getWorld().equals(world)) return false;
+        return x == (block.getX() >> 4) && z == (block.getZ() >> 4);
+    }
 
 }

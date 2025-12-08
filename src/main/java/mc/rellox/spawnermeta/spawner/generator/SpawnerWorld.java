@@ -49,9 +49,12 @@ public class SpawnerWorld {
 		.forEach(queue::add);
 	}
 	
-	public void unload(Chunk chunk) {
+	public void unload(World world, Chunk chunk) {
+        final int x = chunk.getX();
+        final int z = chunk.getZ();
+
 		spawners.values().stream()
-		.filter(g -> g.in(chunk))
+		.filter(g -> g.in(world, x, z))
 		.forEach(g -> g.remove(false));
 	}
 
