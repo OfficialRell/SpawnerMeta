@@ -1,10 +1,8 @@
 package mc.rellox.spawnermeta.api.spawner.requirement;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import mc.rellox.spawnermeta.utility.adapter.BlockSolid;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -14,7 +12,7 @@ public interface IMaterial {
 	
 	static IMaterial empty = block -> true;
 	static IMaterial air = Block::isEmpty;
-	static IMaterial solid = block -> block.getType().isSolid() == true;
+	static IMaterial solid = BlockSolid::isSolid;
 	static IMaterial water = block -> {
 		Material type = block.getType();
 		if(type == Material.WATER) return true;
