@@ -4,14 +4,14 @@
   
   <groupId>mc.rellox</groupId>
   <artifactId>SpawnerMeta</artifactId>
-  <version>25.4</version>
+  <version>25.4-2</version>
   <packaging>jar</packaging>
   
   <name>SpawnerMeta</name>
   <description>Implements spawner customization and upgrading</description>
   
   <properties>
-    <java.version>16</java.version>
+    <java.version>21</java.version>
   </properties>
   
   <repositories>
@@ -99,9 +99,20 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>com.github.GriefPrevention</groupId>
+      <artifactId>GriefPrevention</artifactId>
+      <version>16.18.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>com.tcoded</groupId>
       <artifactId>FoliaLib</artifactId>
       <version>0.5.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bstats</groupId>
+      <artifactId>bstats-bukkit</artifactId>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -125,8 +136,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
-          <source>16</source>
-          <target>16</target>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
           <encoding>ISO-8859-1</encoding>
         </configuration>
       </plugin>
@@ -148,6 +159,10 @@
             <relocation>
               <pattern>com.tcoded.folialib</pattern>
               <shadedPattern>mc.rellox.spawnermeta.lib.folialib</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>org.bstats</pattern>
+              <shadedPattern>mc.rellox.spawnermeta.lib.bstats</shadedPattern>
             </relocation>
           </relocations>
         </configuration>

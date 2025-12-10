@@ -245,6 +245,7 @@ public final class Settings {
 	public boolean check_spawner_nerf;
 	public boolean spawn_babies;
 	public boolean spawn_with_equipment;
+	public boolean spawn_jockeys;
 	public boolean modify_stacked_entities;
 	public int safety_limit;
 	
@@ -551,6 +552,7 @@ public final class Settings {
 		check_spawner_nerf = file.getBoolean("Modifiers.check-spawner-nerf");
 		spawn_babies = file.getBoolean("Modifiers.spawn-babies");
 		spawn_with_equipment = file.getBoolean("Modifiers.spawn-with-equipment");
+		spawn_jockeys = file.getBoolean("Modifiers.spawn-jockeys");
 		modify_stacked_entities = file.getBoolean("Modifiers.modify-stacked-entities");
 		safety_limit = file.getInteger("Modifiers.safety-limit", 16, 1024);
 		
@@ -695,6 +697,10 @@ public final class Settings {
 		ItemMeta meta = item.getItemMeta();
 		if(meta == null) return false;
 		return meta.getEnchantLevel(Enchantment.SILK_TOUCH) >= breaking_silk_level;
+	}
+	
+	public boolean allow(Block block) {
+		return !ignored(block);
 	}
 	
 	public boolean ignored(Block block) {

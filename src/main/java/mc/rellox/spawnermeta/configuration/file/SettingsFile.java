@@ -223,6 +223,7 @@ public class SettingsFile extends AbstractFile {
 		file.addDefault("Modifiers.check-spawner-nerf", true);
 		file.addDefault("Modifiers.spawn-babies", true);
 		file.addDefault("Modifiers.spawn-with-equipment", true);
+		file.addDefault("Modifiers.spawn-jockeys", true);
 		file.addDefault("Modifiers.modify-stacked-entities", true);
 		
 		file.addDefault("Modifiers.safety-limit", 128);
@@ -832,6 +833,9 @@ public class SettingsFile extends AbstractFile {
 					"Are entities spawned with equipment.",
 					"If false then all entities will not have any items,",
 					"  nor will drop any.");
+			c.comment("Modifiers.spawn-jockeys",
+					"Can jockeys be spawned.",
+					"E.g. spider jockeys, chicken jockeys.");
 			c.comment("Modifiers.modify-stacked-entities",
 					"Will already existing entities be modified.",
 					"Entities, such as, WildStacker entities.");

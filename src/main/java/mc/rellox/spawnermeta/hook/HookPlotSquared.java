@@ -16,19 +16,15 @@ import com.plotsquared.core.PlotSquared;
 import com.plotsquared.core.events.PlotDeleteEvent;
 import com.plotsquared.core.plot.Plot;
 import com.plotsquared.core.util.query.PlotQuery;
+import com.sk89q.worldedit.math.BlockVector3;
 
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
-import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
-import mc.rellox.spawnermeta.utility.reflect.type.Invoker;
 
 public class HookPlotSquared implements HookInstance {
 	
 	private PlotAPI api;
-	
-	private final Class<?> _block_vector = RF.get("com.sk89q.worldedit.math.BlockVector3");
-	private final Invoker<?> _block_builder = RF.order(_block_vector, "at", double.class, double.class, double.class);
 
 	@Override
 	public boolean exists() {
@@ -97,8 +93,8 @@ public class HookPlotSquared implements HookInstance {
 		if(plot == null) return true;
 		Location at = entity.getLocation();
 		return plot.getRegions().stream().anyMatch(region -> {
-			Object vector = _block_builder.invoke(at.getX(), at.getY(), at.getZ());
-			return RF.order(region, "contains", _block_vector).as(boolean.class).invoke(false, vector);
+			BlockVector3 vector = BlockVector3.at(at.getX(), at.getY(), at.getZ());
+			return region.contains(vector);
 		});
 	}
 	
@@ -109,15 +105,15 @@ public class HookPlotSquared implements HookInstance {
 	
 	private boolean in(Plot plot, Block block) {
 		return plot.getRegions().stream().anyMatch(region -> {
-			Object vector = _block_builder.invoke((double) block.getX(), (double) block.getY(), (double) block.getZ());
-			return RF.order(region, "contains", _block_vector).as(boolean.class).invoke(false, vector);
+			var vector = BlockVector3.at(block.getX(), block.getY(), block.getZ());
+			return region.contains(vector);
 		});
 	}
 	
 	private boolean in(Plot plot, Location l) {
 		return plot.getRegions().stream().anyMatch(region -> {
-			Object vector = _block_builder.invoke(l.getX(), l.getY(), l.getZ());
-			return RF.order(region, "contains", _block_vector).as(boolean.class).invoke(false, vector);
+			var vector = BlockVector3.at(l.getX(), l.getY(), l.getZ());
+			return region.contains(vector);
 		});
 	}
 

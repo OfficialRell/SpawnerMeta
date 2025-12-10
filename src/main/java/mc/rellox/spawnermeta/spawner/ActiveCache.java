@@ -91,7 +91,7 @@ public class ActiveCache implements ICache {
 
 	@Override
 	public int delay() {
-		if(HookRegistry.SUPERIOR_SKYBLOCK_2.exists() == true)
+		if(HookRegistry.SUPERIOR_SKYBLOCK_2.exists())
 			return HookRegistry.SUPERIOR_SKYBLOCK_2.delay_upgrade(spawner.block(), attributes[1]);
 		return attributes[1];
 	}

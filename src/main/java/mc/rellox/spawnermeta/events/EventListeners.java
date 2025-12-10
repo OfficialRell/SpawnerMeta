@@ -63,7 +63,7 @@ public class EventListeners implements Listener {
 	private void onInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		
-		if(Settings.inactive(player.getWorld()) == true) return;
+		if(Settings.inactive(player.getWorld())) return;
 			
 		Messagable m = new Messagable(player);
 		if(event.getAction() == Action.LEFT_CLICK_BLOCK) {
@@ -74,7 +74,7 @@ public class EventListeners implements Listener {
 		Block block = event.getClickedBlock();
 		if(event.getHand() == EquipmentSlot.OFF_HAND) {
 			ItemStack item = event.getItem();
-			if(item != null && item.getType().name().endsWith("_EGG") == true
+			if(item != null && item.getType().name().endsWith("_EGG")
 					&& block.getType() == Material.SPAWNER) event.setCancelled(true);
 			return;
 		}
@@ -95,8 +95,8 @@ public class EventListeners implements Listener {
 	private void onBreakFirst(BlockBreakEvent event) {
 		try {
 			Block block = event.getBlock();
-			if(Settings.inactive(block.getWorld()) == true) return;
-			if(Settings.settings.ignored(block) == true) return;
+			if(Settings.inactive(block.getWorld())) return;
+			if(Settings.settings.ignored(block)) return;
 			IGenerator generator = GeneratorRegistry.raw(block);
 			if(generator == null) return;
 			event.setExpToDrop(0);
@@ -110,7 +110,7 @@ public class EventListeners implements Listener {
 		try {
 			Block block = event.getBlock();
 			
-			if(Settings.inactive(block.getWorld()) == true) return;
+			if(Settings.inactive(block.getWorld())) return;
 			
 			if(block.getType() != Material.SPAWNER) return;
 			IGenerator generator = fetch(block);
@@ -125,7 +125,7 @@ public class EventListeners implements Listener {
 	private void onBlockExplodeByBlock(BlockExplodeEvent event) {
 		List<Block> list = event.blockList();
 		
-		if(list.size() > 0 && Settings.inactive(list.get(0).getWorld()) == true) return;
+		if(list.size() > 0 && Settings.inactive(list.get(0).getWorld())) return;
 		
 		Iterator<Block> it = list.iterator();
 		try {
@@ -139,7 +139,7 @@ public class EventListeners implements Listener {
 	private void onBlockExplodeByEntity(EntityExplodeEvent event) {
 		try {
 			
-			if(Settings.inactive(event.getEntity().getWorld()) == true) return;
+			if(Settings.inactive(event.getEntity().getWorld())) return;
 			
 			EventRegistry.explode_entity(event);
 		} catch (Exception e) {
@@ -149,10 +149,10 @@ public class EventListeners implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onPlace(BlockPlaceEvent event) {
-		if(event.isCancelled() == true) return;
+		if(event.isCancelled()) return;
 		Block block = event.getBlockPlaced();
 		
-		if(Settings.inactive(block.getWorld()) == true) return;
+		if(Settings.inactive(block.getWorld())) return;
 		
 		if(block.getType() != Material.SPAWNER) return;
 		try {
@@ -169,14 +169,14 @@ public class EventListeners implements Listener {
 		Entity entity = event.getEntity();
 		
 		World world = entity.getWorld();
-		if(Settings.disabled(world) == true) {
+		if(Settings.disabled(world)) {
 			event.setCancelled(true);
 			return;
 		}
-		if(Settings.ignored(world) == true) return;
+		if(Settings.ignored(world)) return;
 		
 		if(entity.getCustomName() != null) return;
-		if(Settings.settings.cancel_spawning_event == true) event.setCancelled(true);
+		if(Settings.settings.cancel_spawning_event) event.setCancelled(true);
 		else entity.remove();
 		try {
 			EventRegistry.spawn(event, entity);
@@ -190,7 +190,7 @@ public class EventListeners implements Listener {
 	private void onJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		SpawnerMeta.scheduler().runAtEntityLater(player, () -> {
-			if(player.isOnline() == false) return;
+			if(!player.isOnline()) return;
 			var il = LocationRegistry.raw(player);
 			if(il == null) return;
 			il.stored().forEach(item -> ItemMatcher.add(player, item));
@@ -198,8 +198,8 @@ public class EventListeners implements Listener {
 	}
 	
 	protected static IGenerator fetch(Block block) {
-		if(Settings.inactive(block.getWorld()) == true) return null;
-		if(Settings.settings.ignored(block) == true) return null;
+		if(Settings.inactive(block.getWorld())) return null;
+		if(Settings.settings.ignored(block)) return null;
 		IGenerator generator = GeneratorRegistry.get(block);
 		if(generator == null) {
 			Text.failure("Unable to get spawner generator at #0, this should never happen,"
@@ -215,12 +215,12 @@ public class EventListeners implements Listener {
 		private boolean registered;
 		
 		protected void register() {
-			if(registered == true) return;
+			if(registered) return;
 			Bukkit.getPluginManager().registerEvents(this, SpawnerMeta.instance());
 		}
 		
 		protected void unregister() {
-			if(registered == false) return;
+			if(!registered) return;
 			HandlerList.unregisterAll(this);
 		}
 		
@@ -232,21 +232,21 @@ public class EventListeners implements Listener {
 		
 		@Override
 		public void update() {
-			if(Settings.settings.entity_target == true) unregister();
+			if(Settings.settings.entity_target) unregister();
 			else register();
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		private void onEntityTarget(EntityTargetEvent event) {
 			Entity entity = event.getEntity();
-			if(DataManager.isSpawned(entity) == false) return;
+			if(!DataManager.isSpawned(entity)) return;
 			event.setCancelled(true);
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		private void onPlayerDamage(EntityDamageByEntityEvent event) {
 			if(event.getEntity() instanceof Player) {
-				if(DataManager.isSpawned(event.getDamager()) == false) return;
+				if(!DataManager.isSpawned(event.getDamager())) return;
 				event.setCancelled(true);
 			}
 		}
@@ -257,7 +257,7 @@ public class EventListeners implements Listener {
 
 		@Override
 		public void update() {
-			if(HookRegistry.WILD_STACKER.exists() == false) unregister();
+			if(!HookRegistry.WILD_STACKER.exists()) unregister();
 			else register();
 		}
 
@@ -275,7 +275,7 @@ public class EventListeners implements Listener {
 
 		@Override
 		public void update() {
-			if(Settings.settings.allow_renaming == true) unregister();
+			if(Settings.settings.allow_renaming) unregister();
 			else register();
 		}
 

@@ -2,6 +2,7 @@ package mc.rellox.spawnermeta;
 
 import java.util.List;
 
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -22,7 +23,6 @@ import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
 import mc.rellox.spawnermeta.spawner.generator.SpawningManager;
 import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.utility.DataManager;
-import mc.rellox.spawnermeta.utility.Metrics;
 import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.version.Version;
 
@@ -43,7 +43,7 @@ public final class SpawnerMeta extends JavaPlugin {
     public void onLoad() {
 		loaded = Version.version != null;
 		
-		if(loaded == true) {
+		if(loaded) {
 			plugin = this;
 			this.api = new APIRegistry();
 		}
@@ -60,10 +60,10 @@ public final class SpawnerMeta extends JavaPlugin {
 		folia = new FoliaLib(this);
 		scheduler = folia.getScheduler();
 		
-		if(loaded == true) {
+		if(loaded) {
 			Text.logLoad();
 			Utility.check(74188, s -> {
-				if(Utility.isDouble(s) == false) return;
+				if(!Utility.isDouble(s)) return;
 				double v = Double.parseDouble(s);
 				if(v > PLUGIN_VERSION) Text.logOutdated(v);
 			});
@@ -85,7 +85,7 @@ public final class SpawnerMeta extends JavaPlugin {
 	
 	@Override
 	public void onDisable() {
-		if(loaded == true) {
+		if(loaded) {
 			Text.logUnload();
 			GeneratorRegistry.clear();
 			LocationRegistry.clear();

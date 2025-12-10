@@ -32,7 +32,7 @@ public class ActiveVirtual implements IVirtual {
 		if(empty != other.isEmpty()) return false;
 		if(Settings.settings.charges_enabled == true) {
 			int oc = other.getCharges();
-			if(Settings.settings.charges_allow_stacking == false
+			if(!Settings.settings.charges_allow_stacking
 					&& charges != oc) return false;
 			boolean a = charges >= 1_000_000_000,
 					b = oc >= 1_000_000_000;

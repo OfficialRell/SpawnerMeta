@@ -18,6 +18,7 @@ public class HookRegistry {
 	public static final HookSuperiorSkyblock2 SUPERIOR_SKYBLOCK_2 = new HookSuperiorSkyblock2();
 	public static final HookPlayerPoints PLAYER_POINTS = new HookPlayerPoints();
 	public static final HookPlotSquared PLOT_SQUARED = new HookPlotSquared();
+    public static final HookGriefPrevention GRIEF_PREVENTION = new HookGriefPrevention();
 
 	public static void load() {
 		try {
@@ -30,6 +31,7 @@ public class HookRegistry {
 			HOOKS.add(SUPERIOR_SKYBLOCK_2);
 			HOOKS.add(PLAYER_POINTS);
 			HOOKS.add(PLOT_SQUARED);
+            HOOKS.add(GRIEF_PREVENTION);
 			
 			HOOKS.forEach(i -> {
 				try {
