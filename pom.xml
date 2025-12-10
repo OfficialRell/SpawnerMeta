@@ -104,6 +104,11 @@
       <version>0.5.1</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.bstats</groupId>
+      <artifactId>bstats-bukkit</artifactId>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
   
   <dependencyManagement>
@@ -148,6 +153,10 @@
             <relocation>
               <pattern>com.tcoded.folialib</pattern>
               <shadedPattern>mc.rellox.spawnermeta.lib.folialib</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>org.bstats</pattern>
+              <shadedPattern>mc.rellox.spawnermeta.lib.bstats</shadedPattern>
             </relocation>
           </relocations>
         </configuration>
