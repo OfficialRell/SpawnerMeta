@@ -603,6 +603,8 @@ public final class EventRegistry {
 		
 		if(HookRegistry.PLOT_SQUARED.exists()
 				&& !HookRegistry.PLOT_SQUARED.modifiable(generator, player)) return;
+        if(HookRegistry.GRIEF_PREVENTION.exists() == true
+                && !HookRegistry.GRIEF_PREVENTION.hasAccessTrust(generator, player)) return;
 		
 		ItemStack item = event.getItem();
 		
