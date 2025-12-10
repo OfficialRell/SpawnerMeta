@@ -37,11 +37,11 @@ public final class GeneratorRegistry implements Listener {
 	public static void initialize() {
 		Bukkit.getPluginManager().registerEvents(new GeneratorRegistry(), SpawnerMeta.instance());
 		load();
-		retime(true);
+		retime();
 	}
 	
 	@SuppressWarnings("deprecation")
-	public static void retime(boolean first) {
+	public static void retime() {
 		if(active_task != null) active_task.cancel();
 		int[] t = {0};
 		final int f = Math.max(100, Settings.settings.check_present_interval / Settings.settings.ticking_interval);
@@ -55,13 +55,13 @@ public final class GeneratorRegistry implements Listener {
 					sw.reduce();
 				}
 			}
-		}, first ? 20 : 5, Settings.settings.ticking_interval);
+		}, 20, Settings.settings.ticking_interval);
 		offline();
 	}
 	
 	@SuppressWarnings("deprecation")
 	private static void offline() {
-		if(offline_task != null && offline_task.isCancelled() == false) offline_task.cancel();
+		if(offline_task != null && !offline_task.isCancelled()) offline_task.cancel();
 		if(Settings.settings.owned_offline_time <= 0) return;
 		
 		offline_task = SpawnerMeta.scheduler().runTimer(() -> {
@@ -112,29 +112,29 @@ public final class GeneratorRegistry implements Listener {
 			}
 			return total;
 		}
-		if(Settings.inactive(world) == true) return 0;
+		if(Settings.inactive(world)) return 0;
 		return get(world).active();
 	}
 
 	private static SpawnerWorld get(World world) {
-		if(Settings.inactive(world) == true) return null;
+		if(Settings.inactive(world)) return null;
 		SpawnerWorld sw = SPAWNERS.get(world);
 		if(sw == null) SPAWNERS.put(world, sw = new SpawnerWorld(world));
 		return sw;
 	}
 	
 	public static void put(Block block) {
-		if(Settings.inactive(block.getWorld()) == true) return;
+		if(Settings.inactive(block.getWorld())) return;
 		get(block.getWorld()).put(block);
 	}
 	
 	public static IGenerator get(Block block) {
-		if(Settings.inactive(block.getWorld()) == true) return null;
+		if(Settings.inactive(block.getWorld())) return null;
 		return get(block.getWorld()).get(block);
 	}
 	
 	public static IGenerator raw(Block block) {
-		if(Settings.inactive(block.getWorld()) == true) return null;
+		if(Settings.inactive(block.getWorld())) return null;
 		return get(block.getWorld()).raw(block);
 	}
 	
@@ -155,7 +155,7 @@ public final class GeneratorRegistry implements Listener {
 	
 	public static void update(Block block) {
 		World world = block.getWorld();
-		if(Settings.inactive(world) == true) return;
+		if(Settings.inactive(world)) return;
 		
 		IGenerator generator = get(world).get(block);
 		if(generator != null) {
@@ -173,13 +173,13 @@ public final class GeneratorRegistry implements Listener {
 	}
 	
 	public static void remove(Block block) {
-		if(Settings.inactive(block.getWorld()) == true) return;
+		if(Settings.inactive(block.getWorld())) return;
 		IGenerator generator = get(block.getWorld()).raw(block);
 		if(generator != null) generator.remove(false);
 	}
 	
 	public static void delete(Block block) {
-		if(Settings.inactive(block.getWorld()) == true) return;
+		if(Settings.inactive(block.getWorld())) return;
 		IGenerator generator = get(block.getWorld()).raw(block);
 		if(generator != null) generator.remove(true);
 		else block.setType(Material.AIR);
@@ -187,7 +187,7 @@ public final class GeneratorRegistry implements Listener {
 	
 	public static int remove(World world, boolean fully, Predicate<IGenerator> filter) {
 		if(world != null) {
-			if(Settings.inactive(world) == true) return 0;
+			if(Settings.inactive(world)) return 0;
 			return get(world).remove(fully, filter);
 		}
 		int total = 0;
@@ -208,7 +208,7 @@ public final class GeneratorRegistry implements Listener {
 	private void onWorldLoad(WorldLoadEvent event) {
 		try {
 			World world = event.getWorld();
-			if(Settings.inactive(world) == true) return;
+			if(Settings.inactive(world)) return;
 			
 			SpawnerWorld sw = new SpawnerWorld(world);
 			SPAWNERS.put(world, sw);
@@ -222,7 +222,7 @@ public final class GeneratorRegistry implements Listener {
 	private void onWorldUnload(WorldUnloadEvent event) {
 		try {
 			World world = event.getWorld();
-			if(Settings.inactive(world) == true) return;
+			if(Settings.inactive(world)) return;
 			
 			SPAWNERS.remove(world);
 		} catch (Exception e) {
@@ -234,7 +234,7 @@ public final class GeneratorRegistry implements Listener {
 	private void onChunkLoad(ChunkLoadEvent event) {
 		try {
 			World world = event.getWorld();
-			if(Settings.inactive(world) == true) return;
+			if(Settings.inactive(world)) return;
 			
 			get(world).load(event.getChunk());
 		} catch (Exception e) {
@@ -246,12 +246,12 @@ public final class GeneratorRegistry implements Listener {
 	private void onChunkUnload(ChunkUnloadEvent event) {
 		try {
 			World world = event.getWorld();
-			if(Settings.inactive(world) == true) return;
+			if(Settings.inactive(world)) return;
 			
 			get(world).unload(event.getChunk());
 		} catch (Exception e) {
 			String m = e.getMessage();
-			if(m != null && m.contains("Chunk not there when requested") == true) return;
+			if(m != null && m.contains("Chunk not there when requested")) return;
 			RF.debug(e);
 		}
 	}

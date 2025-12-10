@@ -14,6 +14,7 @@ import org.bukkit.entity.Ageable;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EnderDragon.Phase;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
@@ -157,6 +158,16 @@ public final class SpawningManager {
 				EntityEquipment e = a.getEquipment();
 				e.clear();
 			}
+			if(s.spawn_jockeys == false) {
+				var passengers = entity.getPassengers();
+				if(passengers.isEmpty() == false) {
+					if(entity.getType() == EntityType.CHICKEN) entity.remove();
+					else if(entity.getType() == EntityType.SPIDER) {
+						new ArrayList<>(passengers).forEach(Entity::remove);
+					}
+				}
+			}
+			
 			Object o = RF.direct(entity, "getHandle");
 			RF.access(o, "spawnedViaMobSpawner", boolean.class, false).set(true);
 			RF.access(o, "spawnReason", SpawnReason.class, false).set(SpawnReason.SPAWNER);

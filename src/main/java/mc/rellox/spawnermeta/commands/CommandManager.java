@@ -57,7 +57,7 @@ public final class CommandManager {
 		}
 		try {
 			CommandSpawners c = new CommandSpawners(name);
-			if(aliases.isEmpty() == false) c.setAliases(aliases);
+			if(!aliases.isEmpty()) c.setAliases(aliases);
 			c.setPermission("spawnermeta.command.view");
 			cm.register(name, c);
 		} catch(Exception e) {
@@ -70,7 +70,7 @@ public final class CommandManager {
 		aliases = Settings.settings.aliases_shop;
 		try {
 			CommandShop c = new CommandShop(name);
-			if(aliases.isEmpty() == false) c.setAliases(aliases);
+			if(!aliases.isEmpty()) c.setAliases(aliases);
 			c.setPermission("spawnermeta.command.shop");
 			cm.register(name, c);
 		} catch(Exception e) {
@@ -83,7 +83,7 @@ public final class CommandManager {
 		aliases = Settings.settings.aliases_drops;
 		try {
 			CommandDrops c = new CommandDrops(name);
-			if(aliases.isEmpty() == false) c.setAliases(aliases);
+			if(!aliases.isEmpty()) c.setAliases(aliases);
 			c.setPermission("spawnermeta.command.drops");
 			cm.register(name, c);
 		} catch(Exception e) {
@@ -96,7 +96,7 @@ public final class CommandManager {
 		aliases = Settings.settings.aliases_locations;
 		try {
 			CommandLocations c = new CommandLocations(name);
-			if(aliases.isEmpty() == false) c.setAliases(aliases);
+			if(!aliases.isEmpty()) c.setAliases(aliases);
 			c.setPermission("spawnermeta.command.locations");
 			cm.register(name, c);
 		} catch(Exception e) {
@@ -109,7 +109,7 @@ public final class CommandManager {
 		aliases = Settings.settings.aliases_trust;
 		try {
 			CommandTrust c = new CommandTrust(name);
-			if(aliases.isEmpty() == false) c.setAliases(aliases);
+			if(!aliases.isEmpty()) c.setAliases(aliases);
 			c.setPermission("spawnermeta.command.trust");
 			cm.register(name, c);
 		} catch(Exception e) {
@@ -122,22 +122,22 @@ public final class CommandManager {
 
 	public static boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		Player player = (sender instanceof Player p) ? p : null;
-		if(command.equals(CommandManager.SPAWNERMETA) == true) {
+		if(command.equals(CommandManager.SPAWNERMETA)) {
 			String help = help(command, null, "update", "give", "modify", "location", "active", "disable", "version");
 			if(args.length < 1) sender.sendMessage(help);
-			else if(args[0].equalsIgnoreCase("update") == true) {
+			else if(args[0].equalsIgnoreCase("update")) {
 				update0(sender, command, args, player);
-			} else if(args[0].equalsIgnoreCase("give") == true) {
+			} else if(args[0].equalsIgnoreCase("give")) {
 				give0(sender, command, args, player);
-			} else if(args[0].equalsIgnoreCase("modify") == true) {
+			} else if(args[0].equalsIgnoreCase("modify")) {
 				modify0(sender, command, args, player);
-			} else if(args[0].equalsIgnoreCase("location") == true) {
+			} else if(args[0].equalsIgnoreCase("location")) {
 				location0(sender, command, args);
-			} else if(args[0].equalsIgnoreCase("disable") == true) {
+			} else if(args[0].equalsIgnoreCase("disable")) {
 				disable0(sender, command, args);
-			} else if(args[0].equalsIgnoreCase("active") == true) {
+			} else if(args[0].equalsIgnoreCase("active")) {
 				active0(sender, command, args);
-			} else if(args[0].equalsIgnoreCase("version") == true) {
+			} else if(args[0].equalsIgnoreCase("version")) {
 				success(sender, "You are running SpawnerMeta v#0", SpawnerMeta.PLUGIN_VERSION);
 			} else sender.sendMessage(help);
 		}
@@ -149,7 +149,7 @@ public final class CommandManager {
 		if(args.length < 2) sender.sendMessage(help0);
 		else {
 			String w = args[1];
-			if(w.equalsIgnoreCase("#all") == true) {
+			if(w.equalsIgnoreCase("#all")) {
 				int a = GeneratorRegistry.active(null);
 				success(sender, "There are #0 active spawner" + (a > 1 ? "s" : ""), a);
 			} else {
@@ -168,7 +168,7 @@ public final class CommandManager {
 	private static void disable0(CommandSender sender, Command command, String[] args) {
 		String help0 = help(command, "disable", "true", "false");
 		if(args.length < 2) sender.sendMessage(help0);
-		else if(args[1].equalsIgnoreCase("true") == false && args[1].equalsIgnoreCase("false") == false) sender.sendMessage(help0);
+		else if(!args[1].equalsIgnoreCase("true") && !args[1].equalsIgnoreCase("false")) sender.sendMessage(help0);
 		else {
 			Settings.settings.spawning = !Boolean.parseBoolean(args[1]);
 			success(sender, "Spawner spawning #0!", Settings.settings.spawning ? "enabled" : "disabled");
@@ -178,7 +178,7 @@ public final class CommandManager {
 	private static void location0(CommandSender sender, Command command, String[] args) {
 		String help0 = help(command, "location", "view", "clear", "validate") + extra("player^") + extra("world^?");
 		if(args.length < 2) sender.sendMessage(help0);
-		else if(args[1].equalsIgnoreCase("view") == true) {
+		else if(args[1].equalsIgnoreCase("view")) {
 			String help1 = help(command, "location view", "player^") + extra("world^?");
 			if(args.length < 3) sender.sendMessage(help1);
 			else {
@@ -203,11 +203,11 @@ public final class CommandManager {
 				
 				worlds.stream().forEach(world -> {
 					Set<Location> set = il.get(world);
-					if(set.isEmpty() == true) return;
+					if(set.isEmpty()) return;
 					has.add(world);
 					locations.add(set);
 				});
-				if(has.isEmpty() == true) warn(sender, "This player does not have any placed spawners in this world!");
+				if(has.isEmpty()) warn(sender, "This player does not have any placed spawners in this world!");
 				else {
 					send(sender, Text.color(Colors.aqua) + "Spawner locations for "
 							+ Text.color(Colors.orange) + name + Text.color(Colors.aqua) + ":");
@@ -220,7 +220,7 @@ public final class CommandManager {
 					}
 				}
 			}
-		} else if(args[1].equalsIgnoreCase("clear") == true) {
+		} else if(args[1].equalsIgnoreCase("clear")) {
 			String help1 = help(command, "location clear", "player^") + extra("world^?");
 			if(args.length < 3) sender.sendMessage(help1);
 			else {
@@ -247,7 +247,7 @@ public final class CommandManager {
 				else send(sender, Text.color(Colors.orange) + "Cleared " + Text.color(Colors.aqua)
 						+ r + Text.color(Colors.orange) + " spawner" + (r > 1 ? "s!" : "!"));
 			}
-		} else if(args[1].equalsIgnoreCase("validate") == true) {
+		} else if(args[1].equalsIgnoreCase("validate")) {
 			String help1 = help(command, "location validate", "player^") + extra("world^?");
 			if(args.length < 3) sender.sendMessage(help1);
 			else {
@@ -281,7 +281,7 @@ public final class CommandManager {
 		String help0 = help(command, "modify", "type", "stack", "entities", "charges");
 		if(player == null) warn(sender, "Cannot use this command in console!");
 		else if(args.length < 2) sender.sendMessage(help0);
-		else if(args[1].equalsIgnoreCase("type") == true) {
+		else if(args[1].equalsIgnoreCase("type")) {
 			String help1 = help(command, "modify type", "type^");
 			if(args.length < 3) sender.sendMessage(help1);
 			else {
@@ -299,12 +299,12 @@ public final class CommandManager {
 					}
 				}
 			}
-		} else if(args[1].equalsIgnoreCase("stack") == true) {
+		} else if(args[1].equalsIgnoreCase("stack")) {
 			String help1 = help(command, "modify stack", "(+/-) value*");
 			if(args.length < 3) sender.sendMessage(help1);
 			else {
 				String a = args[2];
-				if(Utility.isInteger(a) == false) warn(sender, "Invalid value!");
+				if(!Utility.isInteger(a)) warn(sender, "Invalid value!");
 				else {
 					int s = Integer.parseInt(a);
 					Block block = player.getTargetBlock(null, 10);
@@ -318,13 +318,13 @@ public final class CommandManager {
 					}
 				}
 			}
-		} else if(args[1].equalsIgnoreCase("entities") == true) {
+		} else if(args[1].equalsIgnoreCase("entities")) {
 			String help1 = help(command, "modify entities", "(+/-) value*");
 			if(args.length < 3) sender.sendMessage(help1);
 			else {
 				String a = args[2];
 				boolean inf = a.equalsIgnoreCase("infinite");
-				if(Utility.isInteger(a) == false && inf == false) warn(sender, "Invalid value!");
+				if(!Utility.isInteger(a) && !inf) warn(sender, "Invalid value!");
 				else {
 					int s = inf ? 1_500_000_000 : Integer.parseInt(a);
 					Block block = player.getTargetBlock(null, 10);
@@ -338,13 +338,13 @@ public final class CommandManager {
 					}
 				}
 			}
-		} else if(args[1].equalsIgnoreCase("charges") == true) {
+		} else if(args[1].equalsIgnoreCase("charges")) {
 			String help1 = help(command, "modify charges", "(+/-) value*");
 			if(args.length < 3) sender.sendMessage(help1);
 			else {
 				String a = args[2];
 				boolean inf = a.equalsIgnoreCase("infinite");
-				if(Utility.isInteger(a) == false && inf == false) warn(sender, "Invalid value!");
+				if(!Utility.isInteger(a) && !inf) warn(sender, "Invalid value!");
 				else {
 					int s = inf ? 1_500_000_000 : Integer.parseInt(a);
 					Block block = player.getTargetBlock(null, 10);
@@ -371,18 +371,18 @@ public final class CommandManager {
 			else {
 				Messagable m = new Messagable(player);
 				boolean empty = type == SpawnerType.EMPTY;
-				if(Settings.settings.disabled(type) == true) warn(sender, "This spawner is disabled!");
+				if(Settings.settings.disabled(type)) warn(sender, "This spawner is disabled!");
 				else if(args.length < 3) {
 					if(player != null) {
 						List<ItemStack> items = DataManager.getSpawners(type, 1, empty, true);
-						if(items.isEmpty() == true) warn(sender, "Could not create any items!");
+						if(items.isEmpty()) warn(sender, "Could not create any items!");
 						else {
 							m.send(Language.list("Spawners.give.success-single", "type", type.formated()));
 							player.getInventory().addItem(items.get(0));
 							player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 2f);
 						}
 					}
-				} else if(Utility.isInteger(args[2]) == false) warn(sender, "Invalid amount!");
+				} else if(!Utility.isInteger(args[2])) warn(sender, "Invalid amount!");
 				else {
 					int amount = Integer.parseInt(args[2]);
 					if(amount < 1) warn(sender, "Amount must be greater then 0!");
@@ -401,9 +401,9 @@ public final class CommandManager {
 						} else {
 							String values = "";
 							for(int i = 4; i < args.length; i++) values += args[i];
-							if(values.matches("((\\d+|-)[,;:]){2}(\\d+|-)([,;:](\\d+|-|[a-z]+)){0,2}") == true) {
+							if(values.matches("((\\d+|-)[,;:]){2}(\\d+|-)([,;:](\\d+|-|[a-z]+)){0,2}")) {
 								List<ItemStack> items = DataManager.getSpawner(type, values, amount, empty);
-								if(items.isEmpty() == true) warn(sender, "Unable to read values (#0)!", values);
+								if(items.isEmpty()) warn(sender, "Unable to read values (#0)!", values);
 								else items.forEach(item -> ItemMatcher.add(getter, item));
 							} else warn(sender, "Unable to read values (#0)!", values);
 						}
@@ -416,39 +416,39 @@ public final class CommandManager {
 	private static void update0(CommandSender sender, Command command, String[] args, Player player) {
 		String help0 = help(command, "update", "#all", "configuration", "language", "shop", "spawners");
 		if(args.length < 2) sender.sendMessage(help0);
-		else if(args[1].equalsIgnoreCase("#all") == true) {
+		else if(args[1].equalsIgnoreCase("#all")) {
 			update((byte) 0x1f, sender, player);
-		} else if(args[1].equalsIgnoreCase("configuration") == true) {
+		} else if(args[1].equalsIgnoreCase("configuration")) {
 			update((byte) 0x1, sender, player);
-		} else if(args[1].equalsIgnoreCase("language") == true) {
+		} else if(args[1].equalsIgnoreCase("language")) {
 			update((byte) 0x2, sender, player);
-		} else if(args[1].equalsIgnoreCase("shop") == true) {
+		} else if(args[1].equalsIgnoreCase("shop")) {
 			update((byte) 0x4, sender, player);
-		} else if(args[1].equalsIgnoreCase("spawners") == true) {
+		} else if(args[1].equalsIgnoreCase("spawners")) {
 			update((byte) 0x8, sender, player);
 		} else sender.sendMessage(help0);
 	}
 	
 	private static void update(byte i, CommandSender sender, Player player) {
-		if(is(i, 0) == true) {
+		if(is(i, 0)) {
 			sender.sendMessage(c6 + "(!) " + c0 + "Updating configuration...");
 			if(player != null) player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
 			HookRegistry.ECONOMY.load();
 			Configuration.initialize();
 			EventListeners.update();
-			GeneratorRegistry.retime(false);
+			GeneratorRegistry.retime();
 		}
-		if(is(i, 1) == true) {
+		if(is(i, 1)) {
 			sender.sendMessage(c6 + "(!) " + c0 + "Updating language...");
 			if(player != null) player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
 			CF.l.load();
 		}
-		if(is(i, 2) == true) {
+		if(is(i, 2)) {
 			sender.sendMessage(c6 + "(!) " + c0 + "Updating shop...");
 			if(player != null) player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
 			ShopRegistry.initialize();
 		}
-		if(is(i, 3) == true) {
+		if(is(i, 3)) {
 			sender.sendMessage(c6 + "(!) " + c0 + "Updating spawners...");
 			if(player != null) player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
 			GeneratorRegistry.reload();
@@ -491,58 +491,58 @@ public final class CommandManager {
 	public static void warn(CommandSender sender, String warning, Object... os) {
 		String w = c7 + "(!) " + c5 + warning;
 		if(os != null) for(int i = 0; i < os.length; i++) w = w.replace("#" + i, c4 + os[i].toString() + c5);
-		if(sender instanceof Player == false) w = ChatColor.stripColor(w);
+		if(!(sender instanceof Player)) w = ChatColor.stripColor(w);
 		sender.sendMessage(w);
 	}
 	
 	public static void success(CommandSender sender, String success, Object... os) {
 		String w = c6 + "(!) " + c1 + success;
 		if(os != null) for(int i = 0; i < os.length; i++) w = w.replace("#" + i, c0 + os[i].toString() + c1);
-		if(sender instanceof Player == false) w = ChatColor.stripColor(w);
+		if(!(sender instanceof Player)) w = ChatColor.stripColor(w);
 		sender.sendMessage(w);
 	}
 	
 	public static void send(CommandSender sender, String message) {
-		if(sender instanceof Player == false) message = ChatColor.stripColor(message);
+		if(!(sender instanceof Player)) message = ChatColor.stripColor(message);
 		sender.sendMessage(message);
 	}
 	
 	public static List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		List<String> l = new ArrayList<>();
-		if(command.equals(CommandManager.SPAWNERMETA) == true) {
+		if(command.equals(CommandManager.SPAWNERMETA)) {
 			if(args.length < 1) return null;
 			else if(args.length < 2) return sm(args[0]);
-			else if(args[0].equalsIgnoreCase("update") == true) {
+			else if(args[0].equalsIgnoreCase("update")) {
 				if(args.length < 3) return up(args[1]);
 				else return l;
-			} else if(args[0].equalsIgnoreCase("give") == true) {
+			} else if(args[0].equalsIgnoreCase("give")) {
 				if(args.length < 3) return entities(args[1]);
 				else if(args.length < 4) return l;
 				else {
-					if(Utility.isInteger(args[2]) == true) {
+					if(Utility.isInteger(args[2])) {
 						if(args.length < 5) return pl(args[3]);
 						else return l;
 					} else return l;
 				}
-			} else if(args[0].equalsIgnoreCase("modify") == true) {
+			} else if(args[0].equalsIgnoreCase("modify")) {
 				if(args.length < 3) return mo(args[1]);
-				else if(args[1].equalsIgnoreCase("type") == true) {
+				else if(args[1].equalsIgnoreCase("type")) {
 					if(args.length < 4) return entities(args[2]);
 					else return l;
-				} else if(args[1].equalsIgnoreCase("charges") == true
-						|| args[1].equalsIgnoreCase("entities") == true) {
+				} else if(args[1].equalsIgnoreCase("charges")
+						|| args[1].equalsIgnoreCase("entities")) {
 					if(args.length < 4) return inf(args[2]);
 					else return l;
 				} else return l;
-			} else if(args[0].equalsIgnoreCase("location") == true) {
+			} else if(args[0].equalsIgnoreCase("location")) {
 				if(args.length < 3) return ll(args[1]);
 				else if(args.length < 4) return oo(args[2]);
 				else if(args.length < 5) return ww(args[3]);
 				else return l;
-			} else if(args[0].equalsIgnoreCase("disable") == true) {
+			} else if(args[0].equalsIgnoreCase("disable")) {
 				if(args.length < 3) return tf(args[1]);
 				else return l;
-			} else if(args[0].equalsIgnoreCase("active") == true) {
+			} else if(args[0].equalsIgnoreCase("active")) {
 				if(args.length < 3) return wa(args[1]);
 				else return l;
 			} else return l;
@@ -636,7 +636,7 @@ public final class CommandManager {
 	}
 
 	public static List<String> reduce(List<String> l, String s) {
-		if(s.isEmpty() == true) return l;
+		if(s.isEmpty()) return l;
 		return l.stream()
 				.filter(a -> a.toLowerCase().contains(s.toLowerCase()))
 				.collect(Collectors.toList());

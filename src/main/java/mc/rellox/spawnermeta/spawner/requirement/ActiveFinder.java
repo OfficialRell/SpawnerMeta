@@ -51,7 +51,7 @@ public class ActiveFinder implements IFinder {
 		List<Location> list = new ArrayList<>();
 		
 		Block block = generator.block();
-		if(loaded(block.getWorld(), block.getX(), block.getZ(), rx + box.maximum()) == false) {
+		if(!loaded(block.getWorld(), block.getX(), block.getZ(), rx + box.maximum())) {
 			errors.found = false;
 			return list;
 		}
@@ -68,16 +68,16 @@ public class ActiveFinder implements IFinder {
 			} while(++iy <= ry);
 		} while(++ix <= rx);
 		
-		if(HookRegistry.PLOT_SQUARED.exists() == true)
+		if(HookRegistry.PLOT_SQUARED.exists())
 			HookRegistry.PLOT_SQUARED.filter(generator, list);
 		
-		errors.found = list.isEmpty() == false;
+		errors.found = !list.isEmpty();
 		return list;
 	}
 	
 	private boolean loaded(World world, int x, int z, int r) {
 		int cx = x >> 4, cz = z >> 4;
-		if(world.isChunkLoaded(cx, cz) == false) return false;
+		if(!world.isChunkLoaded(cx, cz)) return false;
 		int[] is = {
 				x + r, z,
 				x + r, z + r,
@@ -92,7 +92,7 @@ public class ActiveFinder implements IFinder {
 			ox = is[i] >> 4;
 			oz = is[i + 1] >> 4;
 			if(ox == cx && oz == cz) continue;
-			if(world.isChunkLoaded(ox, oz) == false) return false;
+			if(!world.isChunkLoaded(ox, oz)) return false;
 		}
 		return true;
 	}

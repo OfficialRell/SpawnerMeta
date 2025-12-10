@@ -83,12 +83,12 @@ public class ActiveGenerator implements IGenerator {
 		DataManager.setNewSpawner(null, spawner.block(), false);
 		
 		update();
-		this.hologram = Settings.settings.holograms_regular_enabled == true
-				&& !(Settings.settings.holograms_regular_show_natural == false
-				&& cache.natural() == true) ? IHologram.hologram(this) : null;
+		this.hologram = Settings.settings.holograms_regular_enabled
+				&& !(!Settings.settings.holograms_regular_show_natural
+				&& cache.natural()) ? IHologram.hologram(this) : null;
 		if(hologram != null) hologram.update();
 		refresh();
-		if(Settings.settings.tick_until_zero == true) ticks = 0;
+		if(Settings.settings.tick_until_zero) ticks = 0;
 	}
 	
 	@Override
@@ -118,11 +118,11 @@ public class ActiveGenerator implements IGenerator {
 	
 	@Override
 	public boolean present() {
-		if(Settings.settings.check_present_enabled == false) return true;
+		if(!Settings.settings.check_present_enabled) return true;
 		Block block = block();
 		boolean loaded = block.getWorld()
 				.isChunkLoaded(block.getX() >> 4, block.getZ() >> 4);
-		if(loaded == false) return false;
+		if(!loaded) return false;
 		return block.getType() == Material.SPAWNER;
 	}
 	
@@ -130,7 +130,7 @@ public class ActiveGenerator implements IGenerator {
 	public void remove(boolean fully) {
 		active = false;
 		clear();
-		if(fully == true) {
+		if(fully) {
 			Block block = block();
 			LocationRegistry.remove(block);
 			block.setType(Material.AIR);
@@ -140,9 +140,9 @@ public class ActiveGenerator implements IGenerator {
 	
 	@Override
 	public void update() {
-		if(active == false) return;
-		cache.cache();
+		if(!active) return;
 		
+		cache.cache();
 		retime();
 		
 		spawner.setDelay(ticks);
@@ -151,8 +151,7 @@ public class ActiveGenerator implements IGenerator {
 		if(box.radius() != r) box = IBox.sphere(spawner.block(), r);
 
 		boolean emptied = cache.type() == SpawnerType.EMPTY;
-		if(online == false || cache.enabled() == false
-				|| emptied == true) spawner.setRotating(rotating = false);
+		if(!online || !cache.enabled() || emptied) spawner.setRotating(rotating = false);
 		else spawner.setRotating(rotating);
 		check();
 	}
@@ -170,19 +169,19 @@ public class ActiveGenerator implements IGenerator {
 	
 	@Override
 	public void rewrite() {
-		if(active == false) return;
+		if(!active) return;
 		if(hologram != null) hologram.rewrite();
 		if(warning != null) warning.rewrite();
 	}
 	
 	@Override
 	public void refresh() {
-		if(active == false) return;
+		if(!active) return;
 		update();
 		valid();
 		rewrite();
 		control();
-		if(online == false) spawner.setRotating(rotating = false);
+		if(!online) spawner.setRotating(rotating = false);
 		else check();
 	}
 	
@@ -191,16 +190,16 @@ public class ActiveGenerator implements IGenerator {
 		Settings s = Settings.settings;
 		
 		UUID id;
-		if(s.owned_if_online == false
-				|| cache.natural() == true
+		if(!s.owned_if_online
+				|| cache.natural()
 				|| (id = spawner.getOwnerID()) == null
-				|| s.owned_offline_ignore.contains(id) == true) {
+				|| s.owned_offline_ignore.contains(id)) {
 			online = true;
 			return;
 		}
 		
 		Player owner = Bukkit.getPlayer(id);
-		if(owner != null && owner.isOnline() == true) {
+		if(owner != null && owner.isOnline()) {
 			online = true;
 			return;
 		}
@@ -237,14 +236,14 @@ public class ActiveGenerator implements IGenerator {
 	public void tick() {
 		SpawnerMeta.scheduler().runAtLocation(spawner.block().getLocation(), task -> {
 			if(--validation < 0) validation = Settings.settings.validation_interval - 1;
-			if(active == false) return;
+			if(!active) return;
 			holograms();
-			if(check() == false) {
+			if(!check()) {
 				tick_untill_zero();
 				return;
 			}
 			if(cache.type() == SpawnerType.EMPTY) return;
-			if(online == false || validate() == false) {
+			if(!online || !validate()) {
 				if(validation == 0) spawner.setDelay(delay);
 				return;
 			}
@@ -256,25 +255,25 @@ public class ActiveGenerator implements IGenerator {
 	}
 
 	private void tick_untill_zero() {
-		if(Settings.settings.tick_until_zero == false || ticks <= 0) return;
+		if(!Settings.settings.tick_until_zero || ticks <= 0) return;
 		ticks--;
 	}
 	
 	private void holograms() {
-		if(validation != 0 || active == false) return;
+		if(validation != 0 || !active) return;
 		if(hologram != null) hologram.update();
 		if(warning != null) warning.update();
 	}
 	
 	private boolean check() {
 		if(--checking < 0) checking = Settings.settings.checking_interval - 1;
-		if(cache.enabled() == false || cache.type() == SpawnerType.EMPTY) return false;
+		if(!cache.enabled() || cache.type() == SpawnerType.EMPTY) return false;
 		if(checking != 0) return rotating;
 		
-		boolean rotate = box.any(spawner.world().getPlayers()) == true;
+		boolean rotate = box.any(spawner.world().getPlayers());
 		
-		if(Settings.settings.redstone_power_disable_with_power == true
-				&& rotate == true)
+		if(Settings.settings.redstone_power_disable_with_power
+				&& rotate)
 			rotate = block().getBlockPower() <= 0;
 		
 		if(rotate != rotating) spawner.setRotating(rotating = rotate);
@@ -284,10 +283,10 @@ public class ActiveGenerator implements IGenerator {
 	@Override
 	public boolean spawn() {
 		Settings s = Settings.settings;
-		if(s.spawning == false || active == false) return false;
+		if(!s.spawning || !active) return false;
 		List<Location> list = finder.find();
 		validation(finder.errors());
-		if(warnings.isEmpty() == false) return false;
+		if(!warnings.isEmpty()) return false;
 		
 		int count = cache.stack() * cache.amount();
 		if(count > s.safety_limit) count = s.safety_limit;
@@ -297,10 +296,10 @@ public class ActiveGenerator implements IGenerator {
 			int r_h = s.radius_horizontal, r_v = s.radius_vertical;
 			int nearby = spawner.world().getNearbyEntities(spawner.center(), r_h, r_v, r_h,
 					entity -> entity instanceof LivingEntity
-					&& entity instanceof Player == false)
+					&& !(entity instanceof Player))
 					.size();
 			if(nearby >= limit) return false;
-			if(s.nearby_reduce == true) {
+			if(s.nearby_reduce) {
 				int left = limit - nearby;
 				if(count > left) count = left;
 			}
@@ -311,19 +310,19 @@ public class ActiveGenerator implements IGenerator {
 		if(chuck > 0) {
 			long total = Stream.of(block.getChunk().getEntities())
 					.filter(e -> e instanceof LivingEntity)
-					.filter(e -> e instanceof Player == false)
+					.filter(e -> !(e instanceof Player))
 					.count();
 			if(total >= chuck) return false;
 		}
 		
 		SpawnerPreSpawnEvent call = EventRegistry.call(new SpawnerPreSpawnEvent(this, count));
-		if(call.cancelled() == true || count < 1) return false;
+		if(call.cancelled() || count < 1) return false;
 		
 		count = call.count;
 		
-		if(call.bypass_checks == false && s.charges_enabled == true && cache.charges() <= 0) {
-			boolean ignore = s.charges_ignore_natural == true && cache.natural() == true;
-			if(ignore == true) warnings.remove(SpawnerWarning.CHARGES);
+		if(!call.bypass_checks && s.charges_enabled && cache.charges() <= 0) {
+			boolean ignore = s.charges_ignore_natural && cache.natural();
+			if(ignore) warnings.remove(SpawnerWarning.CHARGES);
 			else {
 				warn(SpawnerWarning.CHARGES);
 				return false;
@@ -332,7 +331,7 @@ public class ActiveGenerator implements IGenerator {
 		
 		boolean clear = false;
 		int spawned = -1;
-		x: if(call.bypass_checks == false && s.spawnable_enabled == true) {
+		x: if(!call.bypass_checks && s.spawnable_enabled) {
 			int spawnable = cache.spawnable();
 			if(spawnable >= 1_000_000_000) break x;
 			if(spawnable <= 0) {
@@ -355,14 +354,14 @@ public class ActiveGenerator implements IGenerator {
 
 		List<Entity> entities = SpawningManager.spawn(spawner, cache.type(), ISelector.of(list), count);
 		
-		if(entities.isEmpty() == true) return false;
+		if(entities.isEmpty()) return false;
 		
 		if(upgrades != null) upgrades.update();
 		
 		EventRegistry.call(new SpawnerPostSpawnEvent(this, entities));
 		
-		if(s.instant_kill_enabled == true) {
-			if(s.instant_kill_drop_xp == true) {
+		if(s.instant_kill_enabled) {
+			if(s.instant_kill_drop_xp) {
 				Entity killer = block.getWorld()
 						.getNearbyEntities(block.getLocation(), 32, 32, 32)
 						.stream()
@@ -379,8 +378,9 @@ public class ActiveGenerator implements IGenerator {
 			}
 		}
 
-		if(call.bypass_checks == false && s.charges_enabled == true
-				&& cache.charges() < 1_000_000_000) spawner.setCharges(cache.charges() - s.charges_consume.get(cache.type()));
+		if(!call.bypass_checks && s.charges_enabled
+				&& cache.charges() < 1_000_000_000)
+			spawner.setCharges(cache.charges() - s.charges_consume.get(cache.type()));
 
 		if(spawned >= 0) {
 			spawner.setSpawnable(spawned);
@@ -393,7 +393,7 @@ public class ActiveGenerator implements IGenerator {
 			}
 		}
 		
-		if(clear == true) {
+		if(clear) {
 			remove(true);
 			block.getWorld().spawnParticle(Particle.LAVA, Utility.center(block),
 					25, 0.1, 0.1, 0.1, 0);
@@ -413,17 +413,17 @@ public class ActiveGenerator implements IGenerator {
 		if(entity instanceof LivingEntity living) {
 			_damage.objected(living, 10_000_000, killer);
 			living.setHealth(0);
-			if(Settings.settings.instant_kill_death_animation == false)
+			if(!Settings.settings.instant_kill_death_animation)
 				living.remove();
 		}
 	}
 
 	@Override
 	public void warn(SpawnerWarning warn) {
-		if(active == false) return;
+		if(!active) return;
 		warnings.add(warn);
 		if(warning == null
-				&& Settings.settings.holograms_warning_enabled == true) {
+				&& Settings.settings.holograms_warning_enabled) {
 			warning = IHologram.warning(this, hologram != null);
 			warning.update();
 		}
@@ -432,26 +432,26 @@ public class ActiveGenerator implements IGenerator {
 	
 	@Override
 	public boolean warned(SpawnerWarning warn) {
-		return warnings.contains(warn) == true;
+		return warnings.contains(warn);
 	}
 	
 	@Override
 	public boolean warned() {
-		return warnings.isEmpty() == false;
+		return !warnings.isEmpty();
 	}
 	
 	private boolean validate() {
-		if(warnings.isEmpty() == true || rotating == false || active == false) return true;
+		if(warnings.isEmpty() || !rotating || !active) return true;
 		Block block = spawner.block();
-		if(online == false) {
+		if(!online) {
 			block.getWorld().spawnParticle(Utility.particle_redstone, Utility.center(block),
 					1, 0.5, 0.5, 0.5, 0, dust_owner);
 		}
-		if(rotating == true && Settings.settings.warning_particles == true ) {
+		if(rotating && Settings.settings.warning_particles ) {
 			block.getWorld().spawnParticle(Utility.particle_redstone, Utility.center(block),
 					1, 0.5, 0.5, 0.5, 0, dust_warn);
 		}
-		if(validation == 0 && cache.enabled() == true) valid();
+		if(validation == 0 && cache.enabled()) valid();
 		return false;
 	}
 	
@@ -466,8 +466,8 @@ public class ActiveGenerator implements IGenerator {
 		}
 		finder.find();
 		validation(finder.errors());
-		boolean empty = warnings.isEmpty() == true;
-		if(empty == true && warning != null) {
+		boolean empty = warnings.isEmpty();
+		if(empty && warning != null) {
 			warnings.clear();
 			warning.clear();
 			warning = null;
@@ -478,7 +478,7 @@ public class ActiveGenerator implements IGenerator {
 	
 	private void validation(ErrorCounter errors) {
 		warnings.clear();
-		if(errors.valid() == false) {
+		if(!errors.valid()) {
 			int a = errors.light();
 			int b = errors.lighted();
 			int c = errors.ground();
@@ -494,7 +494,7 @@ public class ActiveGenerator implements IGenerator {
 			} else if(b <= 0 && d <= 0) warn(SpawnerWarning.ENVIRONMENT);
 			
 			// safety check
-			if(warnings.isEmpty() == true) warn(SpawnerWarning.UNKNOWN);
+			if(warnings.isEmpty()) warn(SpawnerWarning.UNKNOWN);
 		}
 		var s = Settings.settings;
 
@@ -510,10 +510,10 @@ public class ActiveGenerator implements IGenerator {
 			}
 		}
 
-		if(s.redstone_power_disable_with_power == false) {
+		if(!s.redstone_power_disable_with_power) {
 			int power = s.redstone_power_required;
 			if(power > 0 && spawner.block().getBlockPower() < power
-					&& !(s.redstone_power_ignore_natural == true && cache.natural() == true))
+					&& !(s.redstone_power_ignore_natural && cache.natural()))
 				warn(SpawnerWarning.POWER);
 		}
 	}
@@ -537,7 +537,7 @@ public class ActiveGenerator implements IGenerator {
 	@Override
 	public void close() {
 		if(upgrades == null) return;
-		if(upgrades.active() == true) upgrades.close();
+		if(upgrades.active()) upgrades.close();
 		upgrades = null;
 	}
 	
@@ -554,7 +554,7 @@ public class ActiveGenerator implements IGenerator {
 	
 	@Override
 	public void unload() {
-		if(Settings.settings.reset_spawner_values == false) return;
+		if(!Settings.settings.reset_spawner_values) return;
 		spawner.reset();
 	}
 
