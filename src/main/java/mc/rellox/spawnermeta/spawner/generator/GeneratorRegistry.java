@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -48,10 +46,14 @@ public final class GeneratorRegistry implements Listener {
 		int[] t = {0};
 		final int f = Math.max(100, Settings.settings.check_present_interval / Settings.settings.ticking_interval);
 		active_task = SpawnerMeta.scheduler().runTimer(() -> {
-			SPAWNERS.values().forEach(SpawnerWorld::tick);
+			for (SpawnerWorld sw : SPAWNERS.values()) {
+				sw.tick();
+			}
 			if(++t[0] > f) {
 				t[0] = 0;
-				SPAWNERS.values().forEach(SpawnerWorld::reduce);
+				for (SpawnerWorld sw : SPAWNERS.values()) {
+					sw.reduce();
+				}
 			}
 		}, first ? 20 : 5, Settings.settings.ticking_interval);
 		offline();
@@ -63,7 +65,9 @@ public final class GeneratorRegistry implements Listener {
 		if(Settings.settings.owned_offline_time <= 0) return;
 		
 		offline_task = SpawnerMeta.scheduler().runTimer(() -> {
-			SPAWNERS.values().forEach(SpawnerWorld::control);
+			for (SpawnerWorld sw : SPAWNERS.values()) {
+				sw.control();
+			}
 		}, 20 * 60, 20 * 60);
 	}
 	
@@ -71,18 +75,21 @@ public final class GeneratorRegistry implements Listener {
 	private static void control() {
 		try {
 			SpawnerMeta.scheduler().runLater(() -> {
-				SPAWNERS.values().forEach(SpawnerWorld::control);
+				for (SpawnerWorld sw : SPAWNERS.values()) {
+					sw.control();
+				}
 			}, 5);
 		} catch (Exception e) {}
 	}
 	
 	public static void load() {
 		try {
-			Bukkit.getWorlds()
-			.stream()
-			.map(GeneratorRegistry::get)
-			.filter(Objects::nonNull)
-			.forEach(SpawnerWorld::load);
+			for (World world : Bukkit.getWorlds()) {
+				SpawnerWorld sw = get(world);
+				if (sw != null) {
+					sw.load();
+				}
+			}
 		} catch (Exception e) {
 			RF.debug(e);
 		}
@@ -98,10 +105,13 @@ public final class GeneratorRegistry implements Listener {
 	}
 	
 	public static int active(World world) {
-		if(world == null) return SPAWNERS.values()
-				.stream()
-				.mapToInt(SpawnerWorld::active)
-				.sum();
+		if(world == null) {
+			int total = 0;
+			for (SpawnerWorld sw : SPAWNERS.values()) {
+				total += sw.active();
+			}
+			return total;
+		}
 		if(Settings.inactive(world) == true) return 0;
 		return get(world).active();
 	}
@@ -134,9 +144,13 @@ public final class GeneratorRegistry implements Listener {
 			return sw == null ? new ArrayList<>()
 					: new ArrayList<>(sw.spawners.values());
 		}
-		return SPAWNERS.values().stream()
-				.flatMap(SpawnerWorld::stream)
-				.collect(Collectors.toList());
+		List<IGenerator> result = new ArrayList<>();
+		for (SpawnerWorld sw : SPAWNERS.values()) {
+			for (IGenerator generator : sw.spawners.values()) {
+				result.add(generator);
+			}
+		}
+		return result;
 	}
 	
 	public static void update(Block block) {
@@ -153,7 +167,9 @@ public final class GeneratorRegistry implements Listener {
 	}
 	
 	public static void update() {
-		SPAWNERS.values().forEach(SpawnerWorld::update);
+		for (SpawnerWorld sw : SPAWNERS.values()) {
+			sw.update();
+		}
 	}
 	
 	public static void remove(Block block) {
@@ -174,14 +190,17 @@ public final class GeneratorRegistry implements Listener {
 			if(Settings.inactive(world) == true) return 0;
 			return get(world).remove(fully, filter);
 		}
-		return SPAWNERS.values()
-				.stream()
-				.mapToInt(sw -> sw.remove(fully, filter))
-				.sum();
+		int total = 0;
+		for (SpawnerWorld sw : SPAWNERS.values()) {
+			total += sw.remove(fully, filter);
+		}
+		return total;
 	}
 	
 	public static void clear() {
-		SPAWNERS.values().forEach(SpawnerWorld::clear);
+		for (SpawnerWorld sw : SPAWNERS.values()) {
+			sw.clear();
+		}
 		SPAWNERS.clear();
 	}
 	
