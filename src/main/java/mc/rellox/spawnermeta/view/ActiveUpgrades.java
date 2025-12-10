@@ -115,7 +115,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		players.forEach(Player::closeInventory);
 		players.clear();
 		
-		if(unregister == true) {
+		if(unregister) {
 			HandlerList.unregisterAll(this);
 			generator.close();
 		}
@@ -123,10 +123,10 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	
 	@EventHandler
 	private void onClick(InventoryClickEvent event) {
-		if(event.getInventory().equals(v) == true) event.setCancelled(true);
+		if(event.getInventory().equals(v)) event.setCancelled(true);
 		Inventory clicked = event.getClickedInventory();
 		Player player = (Player) event.getWhoClicked();
-		if(clicked == null || clicked.equals(v) == false || players.contains(player) == false) return;
+		if(clicked == null || !clicked.equals(v) || !players.contains(player)) return;
 		Messagable m = new Messagable(player);
 		try {
 			long now = System.currentTimeMillis();
@@ -135,21 +135,21 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			
 			int o = event.getSlot();
 			
-			if(layout.is(o, SlotField.upgrade_stats) == true) {
+			if(layout.is(o, SlotField.upgrade_stats)) {
 				switch0(player);
 				return;
 			}
 			
-			if(layout.is(o, SlotField.upgrade_charges) == true){
+			if(layout.is(o, SlotField.upgrade_charges)){
 				charge0(event, player, m, o);
 				return;
 			}
 			
 			UpgradeType upgrade;
 			
-			if(layout.is(o, SlotField.upgrade_range) == true) upgrade = UpgradeType.RANGE;
-			else if(layout.is(o, SlotField.upgrade_delay) == true) upgrade = UpgradeType.DELAY;
-			else if(layout.is(o, SlotField.upgrade_amount) == true) upgrade = UpgradeType.AMOUNT;
+			if(layout.is(o, SlotField.upgrade_range)) upgrade = UpgradeType.RANGE;
+			else if(layout.is(o, SlotField.upgrade_delay)) upgrade = UpgradeType.DELAY;
+			else if(layout.is(o, SlotField.upgrade_amount)) upgrade = UpgradeType.AMOUNT;
 			else return;
 			
 			upgrade0(player, m, upgrade);
@@ -161,29 +161,29 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 
 	private void upgrade0(Player player, Messagable m, UpgradeType upgrade) {
 		int i = upgrade.ordinal();
-		if(player.hasPermission("spawnermeta.upgrades.buy") == false) {
+		if(!player.hasPermission("spawnermeta.upgrades.buy")) {
 			m.send(Language.list("Spawners.upgrades.permission.purchase"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
-		if(allowed(i) == false) {
+		if(!allowed(i)) {
 			m.send(Language.list("Upgrade-GUI.disabled-upgrade"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
-		if(Settings.settings.natural_can_upgrade == false && cache.natural() == true) {
-			if(player.hasPermission("spawnermeta.ownership.bypass.upgrading") == false) {
+		if(!Settings.settings.natural_can_upgrade && cache.natural()) {
+			if(!player.hasPermission("spawnermeta.ownership.bypass.upgrading")) {
 				m.send(Language.list("Spawners.natural.upgrading.warning"));
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 				return;
 			}
 		}
-		x: if(Settings.settings.owned_can_upgrade == false) {
+		x: if(!Settings.settings.owned_can_upgrade) {
 			UUID owner = generator.spawner().getOwnerID();
-			if(owner != null && owner.equals(player.getUniqueId()) == false) {
-				if(player.hasPermission("spawnermeta.ownership.bypass.upgrading") == false) {
-					if(Settings.settings.trusted_can_upgrade == true
-							&& LocationRegistry.trusted(owner, player) == true) break x;
+			if(owner != null && !owner.equals(player.getUniqueId())) {
+				if(!player.hasPermission("spawnermeta.ownership.bypass.upgrading")) {
+					if(Settings.settings.trusted_can_upgrade
+							&& LocationRegistry.trusted(owner, player)) break x;
 					m.send(Language.list("Spawners.ownership.upgrading.warning"));
 					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 					return;
@@ -199,14 +199,14 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			SpawnerUpgradeEvent call = EventRegistry.call(
 					new SpawnerUpgradeEvent(player, generator, upgrade, ls[i] + 1, ms[i], price));
 			
-			if(price.has(player) == false) {
+			if(!price.has(player)) {
 				price = call.getUnsafePrice();
 				m.send(Language.list("Prices.insufficient", 
 						"insufficient", price.insufficient(), "price", price.requires(player)));
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 				return;
 			}
-			if(call.cancelled() == true || call.withdraw(player) == false) return;
+			if(call.cancelled() || !call.withdraw(player)) return;
 			
 			int u = call.upgrade_level;
 			ls[i] = u < 1 ? 1 : u > ms[i] ? ms[i] : u;
@@ -224,28 +224,28 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	}
 
 	private void charge0(InventoryClickEvent event, Player player, Messagable m, int o) {
-		if(Settings.settings.charges_enabled == true
-				&& layout.is(o, SlotField.upgrade_charges) == true) {
-			if(Settings.settings.charges_ignore_natural == true
-					&& cache.natural() == true) return;
+		if(Settings.settings.charges_enabled
+				&& layout.is(o, SlotField.upgrade_charges)) {
+			if(Settings.settings.charges_ignore_natural
+					&& cache.natural()) return;
 			ClickType ct = event.getClick();
 			SpawnerType type = cache.type();
 			
 			int r = Settings.settings.charges_price(type, generator);
 			int a;
-			if(ct.isShiftClick() == true) {
+			if(ct.isShiftClick()) {
 				a = lowestCharges() / r;
 				if(a <= 0) return;
-			} else if(ct.isLeftClick() == true) {
+			} else if(ct.isLeftClick()) {
 				a = Settings.settings.charges_buy_first;
-			} else if(ct.isRightClick() == true) {
+			} else if(ct.isRightClick()) {
 				a = Settings.settings.charges_buy_second;
 			} else return;
 			Price price = Price.of(Group.charges, r * a);
 			
 			SpawnerChargeEvent call = EventRegistry.call(new SpawnerChargeEvent(player, generator, price, a));
-			if(call.cancelled() == true) return;
-			if(call.withdraw(player) == false) return;
+			if(call.cancelled()) return;
+			if(!call.withdraw(player)) return;
 			
 			int charges = cache.charges() + call.charges;
 			spawner.setCharges(charges);
@@ -256,10 +256,10 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	}
 
 	private void switch0(Player player) {
-		if(Settings.settings.spawner_switching == false) return;
+		if(!Settings.settings.spawner_switching) return;
 		
 		SpawnerSwitchEvent call = EventRegistry.call(new SpawnerSwitchEvent(player, generator, !enabled));
-		if(call.cancelled() == true) return;
+		if(call.cancelled()) return;
 		
 		spawner.setEnabled(enabled = !enabled);
 		player.playSound(player.getEyeLocation(), enabled
@@ -267,15 +267,22 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		update();
 	}
 	
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	private void onClose(InventoryCloseEvent event) {
-		if(active == false) return;
+		if(!active) return;
 		
 		Player player = (Player) event.getPlayer();
 		players.remove(player);
 		
-		if(players.isEmpty() == true) close();
+		if(players.isEmpty()) close();
 		else update();
+		
+		SpawnerMeta.scheduler().runAtEntityLater(player, () -> {
+			if(player.getOpenInventory().getTopInventory().equals(v)) {
+				if(!players.contains(player)) player.closeInventory();
+			}
+		}, 1);
 	}
 
 	@Override
@@ -287,9 +294,9 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		layout.fill(v, upgrade(0, SlotField.upgrade_range), SlotField.upgrade_range);
 		layout.fill(v, upgrade(1, SlotField.upgrade_delay), SlotField.upgrade_delay);
 		layout.fill(v, upgrade(2, SlotField.upgrade_amount), SlotField.upgrade_amount);
-		if(Settings.settings.charges_enabled == true) {
-			if(Settings.settings.charges_ignore_natural == true
-					&& cache.natural() == true) return;
+		if(Settings.settings.charges_enabled) {
+			if(Settings.settings.charges_ignore_natural
+					&& cache.natural()) return;
 			layout.fill(v, charges(), SlotField.upgrade_charges);
 		}
 	}
@@ -347,7 +354,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	
 	private ItemStack upgrade(int i, SlotField field) {
 		ISlot slot = layout.get(field);
-		return allowed(i) == true ? upgrade(slot, i) : denied(slot, i);
+		return allowed(i) ? upgrade(slot, i) : denied(slot, i);
 	}
 	
 	private ItemStack denied(ISlot slot, int i) {
@@ -396,12 +403,12 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 
 		order.named(name);
 
-		if(cache.empty() == true) {
+		if(cache.empty()) {
 			order.submit("EMPTY", () -> Language.list("Upgrade-GUI.items.stats.empty"));
 		}
-		if(Settings.settings.spawner_switching == true) {
+		if(Settings.settings.spawner_switching) {
 			order.submit("SWITCHING", () -> {
-				return enabled == true ? Language.list("Upgrade-GUI.items.stats.enabled")
+				return enabled ? Language.list("Upgrade-GUI.items.stats.enabled")
 						: Language.list("Upgrade-GUI.items.stats.disabled");
 			});
 		}
@@ -411,16 +418,16 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 					"x", c(l[0]), "y", l[1], "z", c(l[2]));
 		});
 		int stack = cache.stack();
-		if(Settings.settings.stacking_enabled == true) {
+		if(Settings.settings.stacking_enabled) {
 			order.submit("STACK", () -> {
-				if(Settings.settings.stacking_ignore_limit == true)
+				if(Settings.settings.stacking_ignore_limit)
 					return Language.list("Upgrade-GUI.items.stats.stacking.infinite",
 							"stack", stack);
 				return Language.list("Upgrade-GUI.items.stats.stacking.finite",
 						"stack", stack, "limit", Settings.settings.stacking_limit(null, generator));
 			});
 		}
-		if(Settings.settings.spawnable_enabled == true) {
+		if(Settings.settings.spawnable_enabled) {
 			int spawnable = cache.spawnable();
 			if(spawnable < 1_000_000_000) {
 				order.submit("SPAWNABLE", () -> {
@@ -429,7 +436,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 				});
 			}
 		}
-		if(generator.warned() == true) {
+		if(generator.warned()) {
 			order.submit("WARNING", () -> {
 				List<Content> list = new ArrayList<>();
 				long count = Stream.of(SpawnerWarning.values())
@@ -446,7 +453,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			});
 		}
 		
-		if(generator.online() == false) {
+		if(!generator.online()) {
 			order.submit("OFFLINE", () -> Language.list("Upgrade-GUI.items.stats.owner-offline"));
 		}
 		
@@ -477,11 +484,11 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		ItemStack item = slot.toItem(false);
 		ItemMeta meta = item.getItemMeta();
 		int charges = cache.charges();
-		boolean b = charges >= 1_000_000_000;
-		String charges_text = b ? Text.infinity : "" + charges;
+		boolean infinite = charges >= 1_000_000_000;
+		String charges_text = infinite ? Text.infinity : "" + charges;
 		meta.setDisplayName(Language.get("Upgrade-GUI.items.charges.name",
 				"charges", charges_text).text());
-		if(b == false) {
+		if(!infinite) {
 			List<String> lore = new ArrayList<>();
 			lore.add("");
 			int f0 = Settings.settings.charges_buy_first;
