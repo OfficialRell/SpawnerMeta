@@ -11,7 +11,11 @@ import org.bukkit.block.data.Waterlogged;
 public interface IMaterial {
 	
 	static IMaterial empty = block -> true;
-	static IMaterial air = Block::isEmpty;
+	static IMaterial air = block -> {
+        Material type = block.getType();
+        return type.getHardness() <= 0
+                || type.isAir();
+    };
 	static IMaterial solid = BlockSolid::isSolid;
 	static IMaterial water = block -> {
 		Material type = block.getType();
