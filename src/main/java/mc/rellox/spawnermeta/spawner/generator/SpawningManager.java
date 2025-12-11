@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import mc.rellox.spawnermeta.utility.adapter.BlockSnapshot;
+import mc.rellox.spawnermeta.utility.adapter.Platform;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.attribute.Attributable;
@@ -229,7 +229,7 @@ public final class SpawningManager {
 		public final ISpawner spawner;
 
 		public SpawnerMetaSpawnEvent(Entity spawnee, ISpawner spawner) {
-			super(spawnee, (CreatureSpawner) BlockSnapshot.getBlockState(spawner.block()));
+			super(spawnee, (CreatureSpawner) Platform.ADAPTER.getState(spawner.block()));
 			this.spawner = spawner;
 		}
 		

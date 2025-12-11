@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.utility.adapter.ChunkTileEntities;
+import mc.rellox.spawnermeta.utility.adapter.Platform;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -42,7 +42,7 @@ public class SpawnerWorld {
     }
 
     public void load(Chunk chunk) {
-		BlockState[] tileEntities = ChunkTileEntities.getTileEntities(chunk);
+		BlockState[] tileEntities = Platform.ADAPTER.getTileEntities(chunk);
 		for (BlockState state : tileEntities) {
 			if (state instanceof CreatureSpawner) {
 				Block block = state.getBlock();
