@@ -2,7 +2,10 @@ package mc.rellox.spawnermeta.utility.region;
 
 import java.util.function.IntSupplier;
 
+import mc.rellox.spawnermeta.api.spawner.requirement.ILight;
+import mc.rellox.spawnermeta.api.spawner.requirement.IMaterial;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 
 import mc.rellox.spawnermeta.api.spawner.requirement.ErrorCounter.ErrorSubmit;
@@ -75,12 +78,12 @@ public abstract class EntityBox {
 
 		@Override
 		public Location check(Block block, IRequirements requirements, ErrorSubmit submit) {
-			boolean l = requirements.light().is(block) == false;
-			if(requirements.environment().is(block) == false) {
+			boolean l = !requirements.light().is(block);
+			if(!requirements.environment().is(block)) {
 				submit.environment();
-				if(l == true) submit.light();
-			} else if(l == true) submit.lighted();
-			if(requirements.ground().is(block.getRelative(0, -1, 0)) == false) submit.ground();
+				if(l) submit.light();
+			} else if(l) submit.lighted();
+			if(!requirements.ground().is(block.getRelative(0, -1, 0))) submit.ground();
 			submit.submit();
 			return submit.valid() ? block.getLocation().add(0.5, 0, 0.5) : null;
 		}
@@ -95,18 +98,18 @@ public abstract class EntityBox {
 
 		@Override
 		public Location check(Block block, IRequirements requirements, ErrorSubmit submit) {
-			if(requirements.ground().is(block.getRelative(0, -1, 0)) == false) submit.ground();
+			if(!requirements.ground().is(block.getRelative(0, -1, 0))) submit.ground();
 			boolean e = false, l = false;
 			int i = 0;
 			do {
 				Block relative = block.getRelative(0, i, 0);
-				if(requirements.environment().is(relative) == false) e = true;
-				if(requirements.light().is(relative) == false) l = true;
+				if(!requirements.environment().is(relative)) e = true;
+				if(!requirements.light().is(relative)) l = true;
 			} while(++i < y);
-			if(e == true) {
+			if(e) {
 				submit.environment();
-				if(l == true) submit.light();
-			} else if(l == true) submit.lighted();
+				if(l) submit.light();
+			} else if(l) submit.lighted();
 			submit.submit();
 			return submit.valid() ? block.getLocation().add(0.5, 0, 0.5) : null;
 		}
@@ -119,31 +122,81 @@ public abstract class EntityBox {
 			super(x, y, z);
 		}
 
-		@Override
-		public Location check(Block block, IRequirements requirements, ErrorSubmit submit) {
-			boolean e = false, l = false;
-			int ix = 0, iy, iz;
-			Block b;
-			do {
-				iy = 0;
-				do {
-					iz = 0;
-					do {
-						b = block.getRelative(ix, iy, iz);
-						if(iy == 0 && requirements.ground().is(b.getRelative(0, -1, 0)) == false) submit.ground();
-						if(requirements.environment().is(b) == false) e = true;
-						if(requirements.light().is(b) == false) l = true;
-					} while(++iz < z);
-				} while(++iy < y);
-			} while(++ix < x);
-			if(e == true) {
-				submit.environment();
-				if(l == true) submit.light();
-			} else if(l == true) submit.lighted();
-			submit.submit();
-			return submit.valid() ? block.getLocation().add(x * 0.5, 0, z * 0.5) : null;
-		}
-		
-	}
+        @Override
+        public Location check(Block block, IRequirements requirements, ErrorSubmit submit) {
+            final ILight lightReq = requirements.light();
+            final IMaterial groundReq = requirements.ground();
+            final IMaterial envReq = requirements.environment();
+
+            final boolean noLightReq = (lightReq == ILight.empty);
+            final boolean noGroundReq = (groundReq == IMaterial.empty);
+            final boolean noEnvReq = (envReq == IMaterial.empty);
+
+            // Nothing to check at all
+            if (noLightReq && noGroundReq && noEnvReq) {
+                return block.getLocation().add(x * 0.5, 0, z * 0.5);
+            }
+
+            boolean groundFail = false;
+            boolean envFail = false;
+            boolean lightFail = false;
+
+            final World world = block.getWorld();
+            final int baseX = block.getX();
+            final int baseY = block.getY();
+            final int baseZ = block.getZ();
+
+            for (int ix = 0; ix < x; ix++) {
+                for (int iy = 0; iy < y; iy++) {
+                    for (int iz = 0; iz < z; iz++) {
+
+                        Block b = world.getBlockAt(baseX + ix, baseY + iy, baseZ + iz);
+
+                        // Ground check (bottom layer only)
+                        if (!noGroundReq && iy == 0 && !groundFail) {
+                            Block below = world.getBlockAt(b.getX(), b.getY() - 1, b.getZ());
+                            if (!groundReq.is(below)) {
+                                groundFail = true;
+                            }
+                        }
+
+                        // Environment check
+                        if (!noEnvReq && !envFail && !envReq.is(b)) {
+                            envFail = true;
+                        }
+
+                        // Light check
+                        if (!noLightReq && !lightFail && !lightReq.is(b)) {
+                            lightFail = true;
+                        }
+
+                        // Safe early exit
+                        if (groundFail && envFail && lightFail && iy > 0) {
+                            ix = x;
+                            iy = y;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Submit final errors
+            if (groundFail) submit.ground();
+
+            if (envFail) {
+                submit.environment();
+                if (lightFail) submit.light();
+            } else if (lightFail) {
+                submit.lighted();
+            }
+
+            submit.submit();
+
+            return submit.valid()
+                    ? block.getLocation().add(x * 0.5, 0, z * 0.5)
+                    : null;
+        }
+
+    }
 
 }
