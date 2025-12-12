@@ -170,10 +170,7 @@ public final class SpawningManager {
 					}
 				}
 			}
-			
-			Object o = RF.direct(entity, "getHandle");
-			RF.access(o, "spawnedViaMobSpawner", boolean.class, false).set(true);
-			RF.access(o, "spawnReason", SpawnReason.class, false).set(SpawnReason.SPAWNER);
+
 			if(s.send_spawning_event == true) {
 				SpawnerMetaSpawnEvent event = new SpawnerMetaSpawnEvent(entity, spawner);
 				entity.getServer().getPluginManager().callEvent(event);
@@ -203,9 +200,6 @@ public final class SpawningManager {
 					mob.setAware(false);
 				}
 			}
-			Object o = RF.direct(entity, "getHandle");
-			RF.access(o, "spawnedViaMobSpawner", boolean.class, false).set(true);
-			RF.access(o, "spawnReason", SpawnReason.class, false).set(SpawnReason.SPAWNER);
 		} catch (Exception e) {
 			RF.debug(e);
 		}
@@ -235,7 +229,6 @@ public final class SpawningManager {
     private static boolean isSpawnerNerfed(World world) {
         return NERF_SPAWNER_CACHE.computeIfAbsent(world.getUID(), id -> {
             try {
-                SpawnerMeta.instance().getLogger().info("Computing setting for world: " + world.getName());
                 Object handle = RF.direct(world, "getHandle");
                 Object spigotConfig = RF.fetch(handle, "spigotConfig");
                 return RF.access(spigotConfig, "nerfSpawnerMobs")
