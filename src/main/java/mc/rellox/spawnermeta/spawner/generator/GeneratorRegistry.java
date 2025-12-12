@@ -206,8 +206,11 @@ public final class GeneratorRegistry implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGH)
 	private void onWorldLoad(WorldLoadEvent event) {
-		try {
-			World world = event.getWorld();
+        World world = event.getWorld();
+
+        SpawningManager.removeWorldFromCache(world);
+
+        try {
 			if(Settings.inactive(world)) return;
 			
 			SpawnerWorld sw = new SpawnerWorld(world);
@@ -220,8 +223,11 @@ public final class GeneratorRegistry implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGH)
 	private void onWorldUnload(WorldUnloadEvent event) {
-		try {
-			World world = event.getWorld();
+        World world = event.getWorld();
+
+        SpawningManager.removeWorldFromCache(world);
+
+        try {
 			if(Settings.inactive(world)) return;
 			
 			SPAWNERS.remove(world);
