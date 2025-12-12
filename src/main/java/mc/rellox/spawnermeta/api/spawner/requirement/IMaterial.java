@@ -13,7 +13,7 @@ public interface IMaterial {
 	static IMaterial empty = block -> true;
 	static IMaterial air = block -> {
 		Material type = block.getType();
-		return type.isAir() || (!type.isSolid() && type != Material.WATER && type != Material.LAVA);
+		return type.isAir() || (!Platform.ADAPTER.isSolid(block) && type != Material.WATER && type != Material.LAVA);
 	};
 	static IMaterial solid = Platform.ADAPTER::isSolid;
 	static IMaterial water = block -> {
