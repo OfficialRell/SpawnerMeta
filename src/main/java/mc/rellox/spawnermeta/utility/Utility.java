@@ -36,8 +36,22 @@ public final class Utility {
 	public static boolean op(Player player) {
 		return player.isOp() == true && player.getGameMode() == GameMode.CREATIVE;
 	}
-	
-	// Experience
+
+    private static final EntityType ITEM_ENTITY;
+
+    static {
+        EntityType found;
+        try {
+            // Newer versions (1.20.6+)
+            found = EntityType.valueOf("ITEM");
+        } catch (IllegalArgumentException ex) {
+            // Older versions
+            found = EntityType.valueOf("DROPPED_ITEM");
+        }
+        ITEM_ENTITY = found;
+    }
+
+    // Experience
 
 	public static void changeExp(Player player, int exp) {
 		player.giveExp(exp);
@@ -250,10 +264,10 @@ public final class Utility {
 				return false;
 		return true;
 	}
-	
-	public static boolean isItem(EntityType type) {
-		return type == RF.enumerate(EntityType.class, "DROPPED_ITEM", "ITEM");
-	}
+
+    public static boolean isItem(EntityType type) {
+        return type == ITEM_ENTITY;
+    }
 	
 	// Types
 	

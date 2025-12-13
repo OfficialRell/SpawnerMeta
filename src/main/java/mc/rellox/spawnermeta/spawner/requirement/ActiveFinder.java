@@ -55,20 +55,21 @@ public class ActiveFinder implements IFinder {
 			errors.found = false;
 			return list;
 		}
-		Location l;
-		int ix = -rx, iy, iz;
-		do {
-			iy = -ry;
-			do {
-				iz = -rx;
-				do {
-					if((l = box.check(block.getRelative(ix, iy, iz),
-							requirements, errors.submit())) != null) list.add(l);
-				} while(++iz <= rx);
-			} while(++iy <= ry);
-		} while(++ix <= rx);
-		
-		if(HookRegistry.PLOT_SQUARED.exists())
+        for (int ix = -rx; ix <= rx; ix++) {
+            for (int iy = -ry; iy <= ry; iy++) {
+                for (int iz = -rx; iz <= rx; iz++) {
+
+                    Location l = box.check(block.getRelative(ix, iy, iz),
+                            requirements, errors.submit());
+
+                    if (l != null) {
+                        list.add(l);
+                    }
+                }
+            }
+        }
+
+        if(HookRegistry.PLOT_SQUARED.exists())
 			HookRegistry.PLOT_SQUARED.filter(generator, list);
 		
 		errors.found = !list.isEmpty();

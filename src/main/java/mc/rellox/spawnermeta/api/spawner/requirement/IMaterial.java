@@ -1,11 +1,10 @@
 package mc.rellox.spawnermeta.api.spawner.requirement;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import mc.rellox.spawnermeta.utility.adapter.Platform;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Waterlogged;
 
@@ -14,23 +13,26 @@ public interface IMaterial {
 	static IMaterial empty = block -> true;
 	static IMaterial air = block -> {
 		Material type = block.getType();
-		return type.isAir() || (!type.isSolid() && type != Material.WATER && type != Material.LAVA);
+		return type.isAir() || (!Platform.ADAPTER.isSolid(block) && type != Material.WATER && type != Material.LAVA);
 	};
-	static IMaterial solid = block -> block.getType().isSolid();
+	static IMaterial solid = Platform.ADAPTER::isSolid;
 	static IMaterial water = block -> {
-		var type = block.getType();
+		Material type = block.getType();
 		if(type == Material.WATER) return true;
 		if(type.getHardness() > 0) return false;
 		if(block.getBlockData() instanceof Waterlogged) return true;
 		return type == Material.SEAGRASS || type == Material.TALL_SEAGRASS
 				|| type == Material.KELP_PLANT;
 	};
-	static IMaterial slab = block -> block.getType().name().endsWith("_SLAB");
-	static IMaterial stairs = block -> block.getType().name().endsWith("_STAIRS");
-	static IMaterial fence = block -> block.getType().name().endsWith("_FENCE")
-			|| block.getType().name().endsWith("_FENCE_GATE")
-			|| block.getType().name().endsWith("_WALL");
-	
+	static IMaterial slab = block -> Tag.SLABS.isTagged(block.getType());
+	static IMaterial stairs = block -> Tag.STAIRS.isTagged(block.getType());
+	static IMaterial fence = block -> {
+        Material type = block.getType();
+        return Tag.FENCES.isTagged(type)
+                || Tag.FENCE_GATES.isTagged(type)
+                || Tag.WALLS.isTagged(type);
+    };
+
 	static IMaterial is(Material m) {
 		return new IMaterial() {
 			final Material material = m;

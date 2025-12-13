@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import mc.rellox.spawnermeta.SpawnerMeta;
+import mc.rellox.spawnermeta.utility.adapter.Platform;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -40,7 +42,7 @@ public class SpawnerWorld {
     }
 
     public void load(Chunk chunk) {
-		BlockState[] tileEntities = chunk.getTileEntities();
+		BlockState[] tileEntities = Platform.ADAPTER.getTileEntities(chunk);
 		for (BlockState state : tileEntities) {
 			if (state instanceof CreatureSpawner) {
 				Block block = state.getBlock();
@@ -52,13 +54,16 @@ public class SpawnerWorld {
 			}
 		}
 	}
-	
-	public void unload(Chunk chunk) {
-		for (IGenerator generator : spawners.values()) {
-			if (generator.in(chunk)) {
-				generator.remove(false);
-			}
-		}
+
+    public void unload(World world, Chunk chunk) {
+        final int x = chunk.getX();
+        final int z = chunk.getZ();
+
+        for (IGenerator generator : spawners.values()) {
+            if (generator.in(world, x, z)) {
+                generator.remove(false);
+            }
+        }
 	}
 
 	public void clear() {
@@ -91,9 +96,15 @@ public class SpawnerWorld {
 			}
 			queue.clear();
 		}
-		for (IGenerator generator : spawners.values()) {
-			generator.tick();
-		}
+        if (SpawnerMeta.foliaLib().isFolia()) {
+            for (IGenerator generator : spawners.values()) {
+                generator.tickFolia();
+            }
+        } else {
+            for (IGenerator generator : spawners.values()) {
+                generator.tick();
+            }
+        }
 	}
 
 	public void reduce() {

@@ -2,10 +2,16 @@ package mc.rellox.spawnermeta.spawner.generator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
+import mc.rellox.spawnermeta.SpawnerMeta;
+import mc.rellox.spawnermeta.utility.adapter.Platform;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
@@ -39,8 +45,10 @@ import mc.rellox.spawnermeta.version.Version.VersionType;
 public final class SpawningManager {
 	
 	public static void initialize() {}
-	
-	public static List<Entity> spawn(ISpawner spawner, SpawnerType type, ISelector selector, int count) {
+
+    private static final Map<UUID, Boolean> NERF_SPAWNER_CACHE = new ConcurrentHashMap<>();
+
+    public static List<Entity> spawn(ISpawner spawner, SpawnerType type, ISelector selector, int count) {
 		List<Entity> entities;
 		try {
 			Settings s = Settings.settings;
@@ -144,13 +152,8 @@ public final class SpawningManager {
 				if(at != null) at.setBaseValue(0);
 			}
 			if(s.check_spawner_nerf == true && entity instanceof Mob mob) {
-				Object w = RF.direct(mob.getWorld(), "getHandle");
-				Object f = RF.fetch(w, "spigotConfig");
-				if(RF.access(f, "nerfSpawnerMobs")
-						.as(boolean.class)
-						.get(false) == true) {
-					Object a = RF.direct(mob, "getHandle");
-					RF.access(a, "aware", boolean.class).set(false);
+				if(isSpawnerNerfed(mob.getWorld())) {
+					mob.setAware(false);
 				}
 			}
 			if(s.spawn_babies == false && entity instanceof Ageable ageable) ageable.setAdult();
@@ -167,10 +170,7 @@ public final class SpawningManager {
 					}
 				}
 			}
-			
-			Object o = RF.direct(entity, "getHandle");
-			RF.access(o, "spawnedViaMobSpawner", boolean.class, false).set(true);
-			RF.access(o, "spawnReason", SpawnReason.class, false).set(SpawnReason.SPAWNER);
+
 			if(s.send_spawning_event == true) {
 				SpawnerMetaSpawnEvent event = new SpawnerMetaSpawnEvent(entity, spawner);
 				entity.getServer().getPluginManager().callEvent(event);
@@ -196,18 +196,10 @@ public final class SpawningManager {
 				if(at != null) at.setBaseValue(0);
 			}
 			if(s.check_spawner_nerf == true && entity instanceof Mob mob) {
-				Object w = RF.direct(mob.getWorld(), "getHandle");
-				Object f = RF.fetch(w, "spigotConfig");
-				if(RF.access(f, "nerfSpawnerMobs")
-						.as(boolean.class)
-						.get(false) == true) {
-					Object a = RF.direct(mob, "getHandle");
-					RF.access(a, "aware").as(boolean.class).set(false);
+				if (isSpawnerNerfed(mob.getWorld())) {
+					mob.setAware(false);
 				}
 			}
-			Object o = RF.direct(entity, "getHandle");
-			RF.access(o, "spawnedViaMobSpawner", boolean.class, false).set(true);
-			RF.access(o, "spawnReason", SpawnReason.class, false).set(SpawnReason.SPAWNER);
 		} catch (Exception e) {
 			RF.debug(e);
 		}
@@ -228,10 +220,29 @@ public final class SpawningManager {
 		public final ISpawner spawner;
 
 		public SpawnerMetaSpawnEvent(Entity spawnee, ISpawner spawner) {
-			super(spawnee, (CreatureSpawner) spawner.block().getState());
+			super(spawnee, (CreatureSpawner) Platform.ADAPTER.getState(spawner.block()));
 			this.spawner = spawner;
 		}
 		
 	}
+
+    private static boolean isSpawnerNerfed(World world) {
+        return NERF_SPAWNER_CACHE.computeIfAbsent(world.getUID(), id -> {
+            try {
+                Object handle = RF.direct(world, "getHandle");
+                Object spigotConfig = RF.fetch(handle, "spigotConfig");
+                return RF.access(spigotConfig, "nerfSpawnerMobs")
+                        .as(boolean.class)
+                        .get(false);
+            } catch (Exception e) {
+                RF.debug(e);
+                return false;
+            }
+        });
+    }
+
+    public static void removeWorldFromCache(World world) {
+        NERF_SPAWNER_CACHE.remove(world.getUID());
+    }
 
 }
