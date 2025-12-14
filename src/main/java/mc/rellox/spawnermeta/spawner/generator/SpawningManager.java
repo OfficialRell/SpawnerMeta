@@ -57,7 +57,7 @@ public final class SpawningManager {
 			
 			final Consumer<Entity> modifier, m = modifier(spawner);
 			
-			if(r == true) {
+			if(r) {
 				modifier = e -> {
 					m.accept(e);
 					if(e instanceof Slime slime)
@@ -71,16 +71,16 @@ public final class SpawningManager {
 			} else modifier = m;
 
 			Class<?> clazz = type.entity().getEntityClass();
-			if(LivingEntity.class.isAssignableFrom(clazz) == true
-					&& HookRegistry.WILD_STACKER.exists() == true
-					&& HookRegistry.WILD_STACKER.stacking(type, spawner.center()) == true) {
+			if(LivingEntity.class.isAssignableFrom(clazz)
+					&& HookRegistry.WILD_STACKER.exists()
+					&& HookRegistry.WILD_STACKER.stacking(type, spawner.center())) {
 				entities = HookRegistry.WILD_STACKER.combine(spawner, type, selector, count);
 			} else {
 				entities = new ArrayList<>(count);
 				for(int i = 0; i < count; i++) {
 					Location at = selector.get();
 					Entity entity = invoker.invoke(at, clazz, modifier, s.spawn_reason);
-					if(entity == null || entity.isValid() == false) continue;
+					if(entity == null || !entity.isValid()) continue;
 					entities.add(entity);
 					particle(at);
 				}
@@ -139,55 +139,59 @@ public final class SpawningManager {
 		try {
 			if(entity instanceof EnderDragon dragon) dragon.setPhase(Phase.CIRCLING);
 			Settings s = Settings.settings;
-			if(s.entity_movement == false
+			if(!s.entity_movement
 					&& entity instanceof Attributable le) {
 				AttributeInstance at = le.getAttribute(Utility.attribute_speed);
 				if(at != null) at.setBaseValue(0);
 			}
-			if(s.check_spawner_nerf == true && entity instanceof Mob mob) {
+			if(s.check_spawner_nerf && entity instanceof Mob mob) {
 				Object w = RF.direct(mob.getWorld(), "getHandle");
 				Object f = RF.fetch(w, "spigotConfig");
 				if(RF.access(f, "nerfSpawnerMobs")
 						.as(boolean.class)
-						.get(false) == true) {
+						.get(false)) {
 					Object a = RF.direct(mob, "getHandle");
 					RF.access(a, "aware", boolean.class).set(false);
 				}
 			}
-			if(s.spawn_babies == false && entity instanceof Ageable ageable) ageable.setAdult();
-			if(s.spawn_with_equipment == false && entity instanceof LivingEntity a) {
+			if(!s.spawn_babies && entity instanceof Ageable ageable) ageable.setAdult();
+			if(!s.spawn_with_equipment && entity instanceof LivingEntity a) {
 				EntityEquipment e = a.getEquipment();
 				e.clear();
 			}
-			if(s.spawn_jockeys == false) {
-				SpawnerMeta.scheduler().runAtEntityLater(entity,
-						() -> {
-							var passengers = entity.getPassengers();
-							if(passengers.isEmpty() == false) {
-								if(entity.getType() == EntityType.ZOMBIE) {
-									Entity vehicle = entity.getVehicle();
-									if(vehicle != null) vehicle.remove();
-								} else if(entity.getType() == EntityType.SPIDER) {
-									passengers.forEach(Entity::remove);
-								}
-							}
-						},
-						1);
+			
+			if(!s.spawn_jockeys) {
+				if(entity.getType() == EntityType.ZOMBIE) {
+					runLater(entity, () -> {
+						Entity vehicle = entity.getVehicle();
+						if(vehicle != null) vehicle.remove();
+					});
+				} else if(entity.getType() == EntityType.SPIDER) {
+					runLater(entity, () -> {
+						var passengers = entity.getPassengers();
+						if(!passengers.isEmpty())
+							passengers.forEach(Entity::remove);
+					});
+				}
 			}
 
 			Object o = RF.direct(entity, "getHandle");
 			RF.access(o, "spawnedViaMobSpawner", boolean.class, false).set(true);
 			RF.access(o, "spawnReason", SpawnReason.class, false).set(SpawnReason.SPAWNER);
-			if(s.send_spawning_event == true) {
+			if(s.send_spawning_event) {
 				SpawnerMetaSpawnEvent event = new SpawnerMetaSpawnEvent(entity, spawner);
 				entity.getServer().getPluginManager().callEvent(event);
 			}
-			if(s.silent_entities.contains(spawner.getType()) == true)
+			if(s.silent_entities.contains(spawner.getType()))
 				entity.setSilent(true);
 		} catch (Exception e) {
 			RF.debug(e);
 		}
 	};
+	
+	private static void runLater(Entity entity, Runnable runnable) {
+		SpawnerMeta.scheduler().runAtEntityLater(entity, runnable, 1);
+	}
 
 	public static Consumer<Entity> modifier(ISpawner spawner) {
 		return entity -> modifier.accept(spawner, entity);
@@ -197,17 +201,17 @@ public final class SpawningManager {
 		try {
 			if(entity instanceof EnderDragon dragon) dragon.setPhase(Phase.CIRCLING);
 			Settings s = Settings.settings;
-			if(s.entity_movement == false
+			if(!s.entity_movement
 					&& entity instanceof Attributable le) {
 				AttributeInstance at = le.getAttribute(Utility.attribute_speed);
 				if(at != null) at.setBaseValue(0);
 			}
-			if(s.check_spawner_nerf == true && entity instanceof Mob mob) {
+			if(s.check_spawner_nerf && entity instanceof Mob mob) {
 				Object w = RF.direct(mob.getWorld(), "getHandle");
 				Object f = RF.fetch(w, "spigotConfig");
 				if(RF.access(f, "nerfSpawnerMobs")
 						.as(boolean.class)
-						.get(false) == true) {
+						.get(false)) {
 					Object a = RF.direct(mob, "getHandle");
 					RF.access(a, "aware").as(boolean.class).set(false);
 				}
@@ -221,12 +225,12 @@ public final class SpawningManager {
 	}
 	
 	public static void particle(Location loc) {
-		if(Settings.settings.spawning_particles == false) return;
+		if(!Settings.settings.spawning_particles) return;
 		loc.getWorld().spawnParticle(Particle.CLOUD, loc.add(0, 0.25, 0), 5, 0.2, 0.2, 0.2, 0.1);
  	}
 	
 	public static void unlink(Block block) {
-		if(HookRegistry.WILD_STACKER.exists() == false) return;
+		if(!HookRegistry.WILD_STACKER.exists()) return;
 		HookRegistry.WILD_STACKER.unlink(block);
 	}
 	
