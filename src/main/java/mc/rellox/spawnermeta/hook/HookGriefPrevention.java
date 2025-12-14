@@ -2,6 +2,7 @@ package mc.rellox.spawnermeta.hook;
 
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import me.ryanhamshire.GriefPrevention.Claim;
+import me.ryanhamshire.GriefPrevention.ClaimPermission;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -31,7 +32,7 @@ public class HookGriefPrevention implements HookInstance {
         if (claim == null) {
             return true;
         }
-        return claim.allowContainers(player) == null;
+        return claim.checkPermission(player, ClaimPermission.Inventory, null) == null;
     }
 
 }
