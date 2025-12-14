@@ -24,6 +24,7 @@ import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.util.Consumer;
 
+import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.location.ISelector;
 import mc.rellox.spawnermeta.configuration.Settings;
@@ -159,15 +160,21 @@ public final class SpawningManager {
 				e.clear();
 			}
 			if(s.spawn_jockeys == false) {
-				var passengers = entity.getPassengers();
-				if(passengers.isEmpty() == false) {
-					if(entity.getType() == EntityType.CHICKEN) entity.remove();
-					else if(entity.getType() == EntityType.SPIDER) {
-						new ArrayList<>(passengers).forEach(Entity::remove);
-					}
-				}
+				SpawnerMeta.scheduler().runAtEntityLater(entity,
+						() -> {
+							var passengers = entity.getPassengers();
+							if(passengers.isEmpty() == false) {
+								if(entity.getType() == EntityType.ZOMBIE) {
+									Entity vehicle = entity.getVehicle();
+									if(vehicle != null) vehicle.remove();
+								} else if(entity.getType() == EntityType.SPIDER) {
+									passengers.forEach(Entity::remove);
+								}
+							}
+						},
+						1);
 			}
-			
+
 			Object o = RF.direct(entity, "getHandle");
 			RF.access(o, "spawnedViaMobSpawner", boolean.class, false).set(true);
 			RF.access(o, "spawnReason", SpawnReason.class, false).set(SpawnReason.SPAWNER);
