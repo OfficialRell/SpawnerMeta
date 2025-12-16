@@ -1,10 +1,12 @@
 package mc.rellox.spawnermeta.spawner.generator;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
+import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.utility.adapter.Platform;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
@@ -20,28 +22,32 @@ import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.ActiveGenerator;
 
 public class SpawnerWorld {
-	
+
 	public final World world;
 	protected final Map<Pos, IGenerator> spawners;
 	private final List<IGenerator> queue;
-	
+
+	// Chunk-based spawners lookups
+	private final Map<Long, Set<Pos>> byChunk;
+
 	public SpawnerWorld(World world) {
 		this.world = world;
 		this.spawners = Collections.synchronizedMap(new HashMap<>());
 		this.queue = Collections.synchronizedList(new LinkedList<>());
+        this.byChunk = new ConcurrentHashMap<>();
 	}
-	
+
 	public Stream<IGenerator> stream() {
 		return spawners.values().stream();
 	}
 
-    public void load() {
-        for (Chunk chunk : world.getLoadedChunks()) {
-            load(chunk);
-        }
-    }
+	public void load() {
+		for (Chunk chunk : world.getLoadedChunks()) {
+			load(chunk);
+		}
+	}
 
-    public void load(Chunk chunk) {
+	public void load(Chunk chunk) {
 		BlockState[] tileEntities = Platform.ADAPTER.getTileEntities(chunk);
 		for (BlockState state : tileEntities) {
 			if (state instanceof CreatureSpawner) {
@@ -55,15 +61,18 @@ public class SpawnerWorld {
 		}
 	}
 
-    public void unload(World world, Chunk chunk) {
-        final int x = chunk.getX();
-        final int z = chunk.getZ();
+	public void unload(Chunk chunk) {
+		long chunkKey = Utility.getChunkKey(chunk);
 
-        for (IGenerator generator : spawners.values()) {
-            if (generator.in(world, x, z)) {
-                generator.remove(false);
-            }
-        }
+		Set<Pos> set = byChunk.get(chunkKey);
+		if (set == null) return;
+
+		for (Pos pos : set) {
+			IGenerator generator = spawners.get(pos);
+			if (generator != null) {
+				generator.remove(false);
+			}
+		}
 	}
 
 	public void clear() {
@@ -71,40 +80,41 @@ public class SpawnerWorld {
 			generator.clear();
 		}
 		spawners.clear();
+		byChunk.clear();
 	}
-	
+
 	public int active() {
 		return spawners.size();
 	}
-	
+
 	public void update() {
 		for (IGenerator generator : spawners.values()) {
 			generator.update();
 		}
 	}
-	
+
 	public void control() {
 		for (IGenerator generator : spawners.values()) {
 			generator.control();
 		}
 	}
-	
+
 	public void tick() {
-		if(!queue.isEmpty()) {
+		if (!queue.isEmpty()) {
 			for (IGenerator generator : queue) {
 				put(generator);
 			}
 			queue.clear();
 		}
-        if (SpawnerMeta.foliaLib().isFolia()) {
-            for (IGenerator generator : spawners.values()) {
-                generator.tickFolia();
-            }
-        } else {
-            for (IGenerator generator : spawners.values()) {
-                generator.tick();
-            }
-        }
+		if (SpawnerMeta.foliaLib().isFolia()) {
+			for (IGenerator generator : spawners.values()) {
+				generator.tickFolia();
+			}
+		} else {
+			for (IGenerator generator : spawners.values()) {
+				generator.tick();
+			}
+		}
 	}
 
 	public void reduce() {
@@ -121,6 +131,7 @@ public class SpawnerWorld {
 			if (!generator.active() || !generator.present()) {
 				generator.clear();
 				toRemove.add(pos);
+				removeFromChunk(pos);
 			}
 		}
 
@@ -145,6 +156,7 @@ public class SpawnerWorld {
 			if (generator.active() && filter.test(generator)) {
 				generator.remove(fully);
 				toRemove.add(pos);
+				removeFromChunk(pos);
 			}
 		}
 
@@ -156,26 +168,45 @@ public class SpawnerWorld {
 
 		return toRemove.size();
 	}
-	
+
 	public void put(Block block) {
 		put(new ActiveGenerator(ISpawner.of(block)));
 	}
-	
+
 	private void put(IGenerator generator) {
-		IGenerator last = spawners.put(generator.position(), generator);
-		if(last != null) last.clear();
+		Pos pos = generator.position();
+
+		IGenerator last = spawners.put(pos, generator);
+		byChunk.computeIfAbsent(Utility.getChunkKey(pos), k -> ConcurrentHashMap.newKeySet())
+				.add(pos);
+		if (last != null) {
+			last.clear();
+		}
 	}
-	
+
 	public IGenerator get(Block block) {
 		IGenerator generator = spawners.get(Pos.of(block));
-		if(generator == null) {
-			if(block.getType() == Material.SPAWNER) put(block);
-		} else if(!generator.active()) return null;
+		if (generator == null) {
+			if (block.getType() == Material.SPAWNER) put(block);
+		} else if (!generator.active()) return null;
 		return generator;
 	}
-	
+
 	public IGenerator raw(Block block) {
 		return spawners.get(Pos.of(block));
+	}
+
+	private void removeFromChunk(Pos pos) {
+		long key = Utility.getChunkKey(pos);
+
+		Set<Pos> set = byChunk.get(key);
+		if (set == null) return;
+
+		set.remove(pos);
+
+		if (set.isEmpty()) {
+			byChunk.remove(key, set);
+		}
 	}
 
 }
