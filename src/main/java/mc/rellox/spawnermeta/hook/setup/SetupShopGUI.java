@@ -79,6 +79,8 @@ public class SetupShopGUI {
 		@Override
 		public ItemStack loadItem(ConfigurationSection section) {
 			String type_string = section.getString("type");
+            if (type_string == null) return null;
+
 			SpawnerType type = SpawnerType.of(type_string);
 			if(type == null) type = SpawnerType.PIG;
 
