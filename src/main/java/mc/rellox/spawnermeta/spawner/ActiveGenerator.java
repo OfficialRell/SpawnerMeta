@@ -231,12 +231,12 @@ public class ActiveGenerator implements IGenerator {
 		this.ticks = Math.max(0, ticks);
 	}
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public void tickFolia() {
         SpawnerMeta.scheduler().runAtLocation(spawner.block().getLocation(), task -> this.tick());
     }
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void tick() {
         if(--validation < 0) validation = Settings.settings.validation_interval - 1;

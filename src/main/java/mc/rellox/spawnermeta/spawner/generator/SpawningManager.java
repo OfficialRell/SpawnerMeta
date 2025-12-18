@@ -7,8 +7,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
-import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.utility.adapter.Platform;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -37,6 +35,7 @@ import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.utility.Utility;
+import mc.rellox.spawnermeta.utility.adapter.Platform;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.utility.reflect.type.Invoker;
 import mc.rellox.spawnermeta.version.Version;
