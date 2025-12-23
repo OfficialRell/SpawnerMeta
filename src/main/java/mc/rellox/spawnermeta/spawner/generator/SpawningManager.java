@@ -137,7 +137,7 @@ public final class SpawningManager {
 
 	private static Invoker<Entity> spawner(Block block) {
 		return RF.order(block.getWorld(), "spawn",
-				Location.class, Class.class, Version.version.high(VersionType.v_20_2)
+				Location.class, Class.class, Version.version.atleast(VersionType.v_20_2)
 				? java.util.function.Consumer.class : org.bukkit.util.Consumer.class, SpawnReason.class)
 				.as(Entity.class);
 	}

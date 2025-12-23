@@ -458,7 +458,7 @@ public final class ShopRegistry {
 	}
 	
 	protected static Commenter commenter() {
-		return Version.version.high(VersionType.v_18_1) == true
+		return Version.version.atleast(VersionType.v_18_1) == true
 				? new Commenter() : null;
 	}
 	
