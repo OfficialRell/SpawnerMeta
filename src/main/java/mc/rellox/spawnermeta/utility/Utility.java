@@ -37,7 +37,7 @@ public final class Utility {
 	private static final Random R = new Random();
 
 	public static boolean op(Player player) {
-		return player.isOp() == true && player.getGameMode() == GameMode.CREATIVE;
+		return player.isOp() && player.getGameMode() == GameMode.CREATIVE;
 	}
 
 	private static final EntityType ITEM_ENTITY;
@@ -121,36 +121,17 @@ public final class Utility {
 		try {
 			Class<?> clazz = RF.craft("inventory.CraftItemStack");
 			Object nms_item = RF.order(clazz, "asNMSCopy", ItemStack.class).invoke(item);
-			String a, b = "getString";
 
-			if (Version.version == VersionType.v_18_1) {
-				a = "v";
-				b = "a";
-			} else if (Version.version == VersionType.v_18_2) {
-				a = "w";
-				b = "a";
-			} else if (Version.version == VersionType.v_19_1
-					|| Version.version == VersionType.v_19_2
-					|| Version.version == VersionType.v_19_3) {
-				a = "x";
-			} else if (Version.version == VersionType.v_20_1
-					|| Version.version == VersionType.v_20_2
-					|| Version.version == VersionType.v_20_3) {
-				a = "y";
-			} else if (Version.version == VersionType.v_20_4) {
-				a = "x";
-			} else if (Version.version == VersionType.v_21_1) {
-				a = "w";
-			} else if (Version.version == VersionType.v_21_2
-					|| Version.version == VersionType.v_21_3
-					|| Version.version == VersionType.v_21_4
-					|| Version.version == VersionType.v_21_5
-					|| Version.version == VersionType.v_21_6) {
-				a = "y";
-			} else {
-				a = "getName";
-				b = "getText";
-			}
+			String[] names = switch (Version.version) {
+				case v_18_1 -> new String[] {"v", "a"};
+				case v_18_2 -> new String[] {"w", "a"};
+				case v_19_1, v_19_2, v_19_3, v_20_4 -> new String[] {"x", "getString"};
+				case v_21_1 -> new String[] {"w", "getString"};
+				default -> new String[] {"y", "getString"};
+			};
+			
+			String a = names[0];
+			String b = names[1];
 
 			Object component = RF.direct(nms_item, a);
 			String name = RF.direct(component, b, String.class);
@@ -176,23 +157,15 @@ public final class Utility {
 			.filter(Objects::nonNull)
 			.toArray(ItemFlag[]::new);
 
-//	public static void hideFlags(ItemMeta meta) {
-//		try {
-//			meta.addItemFlags(Stream.of(ItemFlag.values())
-//					.filter(i -> i.ordinal() < 8 || i.ordinal() > 16)
-//					.toArray(ItemFlag[]::new));
-//		} catch (Exception e) {}
-//	}
-
 	public static Entity create(Location location, EntityType type) {
 		Object entity = RF.order(location.getWorld(), "createEntity", Location.class, Class.class)
 				.invoke(location, type.getEntityClass());
-		if (Version.version.high(VersionType.v_20_3) == true) return (Entity) entity;
+		if (Version.version.atleast(VersionType.v_20_3)) return (Entity) entity;
 		return RF.direct(entity, "getBukkitEntity", Entity.class);
 	}
 
 	public static boolean isWindCharge(Entity entity) {
-		if (Version.version.high(VersionType.v_21_1) == false) return false;
+		if (!Version.version.atleast(VersionType.v_21_1)) return false;
 		return switch (entity.getType().name()) {
 			case "WIND_CHARGE", "BREEZE_WIND_CHARGE" -> true;
 			default -> false;
@@ -249,7 +222,7 @@ public final class Utility {
 
 	public static boolean isInteger(String... l) {
 		if (l == null) return false;
-		for (String s : l) if (isInteger(s) == false) return false;
+		for (String s : l) if (!isInteger(s)) return false;
 		return true;
 	}
 
@@ -263,7 +236,7 @@ public final class Utility {
 
 	public static boolean isValid(String s) {
 		for (char c : s.toCharArray())
-			if (isLetter(c) == false && isNumber(c) == false && c != '_' && c != '.')
+			if (!isLetter(c) && !isNumber(c) && c != '_' && c != '.')
 				return false;
 		return true;
 	}
@@ -296,7 +269,7 @@ public final class Utility {
 			try (InputStream is = new URI("https://api.spigotmc.org/legacy/update.php?resource=" + id)
 					.toURL().openStream();
 				 Scanner sc = new Scanner(is)) {
-				if (sc.hasNext() == true) action.accept(sc.next());
+				if (sc.hasNext()) action.accept(sc.next());
 			} catch (Exception ignored) {
 			}
 		}, 50);
