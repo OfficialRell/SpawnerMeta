@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import mc.rellox.spawnermeta.utility.adapter.Platform;
+import io.github.rvskele.paperlib.PaperLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Color;
@@ -1098,7 +1098,7 @@ public final class EventRegistry {
 	}
 	
 	public static int spawnersInChunk(Chunk chunk) {
-		BlockState[] bs = Platform.ADAPTER.getTileEntities(chunk);
+		BlockState[] bs = PaperLib.getTileEntities(chunk, false).getTileEntities();
 		return bs == null ? 0 : (int) Stream.of(bs)
 				.filter(s -> s instanceof CreatureSpawner)
 				.count();
