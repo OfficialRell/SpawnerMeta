@@ -2,7 +2,7 @@ package mc.rellox.spawnermeta.api.spawner.requirement;
 
 import java.util.*;
 
-import mc.rellox.spawnermeta.utility.adapter.Platform;
+import io.github.rvskele.paperlib.PaperLib;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -13,9 +13,9 @@ public interface IMaterial {
 	static IMaterial empty = block -> true;
 	static IMaterial air = block -> {
 		Material type = block.getType();
-		return type.isAir() || (!Platform.ADAPTER.isSolid(block) && type != Material.WATER && type != Material.LAVA);
+		return type.isAir() || (!PaperLib.isSolid(block) && type != Material.WATER && type != Material.LAVA);
 	};
-	static IMaterial solid = Platform.ADAPTER::isSolid;
+	static IMaterial solid = PaperLib::isSolid;
 	static IMaterial water = block -> {
 		Material type = block.getType();
 		if(type == Material.WATER) return true;

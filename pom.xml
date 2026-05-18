@@ -66,25 +66,25 @@
     <dependency>
       <groupId>com.bgsoftware</groupId>
       <artifactId>WildStackerAPI</artifactId>
-      <version>2024.3</version>
+      <version>2025.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.bgsoftware</groupId>
       <artifactId>WildToolsAPI</artifactId>
-      <version>2024.1</version>
+      <version>2025.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.bgsoftware</groupId>
       <artifactId>SuperiorSkyblockAPI</artifactId>
-      <version>2023.3</version>
+      <version>2025.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.black_ixx</groupId>
       <artifactId>playerpoints</artifactId>
-      <version>3.2.7</version>
+      <version>3.3.0</version>
          <scope>provided</scope>
     </dependency>
     <dependency>
@@ -108,6 +108,12 @@
       <groupId>com.tcoded</groupId>
       <artifactId>FoliaLib</artifactId>
       <version>0.5.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.github.rvskele</groupId>
+      <artifactId>PaperLib</artifactId>
+      <version>2.1.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -159,6 +165,10 @@
             <relocation>
               <pattern>com.tcoded.folialib</pattern>
               <shadedPattern>mc.rellox.spawnermeta.lib.folialib</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>io.github.rvskele.paperlib</pattern>
+              <shadedPattern>mc.rellox.spawnermeta.lib.paperlib</shadedPattern>
             </relocation>
             <relocation>
               <pattern>org.bstats</pattern>
