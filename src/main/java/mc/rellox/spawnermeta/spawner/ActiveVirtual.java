@@ -30,7 +30,7 @@ public class ActiveVirtual implements IVirtual {
 	public boolean exact(IVirtual other) {
 		if(type != other.getType()) return false;
 		if(empty != other.isEmpty()) return false;
-		if(Settings.settings.charges_enabled == true) {
+		if(Settings.settings.charges_enabled) {
 			int oc = other.getCharges();
 			if(!Settings.settings.charges_allow_stacking
 					&& charges != oc) return false;

@@ -137,15 +137,15 @@ public enum SpawnerType {
 	}
 	
 	public boolean regular() {
-		return exists() == true && this != EMPTY;
+		return exists() && this != EMPTY;
 	}
 
 	public boolean equals(String name) {
-		return name.equalsIgnoreCase(name);
+		return this.name.equalsIgnoreCase(name);
 	}
 
 	public boolean equals(EntityType type) {
-		return this.type == null ? false : this.type.equals(type);
+		return this.type != null && this.type.equals(type);
 	}
 	
 	public EntityBox box() {
@@ -173,13 +173,13 @@ public enum SpawnerType {
 	}
 	
 	public boolean disabled() {
-		return Settings.settings.disabled(this) == true;
+		return Settings.settings.disabled(this);
 	}
 	
 	public static SpawnerType of(String name) {
 		try {
 			SpawnerType type = valueOf(name.toUpperCase());
-			return type.exists() == true ? type : null;
+			return type.exists() ? type : null;
 		} catch (Exception e) {
 			return null;
 		}

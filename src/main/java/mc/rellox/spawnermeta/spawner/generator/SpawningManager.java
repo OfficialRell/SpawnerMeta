@@ -151,7 +151,7 @@ public final class SpawningManager {
 				AttributeInstance at = le.getAttribute(Utility.attribute_speed);
 				if(at != null) at.setBaseValue(0);
 			}
-			if(s.check_spawner_nerf == true && entity instanceof Mob mob) {
+			if(s.check_spawner_nerf && entity instanceof Mob mob) {
 				if(isSpawnerNerfed(mob.getWorld())) {
 					mob.setAware(false);
 				}
@@ -177,7 +177,7 @@ public final class SpawningManager {
 				}
 			}
 
-			if(s.send_spawning_event == true) {
+			if(s.send_spawning_event) {
 				SpawnerMetaSpawnEvent event = new SpawnerMetaSpawnEvent(entity, spawner);
 				entity.getServer().getPluginManager().callEvent(event);
 			}
@@ -205,7 +205,7 @@ public final class SpawningManager {
 				AttributeInstance at = le.getAttribute(Utility.attribute_speed);
 				if(at != null) at.setBaseValue(0);
 			}
-			if(s.check_spawner_nerf == true && entity instanceof Mob mob) {
+			if(s.check_spawner_nerf && entity instanceof Mob mob) {
 				if (isSpawnerNerfed(mob.getWorld())) {
 					mob.setAware(false);
 				}

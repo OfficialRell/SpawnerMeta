@@ -13,7 +13,7 @@ public enum UpgradeType {
 	public final String name, values;
 	public final Color color;
 	
-	private UpgradeType(String name, String values, Color color) {
+	UpgradeType(String name, String values, Color color) {
 		this.name = name;
 		this.values = values;
 		this.color = color;

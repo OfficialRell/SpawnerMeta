@@ -1,11 +1,10 @@
 package mc.rellox.spawnermeta.spawner;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import mc.rellox.spawnermeta.SpawnerMeta;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import mc.rellox.spawnermeta.spawner.type.UpgradeType;
+import mc.rellox.spawnermeta.utility.DataManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -13,10 +12,8 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import mc.rellox.spawnermeta.api.spawner.ISpawner;
-import mc.rellox.spawnermeta.spawner.type.SpawnerType;
-import mc.rellox.spawnermeta.spawner.type.UpgradeType;
-import mc.rellox.spawnermeta.utility.DataManager;
+import java.util.List;
+import java.util.UUID;
 
 public record ActiveSpawner(Block block) implements ISpawner {
 	
@@ -116,7 +113,7 @@ public record ActiveSpawner(Block block) implements ISpawner {
 	
 	@Override
 	public boolean isNatural() {
-		return isOwned() == false;
+		return !isOwned();
 	}
 	
 	@Override
@@ -196,7 +193,6 @@ public record ActiveSpawner(Block block) implements ISpawner {
 		DataManager.setCharges(block(), a);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void setDelay(int t) {
 		if (SpawnerMeta.scheduler().isOwnedByCurrentRegion(block())) {
@@ -225,15 +221,14 @@ public record ActiveSpawner(Block block) implements ISpawner {
 	@Override
 	public String toData() {
 		int[] levels = getUpgradeLevels();
-		return Stream.of(getType().name(),
-				"" + levels[0],
-				"" + levels[1],
-				"" + levels[2],
-				"" + getCharges(),
-				"" + getSpawnable(),
-				"" + getStack(),
-				"" + isEmpty())
-				.collect(Collectors.joining(";"));
+		return String.join(";", getType().name(),
+                "" + levels[0],
+                "" + levels[1],
+                "" + levels[2],
+                "" + getCharges(),
+                "" + getSpawnable(),
+                "" + getStack(),
+                "" + isEmpty());
 	}
 
 }

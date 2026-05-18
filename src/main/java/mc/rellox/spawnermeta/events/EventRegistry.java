@@ -1002,18 +1002,6 @@ public final class EventRegistry {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-	private void onEntityDamaged(EntityDamageEvent event) {
-		DamageCause cause = event.getCause();
-		if(cause != DamageCause.BLOCK_EXPLOSION && cause != DamageCause.ENTITY_EXPLOSION) return;
-		Entity entity = event.getEntity();
-		if(entity instanceof Item drop) {
-			ItemStack item = drop.getItemStack();
-			if(item.getType() != Material.SPAWNER) return;
-			event.setCancelled(true);
-		}
-	}
-
 	static void place(BlockPlaceEvent event, Block block) {
 		ItemStack item = event.getItemInHand().clone();
 		IVirtual temp = IVirtual.of(item, true), data;

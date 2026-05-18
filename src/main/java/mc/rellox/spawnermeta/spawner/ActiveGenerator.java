@@ -231,8 +231,7 @@ public class ActiveGenerator implements IGenerator {
 		this.ticks = Math.max(0, ticks);
 	}
 
-    @SuppressWarnings("deprecation")
-	@Override
+    @Override
     public void tickFolia() {
         SpawnerMeta.scheduler().runAtLocation(spawner.block().getLocation(), task -> this.tick());
     }
@@ -243,7 +242,7 @@ public class ActiveGenerator implements IGenerator {
         if(!active) return;
         holograms();
         if(!check()) {
-            tick_untill_zero();
+            tick_until_zero();
             return;
         }
         if(cache.type() == SpawnerType.EMPTY) return;
@@ -257,7 +256,7 @@ public class ActiveGenerator implements IGenerator {
         }
 	}
 
-	private void tick_untill_zero() {
+	private void tick_until_zero() {
 		if(!Settings.settings.tick_until_zero || ticks <= 0) return;
 		ticks--;
 	}
@@ -388,7 +387,7 @@ public class ActiveGenerator implements IGenerator {
 		if(spawned >= 0) {
 			spawner.setSpawnable(spawned);
 			if(spawned < cache.stack()) {
-				if(spawned <= 0) clear = true;
+				if(spawned == 0) clear = true;
 				else {
 					spawner.setStack(spawned);
 					if(hologram != null) hologram.rewrite();
@@ -471,7 +470,6 @@ public class ActiveGenerator implements IGenerator {
 		validation(finder.errors());
 		boolean empty = warnings.isEmpty();
 		if(empty && warning != null) {
-			warnings.clear();
 			warning.clear();
 			warning = null;
 			if(upgrades != null) upgrades.update();

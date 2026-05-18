@@ -12,6 +12,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,10 +22,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntityTargetEvent;
-import org.bukkit.event.entity.SpawnerSpawnEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -136,10 +134,22 @@ public class EventListeners implements Listener {
 		}
 	}
 
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	private void onEntityDamaged(EntityDamageEvent event) {
+		EntityDamageEvent.DamageCause cause = event.getCause();
+		if(cause != EntityDamageEvent.DamageCause.BLOCK_EXPLOSION
+				&& cause != EntityDamageEvent.DamageCause.ENTITY_EXPLOSION) return;
+		Entity entity = event.getEntity();
+		if(entity instanceof Item drop) {
+			ItemStack item = drop.getItemStack();
+			if(item.getType() != Material.SPAWNER) return;
+			event.setCancelled(true);
+		}
+	}
+
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onBlockExplodeByEntity(EntityExplodeEvent event) {
 		try {
-			
 			if(Settings.inactive(event.getEntity().getWorld())) return;
 			
 			EventRegistry.explode_entity(event);
@@ -150,8 +160,7 @@ public class EventListeners implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onPlace(BlockPlaceEvent event) {
-		if(event.isCancelled()) return;
-		Block block = event.getBlockPlaced();
+        Block block = event.getBlockPlaced();
 		
 		if(Settings.inactive(block.getWorld())) return;
 		
