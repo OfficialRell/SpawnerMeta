@@ -1,17 +1,16 @@
 package mc.rellox.spawnermeta.holograms;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-
 import mc.rellox.spawnermeta.api.hologram.IHologram;
 import mc.rellox.spawnermeta.api.region.IBox;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.text.content.Content;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public abstract class AbstractHologram implements IHologram {
 	
@@ -46,9 +45,9 @@ public abstract class AbstractHologram implements IHologram {
 	public void update() {
 		List<Player> list = generator.world().getPlayers();
 		for(Player player : list) {
-			if(box.in(player) == true) {
-				if(players.add(player) == true) show(player);
-			} else if(players.remove(player) == true) hide(player);
+			if(box.in(player)) {
+				if(players.add(player)) show(player);
+			} else if(players.remove(player)) hide(player);
 		}
 	}
 	

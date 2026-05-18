@@ -71,6 +71,7 @@ public class EventListeners implements Listener {
 			return;
 		}
 		if(event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
 		Block block = event.getClickedBlock();
 		if(event.getHand() == EquipmentSlot.OFF_HAND) {
 			ItemStack item = event.getItem();
@@ -125,7 +126,7 @@ public class EventListeners implements Listener {
 	private void onBlockExplodeByBlock(BlockExplodeEvent event) {
 		List<Block> list = event.blockList();
 		
-		if(list.size() > 0 && Settings.inactive(list.get(0).getWorld())) return;
+		if(!list.isEmpty() && Settings.inactive(list.getFirst().getWorld())) return;
 		
 		Iterator<Block> it = list.iterator();
 		try {
@@ -185,7 +186,6 @@ public class EventListeners implements Listener {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGH)
 	private void onJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();

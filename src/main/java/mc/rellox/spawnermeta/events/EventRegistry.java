@@ -99,7 +99,7 @@ public final class EventRegistry {
 		return event;
 	}
 
-	protected static void open_upgrades(Player player, Messagable m, IGenerator generator) {
+	private static void open_upgrades(Player player, Messagable m, IGenerator generator) {
 		if(!Settings.settings.upgrade_interface_enabled) return;
 		if(!player.hasPermission("spawnermeta.upgrades.open")) {
 			m.send(Language.list("Spawners.upgrades.permission.opening"));
@@ -132,8 +132,8 @@ public final class EventRegistry {
 		generator.open(player);
 	}
 
-	protected static void changing_regular(Player player, Messagable m, IGenerator generator,
-			ItemStack item, SpawnerType change) {
+	private static void changing_regular(Player player, Messagable m, IGenerator generator,
+                                         ItemStack item, SpawnerType change) {
 		if(!Settings.settings.changing_enabled) return;
 		if(change.unique() && !(player.isOp() && player.getGameMode() == GameMode.CREATIVE)) return;
 		if(!player.hasPermission("spawnermeta.eggs")) {
@@ -211,8 +211,8 @@ public final class EventRegistry {
 		SpawningManager.unlink(generator.block());
 	}
 
-	protected static void changing_empty(Player player, Messagable m, IGenerator generator, ItemStack item,
-			SpawnerType change) {
+	private static void changing_empty(Player player, Messagable m, IGenerator generator, ItemStack item,
+                                       SpawnerType change) {
 		if(!change.unique() && Utility.op(player)) return;
 		ICache cache = generator.cache();
 		SpawnerType type = cache.type();
@@ -275,8 +275,7 @@ public final class EventRegistry {
 		SpawningManager.unlink(generator.block());
 	}
 	
-	@SuppressWarnings("deprecation")
-	protected static boolean remove_eggs_from_regular(PlayerInteractEvent event, Player player, Messagable m, ItemStack item, IGenerator generator) {
+	private static boolean remove_eggs_from_regular(PlayerInteractEvent event, Player player, Messagable m, ItemStack item, IGenerator generator) {
 		if(generator.cache().empty()) return true;
 		if(!Settings.settings.empty_remove_from_regular) return true;
 		if(item != null && item.getType() == Material.SPAWNER) return true;
@@ -328,8 +327,7 @@ public final class EventRegistry {
 		return false;
 	}
 	
-	@SuppressWarnings("deprecation")
-	protected static boolean remove_eggs_empty(PlayerInteractEvent event, Player player, Messagable m, ItemStack item, IGenerator generator) {
+	private static boolean remove_eggs_empty(PlayerInteractEvent event, Player player, Messagable m, ItemStack item, IGenerator generator) {
 		ICache cache = generator.cache();
 		
 		if(!cache.empty()) return true;
@@ -392,7 +390,7 @@ public final class EventRegistry {
 		return false;
 	}
 
-	protected static void stack_nearby(PlayerInteractEvent event, Player player, Messagable m, Block block) {
+	static void stack_nearby(PlayerInteractEvent event, Player player, Messagable m, Block block) {
 		if(!Settings.settings.stacking_nearby_enabled) return;
 		
 		ItemStack item = event.getItem();
@@ -444,7 +442,7 @@ public final class EventRegistry {
 		stacking(player, m, generator, item, false);
 	}
 
-	protected static void verify_removing(PlayerInteractEvent event, Player player, Messagable m) {
+	static void verify_removing(PlayerInteractEvent event, Player player, Messagable m) {
 		if(!Settings.settings.empty_verify_removing) return;
 		Block block = event.getClickedBlock();
 		
@@ -475,7 +473,7 @@ public final class EventRegistry {
 		remove_eggs(player, generator, empty);
 	}
 
-	protected static boolean stacking(Player player, Messagable m, IGenerator generator, ItemStack item, boolean direct) {
+	private static boolean stacking(Player player, Messagable m, IGenerator generator, ItemStack item, boolean direct) {
 		int stack = generator.cache().stack();
 		Settings s = Settings.settings;
 		int limit = s.stacking_limit(player, generator);
@@ -596,7 +594,7 @@ public final class EventRegistry {
 		return false;
 	}
 
-	protected static void interact(PlayerInteractEvent event, Player player, Messagable m, IGenerator generator) {
+	static void interact(PlayerInteractEvent event, Player player, Messagable m, IGenerator generator) {
 		
 		SpawnerType type = generator.cache().type();
 		if(type.disabled()) return;
@@ -604,7 +602,7 @@ public final class EventRegistry {
 		
 		if(HookRegistry.PLOT_SQUARED.exists()
 				&& !HookRegistry.PLOT_SQUARED.modifiable(generator, player)) return;
-        if(HookRegistry.GRIEF_PREVENTION.exists() == true
+        if(HookRegistry.GRIEF_PREVENTION.exists()
                 && !HookRegistry.GRIEF_PREVENTION.hasAccessTrust(generator, player)) return;
 		
 		ItemStack item = event.getItem();
@@ -656,7 +654,7 @@ public final class EventRegistry {
 		event.setCancelled(true);
 	}
 
-	protected static void remove_eggs(Player player, IGenerator generator, boolean empty) {
+	private static void remove_eggs(Player player, IGenerator generator, boolean empty) {
 		ISpawner spawner = generator.spawner();
 		
 		ItemStack refund = null;
@@ -744,17 +742,14 @@ public final class EventRegistry {
 							&& LocationRegistry.trusted(owner, player)) break x;
 					m.send(Language.list("Spawners.ownership.breaking.warning"));
 					if(Settings.settings.breaking_show_owner) {
-						if(owner != null) {
-							OfflinePlayer off = Bukkit.getOfflinePlayer(owner);
-							var name = off.getName();
-							if(name != null) m.send(Language.list("Spawners.ownership.show-owner",
-									"player", name));
-						}
-					}
+                        OfflinePlayer offline = Bukkit.getOfflinePlayer(owner);
+                        var name = offline.getName();
+                        if(name != null) m.send(Language.list("Spawners.ownership.show-owner",
+                                "player", name));
+                    }
 					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 					return;
 				}
-				
 			}
 		}
 		if(!Settings.settings.breaking_drop_on_ground) {
@@ -769,7 +764,7 @@ public final class EventRegistry {
 				return;
 			}
 		}
-		boolean silk = Settings.settings.breaking_silk_enabled ? getAPI().hasSilkTouch(player) : true;
+		boolean silk = !Settings.settings.breaking_silk_enabled || getAPI().hasSilkTouch(player);
 		if(player.hasPermission("spawnermeta.breaking.bypass.silktouch"))
 			silk = true;
 		else if(!Settings.settings.breaking_silk_destroy && !silk) {
@@ -871,7 +866,7 @@ public final class EventRegistry {
 		orb.setExperience(xp);
 	}
 
-	protected static void explode_block(Iterator<Block> it) {
+	static void explode_block(Iterator<Block> it) {
 		Block block;
 		while(it.hasNext() && (block = it.next()) != null) {
 			if(block.getType() != Material.SPAWNER) continue;
@@ -947,7 +942,7 @@ public final class EventRegistry {
 							.setVelocity(new Vector());
 					} else if(player != null) {
 						while(s > 0) {
-							ItemStack item = new ItemStack(mat, s >= 64 ? 64 : s);
+							ItemStack item = new ItemStack(mat, Math.min(s, 64));
 							ItemCollector.add(player, item);
 							s -= 64;
 						}
@@ -959,7 +954,7 @@ public final class EventRegistry {
 		}
 	}
 
-	protected static void explode_entity(EntityExplodeEvent event) {
+	static void explode_entity(EntityExplodeEvent event) {
 		Entity entity = event.getEntity();
 		Iterator<Block> it = event.blockList().iterator();
 		Block block;
@@ -980,12 +975,12 @@ public final class EventRegistry {
 				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.TNT);
 			} else if(entity instanceof Creeper) {
 				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.CREEPERS);
-			} else if(entity instanceof Fireball || entity instanceof LargeFireball) {
+			} else if(entity instanceof WitherSkull || entity instanceof Wither) {
+				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.WITHER);
+			} else if(entity instanceof Fireball) {
 				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.FIREBALLS);
 			} else if(entity instanceof EnderCrystal) {
 				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.END_CRYSTALS);
-			} else if(entity instanceof Wither || entity instanceof WitherSkull) {
-				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.WITHER);
 			} else continue;
 			
 			SpawnerExplodeEvent call = call(new SpawnerExplodeEvent(generator, explosion, xs));
@@ -1014,13 +1009,12 @@ public final class EventRegistry {
 		Entity entity = event.getEntity();
 		if(entity instanceof Item drop) {
 			ItemStack item = drop.getItemStack();
-			if(item == null || item.getType() != Material.SPAWNER) return;
+			if(item.getType() != Material.SPAWNER) return;
 			event.setCancelled(true);
 		}
 	}
 
-	@SuppressWarnings("deprecation")
-	protected static void place(BlockPlaceEvent event, Block block) {
+	static void place(BlockPlaceEvent event, Block block) {
 		ItemStack item = event.getItemInHand().clone();
 		IVirtual temp = IVirtual.of(item, true), data;
 		if(temp == null) {
@@ -1128,7 +1122,7 @@ public final class EventRegistry {
 		return true;
 	}
 
-	protected static void spawn(SpawnerSpawnEvent event, Entity entity) {
+	static void spawn(SpawnerSpawnEvent event, Entity entity) {
 		if(!Settings.settings.spawning) {
 			event.setCancelled(true);
 			return;
@@ -1149,10 +1143,7 @@ public final class EventRegistry {
 		IGenerator generator = GeneratorRegistry.get(event.getSpawner().getBlock());
 		if(generator == null) return;
 		
-		if(generator.cache().type().disabled()) {
-			event.setCancelled(true);
-			return;
-		}
+		if(generator.cache().type().disabled()) event.setCancelled(true);
 	}
 
 }

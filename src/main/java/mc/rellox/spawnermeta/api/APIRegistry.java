@@ -49,7 +49,7 @@ public final class APIRegistry implements APIInstance {
 		WrappedExecutor<?> wrapper = new WrappedExecutor<>(c, executor);
 		int j = 0;
 		for(int i = 0; i < executors.size(); i++) {
-			if(executors.get(i).subclass(c) == true) {
+			if(executors.get(i).subclass(c)) {
 				j = i + 1;
 				break;
 			}
@@ -141,34 +141,26 @@ public final class APIRegistry implements APIInstance {
 	
 	public void execute(IEvent event) {
 		executors.forEach(wrapper -> {
-			if(wrapper.castable(event) == false) return;
+			if(!wrapper.castable(event)) return;
 			wrapper.execute(event);
 		});
 	}
-	
-	private static class WrappedExecutor<E> {
 
-		private final Class<E> c;
-		private final EventExecutor<E> e;
-		
-		public WrappedExecutor(Class<E> c, EventExecutor<E> e) {
-			this.c = c;
-			this.e = e;
-		}
-		
+	private record WrappedExecutor<E>(Class<E> type, EventExecutor<E> executor) {
+
 		public boolean subclass(Class<?> a) {
-			return c.isAssignableFrom(a);
+			return type.isAssignableFrom(a);
 		}
-		
+
 		public boolean castable(Object o) {
-			return c.isInstance(o);
+			return type.isInstance(o);
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		public void execute(Object o) {
-			e.execute((E) o);
+			executor.execute((E) o);
 		}
-		
+
 	}
 
 }

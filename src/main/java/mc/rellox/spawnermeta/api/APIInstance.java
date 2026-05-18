@@ -279,7 +279,7 @@ public interface APIInstance {
 
 	/**
 	 * Returns a spawner builder with the specified spawner type.
-	 * 
+	 * <p>
 	 * This method is deprecated, use {@code Spawner.builder()} method instead.
 	 * 
 	 * @param type - spawner type

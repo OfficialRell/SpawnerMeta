@@ -12,7 +12,8 @@ import mc.rellox.spawnermeta.text.content.Content;
 
 public final class Text {
 	
-	public static final String infinity = "" + '\u221E';
+	public static final String infinity = "\u221E";
+	public static final String multiply = "\u00d7";
 	public static final char color_symbol = ChatColor.COLOR_CHAR;
 	
 	public static void logLoad() {
@@ -61,9 +62,9 @@ public final class Text {
 	}
 
 	public static String color(String hex) {
-		String s = color_symbol + "x";
-		for(char c : hex.toCharArray()) s += color_symbol + "" + c;
-		return s;
+		StringBuilder s = new StringBuilder(color_symbol + "x");
+		for(char c : hex.toCharArray()) s.append(color_symbol + "").append(c);
+		return s.toString();
 	}
 	
 	public static String color(int rgb) {
@@ -73,15 +74,15 @@ public final class Text {
 	public static void clean(List<String> list) {
 		boolean n = false;
 		Iterator<String> it = list.iterator();
-		while(it.hasNext() == true) {
-			if(it.next().isEmpty() == true) {
-				if(n == true) it.remove();
+		while(it.hasNext()) {
+			if(it.next().isEmpty()) {
+				if(n) it.remove();
 				n = true;
 			} else n = false;
 		}
-		if(list.isEmpty() == false) {
+		if(!list.isEmpty()) {
 			int last = list.size() - 1;
-			if(list.get(last).isEmpty() == true)
+			if(list.get(last).isEmpty())
 				list.remove(last);
 		}
 	}
@@ -101,7 +102,7 @@ public final class Text {
 			else if(c == '&') l = true;
 			else if(c == '#') h = true;
 			else {
-				if(l == true) {
+				if(l) {
 					String o = switch (c) {
 					case 'a' -> "<#00ff00>"; case 'b' -> "<#00ffff>";
 					case 'c' -> "<#ff0000>"; case 'd' -> "<#ff00ff>";
@@ -117,7 +118,7 @@ public final class Text {
 					};
 					sb.append(o);
 					l = false;
-				} else if(h == true) {
+				} else if(h) {
 					x += "" + c;
 					if(x.length() >= 6) {
 						sb.append("<#").append(x).append('>');
@@ -126,7 +127,7 @@ public final class Text {
 					}
 				} else sb.append(c);
 			}
-			if(i == true && l == true || h == true) return s;
+			if(i && l || h) return s;
 			i = false;
 		}
 		return sb.toString();

@@ -2,6 +2,7 @@ package mc.rellox.spawnermeta.view;
 
 import java.util.List;
 
+import mc.rellox.spawnermeta.text.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -65,9 +66,9 @@ public final class SpawnerView implements Listener {
 	
 	@EventHandler
 	private void onClick(InventoryClickEvent event) {
-		if(player.isOnline() == true) {
-			if(v.equals(event.getClickedInventory()) == false) return;
-			if(player.equals(event.getWhoClicked()) == false) return;
+		if(player.isOnline()) {
+			if(!v.equals(event.getClickedInventory())) return;
+			if(!player.equals(event.getWhoClicked())) return;
 			event.setCancelled(true);
 			int s = event.getSlot();
 			if(s == 33) {
@@ -80,17 +81,17 @@ public final class SpawnerView implements Listener {
 				page--;
 				update();
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 2f, 2f);
-			} else if(player.getGameMode() == GameMode.CREATIVE && player.isOp() == true) {
+			} else if(player.getGameMode() == GameMode.CREATIVE && player.isOp()) {
 				int l = (Math.min(types.size(), (page + 1) * 27) - 1) % 27;
 				if(s > l) return;
 				SpawnerType type = types.get(page * 27 + s);
-				if(type.exists() == false) return;
+				if(!type.exists()) return;
 				int a;
 				ClickType click = event.getClick();
-				if(click.isShiftClick() == true) a = 64;
-				else if(click.isRightClick() == true) a = 8;
+				if(click.isShiftClick()) a = 64;
+				else if(click.isRightClick()) a = 8;
 				else a = 1;
-				CommandManager.success(player, "Added #0 × #1 to your inventory!", a, type.formated() + " Spawner");
+				CommandManager.success(player, "Added #0 " + Text.multiply + " #1 to your inventory!", a, type.formated() + " Spawner");
 				player.getInventory().addItem(DataManager.getSpawners(type, a, false, true).get(0));
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 2f);
 			}
@@ -99,7 +100,7 @@ public final class SpawnerView implements Listener {
 
 	@EventHandler
 	private void onClose(InventoryCloseEvent event) {
-		if(v.equals(event.getInventory()) == false) return;
+		if(!v.equals(event.getInventory())) return;
 		close();
 	}
 	
