@@ -5,9 +5,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import io.github.rvskele.paperlib.PaperLib;
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.utility.Utility;
-import mc.rellox.spawnermeta.utility.adapter.Platform;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -48,7 +48,7 @@ public class SpawnerWorld {
 	}
 
 	public void load(Chunk chunk) {
-		BlockState[] tileEntities = Platform.ADAPTER.getTileEntities(chunk);
+		BlockState[] tileEntities = PaperLib.getTileEntities(chunk, false).getTileEntities();
 		for (BlockState state : tileEntities) {
 			if (state instanceof CreatureSpawner) {
 				Block block = state.getBlock();
