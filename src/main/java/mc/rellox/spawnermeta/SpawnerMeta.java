@@ -25,10 +25,11 @@ import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.version.Version;
+import org.jetbrains.annotations.NotNull;
 
 public final class SpawnerMeta extends JavaPlugin {
 	
-	public static final double PLUGIN_VERSION = 25.5;
+	public static final double PLUGIN_VERSION = 25.6;
 	
 	private static SpawnerMeta plugin;
     
@@ -133,12 +134,12 @@ public final class SpawnerMeta extends JavaPlugin {
 	}
 	
 	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, String label, String[] args) {
 		return CommandManager.onCommand(sender, command, label, args);
 	}
 
 	@Override
-	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+	public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, String alias, String[] args) {
 		return CommandManager.onTabComplete(sender, command, alias, args);
 	}
 	

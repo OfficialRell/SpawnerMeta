@@ -34,257 +34,257 @@ import org.jetbrains.annotations.NotNull;
 
 public final class Utility {
 
-	private static final Random R = new Random();
+    private static final Random R = new Random();
 
-	public static boolean op(Player player) {
-		return player.isOp() && player.getGameMode() == GameMode.CREATIVE;
-	}
+    public static boolean op(Player player) {
+        return player.isOp() && player.getGameMode() == GameMode.CREATIVE;
+    }
 
-	private static final EntityType ITEM_ENTITY;
+    private static final EntityType ITEM_ENTITY;
 
-	static {
-		EntityType found;
-		try {
-			// Newer versions (1.20.6+)
-			found = EntityType.valueOf("ITEM");
-		} catch (IllegalArgumentException ex) {
-			// Older versions
-			found = EntityType.valueOf("DROPPED_ITEM");
-		}
-		ITEM_ENTITY = found;
-	}
+    static {
+        EntityType found;
+        try {
+            // Newer versions (1.20.6+)
+            found = EntityType.valueOf("ITEM");
+        } catch(IllegalArgumentException ex) {
+            // Older versions
+            found = EntityType.valueOf("DROPPED_ITEM");
+        }
+        ITEM_ENTITY = found;
+    }
 
-	// Experience
+    // Experience
 
-	public static void changeExp(Player player, int exp) {
-		player.giveExp(exp);
-	}
+    public static void changeExp(Player player, int exp) {
+        player.giveExp(exp);
+    }
 
-	public static int getExp(Player player) {
-		int v = player.getLevel(), l = getExpAtLevel(v), u = getExpToLevelUp(v);
-		return l + Math.round(u * player.getExp());
-	}
+    public static int getExp(Player player) {
+        int v = player.getLevel(), l = getExpAtLevel(v), u = getExpToLevelUp(v);
+        return l + Math.round(u * player.getExp());
+    }
 
-	public static int getExpAtLevel(int level) {
-		int lq = level * level;
-		if (level <= 16) return (int) (lq + 6 * level);
-		else if (level <= 31) return (int) (2.5 * lq - 40.5 * level + 360.0);
-		else return (int) (4.5 * lq - 162.5 * level + 2220.0);
-	}
+    public static int getExpAtLevel(int level) {
+        int lq = level * level;
+        if(level <= 16) return lq + 6 * level;
+        else if(level <= 31) return (int) (2.5 * lq - 40.5 * level + 360.0);
+        else return (int) (4.5 * lq - 162.5 * level + 2220.0);
+    }
 
-	public static int getExpToLevelUp(int level) {
-		if (level <= 15) return 2 * level + 7;
-		else if (level <= 30) return 5 * level - 38;
-		else return 9 * level - 158;
-	}
+    public static int getExpToLevelUp(int level) {
+        if(level <= 15) return 2 * level + 7;
+        else if(level <= 30) return 5 * level - 38;
+        else return 9 * level - 158;
+    }
 
-	// Locations
+    // Locations
 
-	public static Location center(Block block) {
-		return block.getLocation().add(0.5, 0.5, 0.5);
-	}
+    public static Location center(Block block) {
+        return block.getLocation().add(0.5, 0.5, 0.5);
+    }
 
-	public static int[] location(Block block) {
-		return new int[]{block.getX(), block.getY(), block.getZ()};
-	}
+    public static int[] location(Block block) {
+        return new int[] {block.getX(), block.getY(), block.getZ()};
+    }
 
-	// Roman numerals
+    // Roman numerals
 
-	// 1-I 5-V 10-X 50-L 100-C 500-D 1000-M
-	public static String roman(int i) {
-		if (i <= 0 || i > 5000) return "" + i;
-		StringBuilder sb = new StringBuilder();
-		if (i >= 1000) do sb.append("M"); while ((i -= 1000) >= 1000);
-		if (i >= 900) i -= r(sb, "CM", 900);
-		if (i >= 500) i -= r(sb, "D", 500);
-		if (i >= 400) i -= r(sb, "CD", 400);
-		if (i >= 100) do sb.append("C"); while ((i -= 100) >= 100);
-		if (i >= 90) i -= r(sb, "XC", 90);
-		if (i >= 50) i -= r(sb, "L", 50);
-		if (i >= 40) i -= r(sb, "XL", 40);
-		if (i >= 10) do sb.append("X"); while ((i -= 10) >= 10);
-		if (i >= 9) i -= r(sb, "IX", 9);
-		if (i >= 5) i -= r(sb, "V", 5);
-		if (i >= 4) i -= r(sb, "IV", 4);
-		if (i >= 1) do sb.append("I"); while (--i >= 1);
-		return sb.toString();
-	}
+    // 1-I 5-V 10-X 50-L 100-C 500-D 1000-M
+    public static String roman(int i) {
+        if(i <= 0 || i > 5000) return "" + i;
+        StringBuilder sb = new StringBuilder();
+        if(i >= 1000) do sb.append("M"); while((i -= 1000) >= 1000);
+        if(i >= 900) i -= r(sb, "CM", 900);
+        if(i >= 500) i -= r(sb, "D", 500);
+        if(i >= 400) i -= r(sb, "CD", 400);
+        if(i >= 100) do sb.append("C"); while((i -= 100) >= 100);
+        if(i >= 90) i -= r(sb, "XC", 90);
+        if(i >= 50) i -= r(sb, "L", 50);
+        if(i >= 40) i -= r(sb, "XL", 40);
+        if(i >= 10) do sb.append("X"); while((i -= 10) >= 10);
+        if(i >= 9) i -= r(sb, "IX", 9);
+        if(i >= 5) i -= r(sb, "V", 5);
+        if(i >= 4) i -= r(sb, "IV", 4);
+        if(i >= 1) do sb.append("I"); while(--i >= 1);
+        return sb.toString();
+    }
 
-	private static int r(StringBuilder sb, String s, int i) {
-		sb.append(s);
-		return i;
-	}
+    private static int r(StringBuilder sb, String s, int i) {
+        sb.append(s);
+        return i;
+    }
 
-	// Items
+    // Items
 
-	public static String displayName(ItemStack item) {
-		try {
-			Class<?> clazz = RF.craft("inventory.CraftItemStack");
-			Object nms_item = RF.order(clazz, "asNMSCopy", ItemStack.class).invoke(item);
+    public static String displayName(ItemStack item) {
+        try {
+            Class<?> clazz = RF.craft("inventory.CraftItemStack");
+            Object nms_item = RF.order(clazz, "asNMSCopy", ItemStack.class).invoke(item);
 
-			String[] names = switch (Version.version) {
-				case v_18_1 -> new String[] {"v", "a"};
-				case v_18_2 -> new String[] {"w", "a"};
-				case v_19_1, v_19_2, v_19_3, v_20_4 -> new String[] {"x", "getString"};
-				case v_21_1 -> new String[] {"w", "getString"};
-				default -> new String[] {"y", "getString"};
-			};
-			
-			String a = names[0];
-			String b = names[1];
+            String[] names = switch(Version.version) {
+                case v_18_1 -> new String[] {"v", "a"};
+                case v_18_2 -> new String[] {"w", "a"};
+                case v_19_1, v_19_2, v_19_3, v_20_4 -> new String[] {"x", "getString"};
+                case v_21_1 -> new String[] {"w", "getString"};
+                case v_26 -> new String[] {"getHoverName", "getString"};
+                default -> new String[] {"y", "getString"};
+            };
 
-			Object component = RF.direct(nms_item, a);
-			String name = RF.direct(component, b, String.class);
+            String a = names[0];
+            String b = names[1];
 
-			if (name == null)
-				Bukkit.getLogger().warning("Null name got returned when trying to fetch item name");
+            Object component = RF.direct(nms_item, a);
+            String name = RF.direct(component, b, String.class);
 
-			return ChatColor.stripColor(name);
-		} catch (Exception e) {
-			Bukkit.getLogger().warning("Cannot get item display name");
-			return "null";
-		}
-	}
+            if(name == null)
+                Bukkit.getLogger().warning("Null name got returned when trying to fetch item name");
 
-	// array of item flags to apply to items
-	public static final ItemFlag[] ITEM_FLAGS = Stream.of(
-					"HIDE_ENCHANTS", "HIDE_ADDITIONAL_TOOLTIP", "HIDE_ENTITY_DATA",
-					"HIDE_ATTRIBUTES", "HIDE_DYE", "HIDE_ARMOR_TRIM", "HIDE_ENCHANTMENTS",
-					"HIDE_ATTRIBUTE_MODIFIERS", "HIDE_MAP_ID", "HIDE_TRIM", "HIDE_BUCKET_ENTITY_DATA",
-					"HIDE_BLOCK_ENTITY_DATA"
-			)
-			.map(name -> RF.enumerate(ItemFlag.class, name))
-			.filter(Objects::nonNull)
-			.toArray(ItemFlag[]::new);
+            return ChatColor.stripColor(name);
+        } catch(Exception e) {
+            Bukkit.getLogger().warning("Cannot get item display name");
+            return "null";
+        }
+    }
 
-	public static Entity create(Location location, EntityType type) {
-		Object entity = RF.order(location.getWorld(), "createEntity", Location.class, Class.class)
-				.invoke(location, type.getEntityClass());
-		if (Version.version.atleast(VersionType.v_20_3)) return (Entity) entity;
-		return RF.direct(entity, "getBukkitEntity", Entity.class);
-	}
+    // array of item flags to apply to items
+    public static final ItemFlag[] ITEM_FLAGS = Stream.of(
+                    "HIDE_ENCHANTS", "HIDE_ADDITIONAL_TOOLTIP", "HIDE_ENTITY_DATA",
+                    "HIDE_ATTRIBUTES", "HIDE_DYE", "HIDE_ARMOR_TRIM", "HIDE_ENCHANTMENTS",
+                    "HIDE_ATTRIBUTE_MODIFIERS", "HIDE_MAP_ID", "HIDE_TRIM", "HIDE_BUCKET_ENTITY_DATA",
+                    "HIDE_BLOCK_ENTITY_DATA"
+            )
+            .map(name -> RF.enumerate(ItemFlag.class, name))
+            .filter(Objects::nonNull)
+            .toArray(ItemFlag[]::new);
 
-	public static boolean isWindCharge(Entity entity) {
-		if (!Version.version.atleast(VersionType.v_21_1)) return false;
-		return switch (entity.getType().name()) {
-			case "WIND_CHARGE", "BREEZE_WIND_CHARGE" -> true;
-			default -> false;
-		};
-	}
+    public static Entity create(Location location, EntityType type) {
+        Object entity = RF.order(location.getWorld(), "createEntity", Location.class, Class.class)
+                .invoke(location, type.getEntityClass());
+        if(Version.version.atleast(VersionType.v_20_3)) return (Entity) entity;
+        return RF.direct(entity, "getBukkitEntity", Entity.class);
+    }
 
-	public static boolean nulled(ItemStack item) {
-		return item == null ? true : item.getType() == Material.AIR ? true : false;
-	}
+    public static boolean isWindCharge(Entity entity) {
+        if(!Version.version.atleast(VersionType.v_21_1)) return false;
+        return switch(entity.getType().name()) {
+            case "WIND_CHARGE", "BREEZE_WIND_CHARGE" -> true;
+            default -> false;
+        };
+    }
 
-	// Math
+    public static boolean nulled(ItemStack item) {
+        return item == null || (item.getType() == Material.AIR);
+    }
 
-	public static double round(double d) {
-		int i = (int) (d * 100);
-		return (double) (i / 100.0);
-	}
+    // Math
 
-	public static boolean chance(double chance) {
-		return R.nextDouble() * 100 < chance;
-	}
+    public static double round(double d) {
+        int i = (int) (d * 100);
+        return (double) (i / 100.0);
+    }
 
-	public static int random(int r) {
-		return R.nextInt(r);
-	}
+    public static boolean chance(double chance) {
+        return R.nextDouble() * 100 < chance;
+    }
 
-	public static int between(int a, int b) {
-		return random(b - a + 1) + a;
-	}
+    public static int random(int r) {
+        return R.nextInt(r);
+    }
 
-	public static <E> E random(List<E> list) {
-		int size = list.size();
-		return size > 0 ? list.get(R.nextInt(size)) : null;
-	}
+    public static int between(int a, int b) {
+        return random(b - a + 1) + a;
+    }
 
-	// Validation
+    public static <E> E random(List<E> list) {
+        int size = list.size();
+        return size > 0 ? list.get(R.nextInt(size)) : null;
+    }
 
-	public static boolean isInteger(String s) {
-		try {
-			Integer.parseInt(s);
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
+    // Validation
 
-	public static boolean isDouble(String s) {
-		try {
-			Double.parseDouble(s);
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
+    public static boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
+    }
 
-	public static boolean isInteger(String... l) {
-		if (l == null) return false;
-		for (String s : l) if (!isInteger(s)) return false;
-		return true;
-	}
+    public static boolean isDouble(String s) {
+        try {
+            Double.parseDouble(s);
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
+    }
 
-	public static boolean isLetter(char c) {
-		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-	}
+    public static boolean isInteger(String... l) {
+        if(l == null) return false;
+        for(String s : l) if(!isInteger(s)) return false;
+        return true;
+    }
 
-	public static boolean isNumber(char c) {
-		return c >= '0' && c <= '9';
-	}
+    public static boolean isLetter(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
 
-	public static boolean isValid(String s) {
-		for (char c : s.toCharArray())
-			if (!isLetter(c) && !isNumber(c) && c != '_' && c != '.')
-				return false;
-		return true;
-	}
+    public static boolean isNumber(char c) {
+        return c >= '0' && c <= '9';
+    }
 
-	public static boolean isItem(EntityType type) {
-		return type == ITEM_ENTITY;
-	}
+    public static boolean isValid(String s) {
+        for(char c : s.toCharArray())
+            if(!isLetter(c) && !isNumber(c) && c != '_' && c != '.')
+                return false;
+        return true;
+    }
 
-	// Types
+    public static boolean isItem(EntityType type) {
+        return type == ITEM_ENTITY;
+    }
 
-	public static final Particle particle_sharpness = RF.enumerate(Particle.class, "CRIT_MAGIC", "ENCHANTED_HIT");
-	public static final Particle particle_redstone = RF.enumerate(Particle.class, "REDSTONE", "DUST");
-	public static final Particle particle_happy = RF.enumerate(Particle.class, "VILLAGER_HAPPY", "HAPPY_VILLAGER");
-	public static final Particle particle_angry = RF.enumerate(Particle.class, "VILLAGER_ANGRY", "ANGRY_VILLAGER");
-	public static final Particle particle_firework = RF.enumerate(Particle.class, "FIREWORKS_SPARK", "FIREWORK");
+    // Types
 
-	@SuppressWarnings("deprecation")
-	public static final Enchantment enchantment_power = RF.enumerate(Enchantment::getByName, "ARROW_DAMAGE", "POWER");
+    public static final Particle particle_sharpness = RF.enumerate(Particle.class, "CRIT_MAGIC", "ENCHANTED_HIT");
+    public static final Particle particle_redstone = RF.enumerate(Particle.class, "REDSTONE", "DUST");
+    public static final Particle particle_happy = RF.enumerate(Particle.class, "VILLAGER_HAPPY", "HAPPY_VILLAGER");
+    public static final Particle particle_angry = RF.enumerate(Particle.class, "VILLAGER_ANGRY", "ANGRY_VILLAGER");
+    public static final Particle particle_firework = RF.enumerate(Particle.class, "FIREWORKS_SPARK", "FIREWORK");
 
-	// Attributes
+    @SuppressWarnings("deprecation")
+    public static final Enchantment enchantment_power = RF.enumerate(Enchantment::getByName, "ARROW_DAMAGE", "POWER");
 
-	public static final Attribute attribute_damage = RF.fielded(Attribute.class, "GENERIC_ATTACK_DAMAGE", "ATTACK_DAMAGE");
-	public static final Attribute attribute_speed = RF.fielded(Attribute.class, "GENERIC_MOVEMENT_SPEED", "MOVEMENT_SPEED");
+    // Attributes
 
-	// Version check
+    public static final Attribute attribute_damage = RF.fielded(Attribute.class, "GENERIC_ATTACK_DAMAGE", "ATTACK_DAMAGE");
+    public static final Attribute attribute_speed = RF.fielded(Attribute.class, "GENERIC_MOVEMENT_SPEED", "MOVEMENT_SPEED");
 
-	@SuppressWarnings("deprecation")
-	public static void check(final int id, final Consumer<String> action) {
-		SpawnerMeta.scheduler().runLaterAsync(() -> {
-			try (InputStream is = new URI("https://api.spigotmc.org/legacy/update.php?resource=" + id)
-					.toURL().openStream();
-				 Scanner sc = new Scanner(is)) {
-				if (sc.hasNext()) action.accept(sc.next());
-			} catch (Exception ignored) {
-			}
-		}, 50);
-	}
+    // Version check
 
-	public static long getChunkKey(@NotNull Pos pos) {
-		return getChunkKey(pos.x() >> 4, pos.z() >> 4);
-	}
+    public static void check(final int id, final Consumer<String> action) {
+        SpawnerMeta.scheduler().runLaterAsync(() -> {
+            try(InputStream is = new URI("https://api.spigotmc.org/legacy/update.php?resource=" + id)
+                    .toURL().openStream();
+                Scanner sc = new Scanner(is)) {
+                if(sc.hasNext()) action.accept(sc.next());
+            } catch(Exception ignored) {
+            }
+        }, 50);
+    }
 
-	public static long getChunkKey(Chunk chunk) {
-		return getChunkKey(chunk.getX(), chunk.getZ());
-	}
+    public static long getChunkKey(@NotNull Pos pos) {
+        return getChunkKey(pos.x() >> 4, pos.z() >> 4);
+    }
 
-	private static long getChunkKey(int x, int z) {
-		return (long) x & 0xffffffffL | ((long) z & 0xffffffffL) << 32;
-	}
+    public static long getChunkKey(Chunk chunk) {
+        return getChunkKey(chunk.getX(), chunk.getZ());
+    }
+
+    private static long getChunkKey(int x, int z) {
+        return (long) x & 0xffffffffL | ((long) z & 0xffffffffL) << 32;
+    }
 
 }
