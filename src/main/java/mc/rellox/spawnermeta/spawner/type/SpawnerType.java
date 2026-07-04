@@ -1,16 +1,15 @@
 package mc.rellox.spawnermeta.spawner.type;
 
-import java.util.stream.Stream;
-
-import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
-
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.utility.region.EntityBox;
 import mc.rellox.spawnermeta.utility.region.IEntityMulitbox;
+import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
+
+import java.util.stream.Stream;
 
 public enum SpawnerType {
 	
@@ -216,7 +215,8 @@ public enum SpawnerType {
 	}
 	
 	private static EntityType _e(String... ns) {
-		return ns.length == 1 ? RF.enumerate(EntityType.class, ns[0])
+		return ns.length == 1
+				? RF.enumerate(EntityType.class, ns[0])
 				: RF.enumerate(EntityType.class, ns);
 	}
 	
