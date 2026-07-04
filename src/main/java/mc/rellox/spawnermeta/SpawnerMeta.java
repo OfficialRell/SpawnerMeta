@@ -1,16 +1,7 @@
 package mc.rellox.spawnermeta;
 
-import java.util.List;
-
-import org.bstats.bukkit.Metrics;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import com.tcoded.folialib.FoliaLib;
 import com.tcoded.folialib.impl.PlatformScheduler;
-
 import mc.rellox.spawnermeta.api.APIInstance;
 import mc.rellox.spawnermeta.api.APIRegistry;
 import mc.rellox.spawnermeta.commands.CommandManager;
@@ -25,12 +16,17 @@ import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.version.Version;
+import org.bstats.bukkit.Metrics;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public final class SpawnerMeta extends JavaPlugin {
-	
-	public static final double PLUGIN_VERSION = 25.6;
-	
+
 	private static SpawnerMeta plugin;
     
     private static boolean loaded;
@@ -64,9 +60,11 @@ public final class SpawnerMeta extends JavaPlugin {
 		if(loaded) {
 			Text.logLoad();
 			Utility.check(74188, s -> {
-				if(!Utility.isDouble(s)) return;
+				var version = version();
+				if(!Utility.isDouble(s) || !Utility.isDouble(version)) return;
 				double v = Double.parseDouble(s);
-				if(v > PLUGIN_VERSION) Text.logOutdated(v);
+				double c = Double.parseDouble(version);
+				if(v > c) Text.logOutdated(v);
 			});
 			HookRegistry.load();
 			Configuration.initialize();
@@ -99,6 +97,14 @@ public final class SpawnerMeta extends JavaPlugin {
 	
 	public static SpawnerMeta instance() {
 		return plugin;
+	}
+
+	/**
+	 * @return Plugin version
+	 */
+
+	public static String version() {
+		return plugin.getDescription().getVersion();
 	}
 	
 	/**
@@ -134,13 +140,15 @@ public final class SpawnerMeta extends JavaPlugin {
 	}
 	
 	@Override
-	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, String label, String[] args) {
-		return CommandManager.onCommand(sender, command, label, args);
+	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
+							 @NotNull String label, String[] args) {
+		return CommandManager.onCommand(sender, command, args);
 	}
 
 	@Override
-	public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, String alias, String[] args) {
-		return CommandManager.onTabComplete(sender, command, alias, args);
+	public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+									  @NotNull String alias, String[] args) {
+		return CommandManager.onTabComplete(command, args);
 	}
 	
 	private void initializeMetrics() {

@@ -1,9 +1,8 @@
 package mc.rellox.spawnermeta.version;
 
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.version.types.IVersion26;
 import org.bukkit.Bukkit;
-
-import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 
 public final class Version {
 
@@ -16,7 +15,8 @@ public final class Version {
 		server = s.substring(s.lastIndexOf('.') + 1);
 		String bukkit = Bukkit.getBukkitVersion();
 
-		if(bukkit.startsWith("26.1.2")
+		if(bukkit.startsWith("26.2")
+				|| bukkit.startsWith("26.1.2")
 				|| bukkit.startsWith("26.1.1")
 				|| bukkit.startsWith("26.1")) version = VersionType.v_26;
 		else if(server.contains("v1_21_R7")
