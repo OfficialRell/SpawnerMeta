@@ -316,7 +316,9 @@ public class ActiveGenerator implements IGenerator {
 		count = call.count;
 		
 		if(!call.bypass_checks && s.charges_enabled && cache.charges() <= 0) {
-			boolean ignore = s.charges_ignore_natural && cache.natural();
+			boolean ignore = s.charges_ignore_natural
+					&& cache.natural()
+					&& cache.charges() >= s.charges_requires_as_minimum(cache.type(), this);
 			if(ignore) warnings.remove(SpawnerWarning.CHARGES);
 			else {
 				warn(SpawnerWarning.CHARGES);
@@ -375,7 +377,7 @@ public class ActiveGenerator implements IGenerator {
 
 		if(!call.bypass_checks && s.charges_enabled
 				&& cache.charges() < 1_000_000_000)
-			spawner.setCharges(cache.charges() - s.charges_consume.get(cache.type()));
+			spawner.setCharges(cache.charges() - s.charges_consume(cache.type(), this));
 
 		if(spawned >= 0) {
 			spawner.setSpawnable(spawned);
