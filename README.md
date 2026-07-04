@@ -13,7 +13,7 @@ This plugin implements fully customizable and upgradeable spawners.
 <dependency>
   <groupId>com.github.OfficialRell</groupId>
   <artifactId>spawnermeta</artifactId>
-  <version>25.6</version>
+  <version>latest</version>
   <scope>provided</scope>
 </dependency>
 ```
