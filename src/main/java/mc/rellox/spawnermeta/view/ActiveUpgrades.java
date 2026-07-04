@@ -1,25 +1,5 @@
 package mc.rellox.spawnermeta.view;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Particle.DustOptions;
-import org.bukkit.Sound;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.events.SpawnerChargeEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerSwitchEvent;
@@ -46,6 +26,25 @@ import mc.rellox.spawnermeta.text.order.IOrder;
 import mc.rellox.spawnermeta.utility.Messagable;
 import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.view.layout.LayoutRegistry;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Particle.DustOptions;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 public final class ActiveUpgrades implements Listener, IUpgrades {
 	
@@ -209,7 +208,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			if(call.cancelled() || !call.withdraw(player)) return;
 			
 			int u = call.upgrade_level;
-			ls[i] = u < 1 ? 1 : u > ms[i] ? ms[i] : u;
+			ls[i] = u < 1 ? 1 : Math.min(u, ms[i]);
 			
 			spawner.setUpgradeLevels(ls);
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
@@ -267,7 +266,6 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		update();
 	}
 	
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	private void onClose(InventoryCloseEvent event) {
 		if(!active) return;
@@ -310,7 +308,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		
 		List<Content> name = Language.list("Upgrade-GUI.items.upgrade.name." + u.lower(),
 				"level", Utility.roman(level));
-		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
+		if(!name.isEmpty()) meta.setDisplayName(name.removeFirst().text());
 
 		IOrder order = LayoutRegistry.order_upgrade.oderer();
 		
@@ -363,7 +361,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		ItemMeta meta = item.getItemMeta();
 		
 		List<Content> name = Language.list("Upgrade-GUI.items.disabled-upgrade.name." + u.lower());
-		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
+		if(!name.isEmpty()) meta.setDisplayName(name.removeFirst().text());
 
 		IOrder order = LayoutRegistry.order_disabled.oderer();
 
@@ -397,7 +395,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		
 		List<Content> name = Language.list("Upgrade-GUI.items.stats.name",
 				"type", cache.type());
-		if(name.size() > 0) meta.setDisplayName(name.remove(0).text());
+		if(!name.isEmpty()) meta.setDisplayName(name.removeFirst().text());
 		
 		IOrder order = LayoutRegistry.order_stats.oderer();
 
@@ -471,7 +469,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 	
 	private int lowestCharges() {
 		Price c = Price.of(Group.charges, 0);
-		if(players.size() == 1) return c.balance(players.get(0));
+		if(players.size() == 1) return c.balance(players.getFirst());
 		return players.stream()
 				.mapToInt(c::balance)
 				.min()

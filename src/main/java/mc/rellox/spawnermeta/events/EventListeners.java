@@ -71,6 +71,8 @@ public class EventListeners implements Listener {
 		if(event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
 		Block block = event.getClickedBlock();
+		if(block == null) return;
+
 		if(event.getHand() == EquipmentSlot.OFF_HAND) {
 			ItemStack item = event.getItem();
 			if(item != null && item.getType().name().endsWith("_EGG")
@@ -226,11 +228,13 @@ public class EventListeners implements Listener {
 		protected void register() {
 			if(registered) return;
 			Bukkit.getPluginManager().registerEvents(this, SpawnerMeta.instance());
+			registered = true;
 		}
 		
 		protected void unregister() {
 			if(!registered) return;
 			HandlerList.unregisterAll(this);
+			registered = false;
 		}
 		
 		public abstract void update();
@@ -290,8 +294,8 @@ public class EventListeners implements Listener {
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		private void onAnvilPrep(PrepareAnvilEvent event) {
-			var res = event.getResult();
-			if(res == null || res.getType() != Material.SPAWNER) return;
+			var result = event.getResult();
+			if(result == null || result.getType() != Material.SPAWNER) return;
 			event.setResult(null);
 		}
 		

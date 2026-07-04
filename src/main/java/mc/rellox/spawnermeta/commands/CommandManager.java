@@ -1,25 +1,5 @@
 package mc.rellox.spawnermeta.commands;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.configuration.IPlayerData;
 import mc.rellox.spawnermeta.configuration.Configuration;
@@ -41,6 +21,20 @@ import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Messagable;
 import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class CommandManager {
 
@@ -62,7 +56,7 @@ public final class CommandManager {
 			cm.register(name, c);
 		} catch(Exception e) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
-					+ ChatColor.DARK_RED + "An error accured while registering spawner view command (" + name + ")! "
+					+ ChatColor.DARK_RED + "An error occurred while registering spawner view command (" + name + ")! "
 					+ "Try changing it, and restart your server!");
 			return;
 		}
@@ -75,7 +69,7 @@ public final class CommandManager {
 			cm.register(name, c);
 		} catch(Exception e) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
-					+ ChatColor.DARK_RED + "An error accured while registering spawner shop command (" + name + ")! "
+					+ ChatColor.DARK_RED + "An error occurred while registering spawner shop command (" + name + ")! "
 					+ "Try changing it, and restart your server!");
 			return;
 		}
@@ -88,7 +82,7 @@ public final class CommandManager {
 			cm.register(name, c);
 		} catch(Exception e) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
-					+ ChatColor.DARK_RED + "An error accured while registering spawner drops command (" + name + ")! "
+					+ ChatColor.DARK_RED + "An error occurred while registering spawner drops command (" + name + ")! "
 					+ "Try changing it, and restart your server!");
 			return;
 		}
@@ -101,7 +95,7 @@ public final class CommandManager {
 			cm.register(name, c);
 		} catch(Exception e) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
-					+ ChatColor.DARK_RED + "An error accured while registering spawner locations command (" + name + ")! "
+					+ ChatColor.DARK_RED + "An error occurred while registering spawner locations command (" + name + ")! "
 					+ "Try changing it, and restart your server!");
 			return;
 		}
@@ -114,13 +108,12 @@ public final class CommandManager {
 			cm.register(name, c);
 		} catch(Exception e) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta" + ChatColor.DARK_PURPLE + "] "
-					+ ChatColor.DARK_RED + "An error accured while registering spawner trust command (" + name + ")! "
+					+ ChatColor.DARK_RED + "An error occurred while registering spawner trust command (" + name + ")! "
 					+ "Try changing it, and restart your server!");
-			return;
-		}
+        }
 	}
 
-	public static boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+	public static boolean onCommand(CommandSender sender, Command command, String[] args) {
 		Player player = (sender instanceof Player p) ? p : null;
 		if(command.equals(CommandManager.SPAWNERMETA)) {
 			String help = help(command, null, "update", "give", "modify", "location", "active", "disable", "version");
@@ -138,7 +131,7 @@ public final class CommandManager {
 			} else if(args[0].equalsIgnoreCase("active")) {
 				active0(sender, command, args);
 			} else if(args[0].equalsIgnoreCase("version")) {
-				success(sender, "You are running SpawnerMeta v#0", SpawnerMeta.PLUGIN_VERSION);
+				success(sender, "You are running SpawnerMeta v#0", SpawnerMeta.version());
 			} else sender.sendMessage(help);
 		}
 		return false;
@@ -201,7 +194,7 @@ public final class CommandManager {
 				List<World> has = new LinkedList<>();
 				List<Set<Location>> locations = new LinkedList<>();
 				
-				worlds.stream().forEach(world -> {
+				worlds.forEach(world -> {
 					Set<Location> set = il.get(world);
 					if(set.isEmpty()) return;
 					has.add(world);
@@ -290,13 +283,12 @@ public final class CommandManager {
 				if(type == null) warn(sender, "Invalid type!");
 				else {
 					Block block = player.getTargetBlock(null, 10);
-					if(block == null) warn(sender, "Target spawner not found!");
-					else if(block.getType() != Material.SPAWNER) warn(sender, "Target spawner is not a spawner!");
-					else {
-						DataManager.setType(block, type);
-						GeneratorRegistry.update(block);
-						success(sender, "Spawner type set to #0!", type.formated());
-					}
+                    if(block.getType() != Material.SPAWNER) warn(sender, "Target spawner is not a spawner!");
+                    else {
+                        DataManager.setType(block, type);
+                        GeneratorRegistry.update(block);
+                        success(sender, "Spawner type set to #0!", type.formated());
+                    }
 				}
 			}
 		} else if(args[1].equalsIgnoreCase("stack")) {
@@ -308,14 +300,13 @@ public final class CommandManager {
 				else {
 					int s = Integer.parseInt(a);
 					Block block = player.getTargetBlock(null, 10);
-					if(block == null) warn(sender, "Target spawner not found!");
-					else if(block.getType() != Material.SPAWNER) warn(sender, "Target spawner is not a spawner!");
-					else {
-						if(a.charAt(0) == '+' || a.charAt(0) == '-') s += DataManager.getStack(block);
-						DataManager.setStack(block, s < 1 ? 1 : s);
-						GeneratorRegistry.update(block);
-						success(sender, "Spawner stack size set to #0!", s);
-					}
+                    if(block.getType() != Material.SPAWNER) warn(sender, "Target spawner is not a spawner!");
+                    else {
+                        if(a.charAt(0) == '+' || a.charAt(0) == '-') s += DataManager.getStack(block);
+                        DataManager.setStack(block, Math.max(s, 1));
+                        GeneratorRegistry.update(block);
+                        success(sender, "Spawner stack size set to #0!", s);
+                    }
 				}
 			}
 		} else if(args[1].equalsIgnoreCase("entities")) {
@@ -328,14 +319,13 @@ public final class CommandManager {
 				else {
 					int s = inf ? 1_500_000_000 : Integer.parseInt(a);
 					Block block = player.getTargetBlock(null, 10);
-					if(block == null) warn(sender, "Target spawner not found!");
-					else if(block.getType() != Material.SPAWNER) warn(sender, "Target spawner is not a spawner!");
-					else {
-						if(a.charAt(0) == '+' || a.charAt(0) == '-') s += DataManager.getSpawnable(block);
-						DataManager.setSpawnable(block, s < 1 ? 1 : s);
-						GeneratorRegistry.update(block);
-						success(sender, "Spawner spawnable entity set to #0!", inf ? "infinite" : s);
-					}
+                    if(block.getType() != Material.SPAWNER) warn(sender, "Target spawner is not a spawner!");
+                    else {
+                        if(a.charAt(0) == '+' || a.charAt(0) == '-') s += DataManager.getSpawnable(block);
+                        DataManager.setSpawnable(block, Math.max(s, 1));
+                        GeneratorRegistry.update(block);
+                        success(sender, "Spawner spawnable entity set to #0!", inf ? "infinite" : s);
+                    }
 				}
 			}
 		} else if(args[1].equalsIgnoreCase("charges")) {
@@ -348,14 +338,13 @@ public final class CommandManager {
 				else {
 					int s = inf ? 1_500_000_000 : Integer.parseInt(a);
 					Block block = player.getTargetBlock(null, 10);
-					if(block == null) warn(sender, "Target spawner not found!");
-					else if(block.getType() != Material.SPAWNER) warn(sender, "Target spawner is not a spawner!");
-					else {
-						if(a.charAt(0) == '+' || a.charAt(0) == '-') s += DataManager.getCharges(block);
-						DataManager.setCharges(block, s);
-						GeneratorRegistry.update(block);
-						success(sender, "Spawner charges set to #0!", inf ? "infinite" : s);
-					}
+                    if(block.getType() != Material.SPAWNER) warn(sender, "Target spawner is not a spawner!");
+                    else {
+                        if(a.charAt(0) == '+' || a.charAt(0) == '-') s += DataManager.getCharges(block);
+                        DataManager.setCharges(block, s);
+                        GeneratorRegistry.update(block);
+                        success(sender, "Spawner charges set to #0!", inf ? "infinite" : s);
+                    }
 				}
 			}
 		} else sender.sendMessage(help0);
@@ -378,7 +367,7 @@ public final class CommandManager {
 						if(items.isEmpty()) warn(sender, "Could not create any items!");
 						else {
 							m.send(Language.list("Spawners.give.success-single", "type", type.formated()));
-							player.getInventory().addItem(items.get(0));
+							player.getInventory().addItem(items.getFirst());
 							player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 2f);
 						}
 					}
@@ -390,22 +379,23 @@ public final class CommandManager {
 						if(player != null) {
 							m.send(Language.list("Spawners.give.success",
 									"amount", amount, "type", type.formated()));
-							player.getInventory().addItem(DataManager.getSpawners(type, amount, empty, true).get(0));
+							player.getInventory().addItem(DataManager.getSpawners(type, amount, empty, true)
+									.getFirst());
 						} else warn(sender, "You must define a player to use this command in console!");
 					} else {
 						Player getter = Bukkit.getPlayer(args[3]);
 						if(getter == null) warn(sender, "Player not online!");
 						else if(args.length < 5) {
-							ItemStack item = DataManager.getSpawners(type, amount, empty, true).get(0);
+							ItemStack item = DataManager.getSpawners(type, amount, empty, true).getFirst();
 							ItemMatcher.add(getter, item);
 						} else {
-							String values = "";
-							for(int i = 4; i < args.length; i++) values += args[i];
-							if(values.matches("((\\d+|-)[,;:]){2}(\\d+|-)([,;:](\\d+|-|[a-z]+)){0,2}")) {
-								List<ItemStack> items = DataManager.getSpawner(type, values, amount, empty);
-								if(items.isEmpty()) warn(sender, "Unable to read values (#0)!", values);
+							StringBuilder values = new StringBuilder();
+							for(int i = 4; i < args.length; i++) values.append(args[i]);
+							if(values.toString().matches("((\\d+|-)[,;:]){2}(\\d+|-)([,;:](\\d+|-|[a-z]+)){0,2}")) {
+								List<ItemStack> items = DataManager.getSpawner(type, values.toString(), amount, empty);
+								if(items.isEmpty()) warn(sender, "Unable to read values (#0)!", values.toString());
 								else items.forEach(item -> ItemMatcher.add(getter, item));
-							} else warn(sender, "Unable to read values (#0)!", values);
+							} else warn(sender, "Unable to read values (#0)!", values.toString());
 						}
 					}
 				}
@@ -471,21 +461,21 @@ public final class CommandManager {
 	private static String help(Command command, String arg, String... ss) {
 		String help = c3 + "Usage: " + c0 + "/" + command.getLabel();
 		if(arg != null) help += " " + arg;
-		String a = c1 + " [";
+		StringBuilder builder = new StringBuilder(c1 + " [");
 		for(int i = 0, l = ss.length - 1; i < ss.length; i++) {
-			a += c2 + ss[i];
-			if(i < l) a += c0 + "/";
+			builder.append(c2).append(ss[i]);
+			if(i < l) builder.append(c0).append("/");
 		}
-		return help + a + c1 + "]";
+		return help + builder + c1 + "]";
 	}
 	
 	private static String extra(String... ss) {
-		String a = c1 + " [";
+		StringBuilder builder = new StringBuilder(c1 + " [");
 		for(int i = 0, l = ss.length - 1; i < ss.length; i++) {
-			a += c2 + ss[i];
-			if(i < l) a += c0 + "/";
+			builder.append(c2).append(ss[i]);
+			if(i < l) builder.append(c0).append("/");
 		}
-		return a + c1 + "]";
+		return builder + c1 + "]";
 	}
 	
 	public static void warn(CommandSender sender, String warning, Object... os) {
@@ -507,50 +497,50 @@ public final class CommandManager {
 		sender.sendMessage(message);
 	}
 	
-	public static List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+	public static List<String> onTabComplete(Command command, String[] args) {
 		List<String> l = new ArrayList<>();
 		if(command.equals(CommandManager.SPAWNERMETA)) {
 			if(args.length < 1) return null;
-			else if(args.length < 2) return sm(args[0]);
+			else if(args.length < 2) return tab_options(args[0]);
 			else if(args[0].equalsIgnoreCase("update")) {
-				if(args.length < 3) return up(args[1]);
+				if(args.length < 3) return tab_update(args[1]);
 				else return l;
 			} else if(args[0].equalsIgnoreCase("give")) {
-				if(args.length < 3) return entities(args[1]);
+				if(args.length < 3) return tab_entities(args[1]);
 				else if(args.length < 4) return l;
 				else {
 					if(Utility.isInteger(args[2])) {
-						if(args.length < 5) return pl(args[3]);
+						if(args.length < 5) return tab_players(args[3]);
 						else return l;
 					} else return l;
 				}
 			} else if(args[0].equalsIgnoreCase("modify")) {
-				if(args.length < 3) return mo(args[1]);
+				if(args.length < 3) return tab_modify(args[1]);
 				else if(args[1].equalsIgnoreCase("type")) {
-					if(args.length < 4) return entities(args[2]);
+					if(args.length < 4) return tab_entities(args[2]);
 					else return l;
 				} else if(args[1].equalsIgnoreCase("charges")
 						|| args[1].equalsIgnoreCase("entities")) {
-					if(args.length < 4) return inf(args[2]);
+					if(args.length < 4) return tab_infinite(args[2]);
 					else return l;
 				} else return l;
 			} else if(args[0].equalsIgnoreCase("location")) {
-				if(args.length < 3) return ll(args[1]);
-				else if(args.length < 4) return oo(args[2]);
-				else if(args.length < 5) return ww(args[3]);
+				if(args.length < 3) return tab_location(args[1]);
+				else if(args.length < 4) return tab_locations(args[2]);
+				else if(args.length < 5) return tab_worlds(args[3]);
 				else return l;
 			} else if(args[0].equalsIgnoreCase("disable")) {
-				if(args.length < 3) return tf(args[1]);
+				if(args.length < 3) return tab_bool(args[1]);
 				else return l;
 			} else if(args[0].equalsIgnoreCase("active")) {
-				if(args.length < 3) return wa(args[1]);
+				if(args.length < 3) return tab_worlds_all(args[1]);
 				else return l;
 			} else return l;
 		}
 		return null;
 	}
 	
-	private static List<String> sm(String s) {
+	private static List<String> tab_options(String s) {
 		List<String> l = new ArrayList<>();
 		l.add("update");
 		l.add("modify");
@@ -562,20 +552,20 @@ public final class CommandManager {
 		return reduce(l, s);
 	}
 
-	private static List<String> pl(String s) {
+	private static List<String> tab_players(String s) {
 		return reduce(Bukkit.getOnlinePlayers().stream()
 				.map(Player::getName)
 				.collect(Collectors.toList()), s);
 	}
 
-	private static List<String> tf(String s) {
+	private static List<String> tab_bool(String s) {
 		List<String> l = new ArrayList<>();
 		l.add("true");
 		l.add("false");
 		return reduce(l, s);
 	}
 
-	private static List<String> mo(String s) {
+	private static List<String> tab_modify(String s) {
 		List<String> l = new ArrayList<>();
 		l.add("type");
 		l.add("stack");
@@ -584,7 +574,7 @@ public final class CommandManager {
 		return reduce(l, s);
 	}
 
-	private static List<String> ll(String s) {
+	private static List<String> tab_location(String s) {
 		List<String> l = new ArrayList<>();
 		l.add("view");
 		l.add("clear");
@@ -592,18 +582,18 @@ public final class CommandManager {
 		return reduce(l, s);
 	}
 
-	private static List<String> oo(String s) {
+	private static List<String> tab_locations(String s) {
 		return reduce(LocationRegistry.names(), s);
 	}
 
-	private static List<String> ww(String s) {
+	private static List<String> tab_worlds(String s) {
 		return reduce(Bukkit.getWorlds()
 				.stream()
 				.map(World::getName)
 				.toList(), s);
 	}
 
-	private static List<String> wa(String s) {
+	private static List<String> tab_worlds_all(String s) {
 		List<String> list = Bukkit.getWorlds()
 				.stream()
 				.map(World::getName)
@@ -612,7 +602,7 @@ public final class CommandManager {
 		return reduce(list, s);
 	}
 
-	private static List<String> up(String s) {
+	private static List<String> tab_update(String s) {
 		List<String> l = new ArrayList<>();
 		l.add("#all");
 		l.add("configuration");
@@ -622,13 +612,13 @@ public final class CommandManager {
 		return reduce(l, s);
 	}
 
-	private static List<String> inf(String s) {
+	private static List<String> tab_infinite(String s) {
 		List<String> l = new ArrayList<>();
 		l.add("infinite");
 		return reduce(l, s);
 	}
 
-	private static List<String> entities(String s) {
+	private static List<String> tab_entities(String s) {
 		return reduce(Stream.of(SpawnerType.values())
 				.filter(SpawnerType::exists)
 				.map(SpawnerType::name)

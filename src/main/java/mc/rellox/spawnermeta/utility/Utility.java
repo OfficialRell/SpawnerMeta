@@ -1,22 +1,11 @@
 package mc.rellox.spawnermeta.utility;
 
-import java.io.InputStream;
-import java.net.URI;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-
+import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.location.Pos;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
+import mc.rellox.spawnermeta.version.Version;
+import mc.rellox.spawnermeta.version.Version.VersionType;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -25,12 +14,16 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-
-import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
-import mc.rellox.spawnermeta.version.Version;
-import mc.rellox.spawnermeta.version.Version.VersionType;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.InputStream;
+import java.net.URI;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public final class Utility {
 
@@ -103,7 +96,7 @@ public final class Utility {
         if(i >= 50) i -= r(sb, "L", 50);
         if(i >= 40) i -= r(sb, "XL", 40);
         if(i >= 10) do sb.append("X"); while((i -= 10) >= 10);
-        if(i >= 9) i -= r(sb, "IX", 9);
+        if(i == 9) i -= r(sb, "IX", 9);
         if(i >= 5) i -= r(sb, "V", 5);
         if(i >= 4) i -= r(sb, "IV", 4);
         if(i >= 1) do sb.append("I"); while(--i >= 1);
@@ -181,7 +174,7 @@ public final class Utility {
 
     public static double round(double d) {
         int i = (int) (d * 100);
-        return (double) (i / 100.0);
+        return i / 100.0;
     }
 
     public static boolean chance(double chance) {
@@ -248,19 +241,27 @@ public final class Utility {
 
     // Types
 
-    public static final Particle particle_sharpness = RF.enumerate(Particle.class, "CRIT_MAGIC", "ENCHANTED_HIT");
-    public static final Particle particle_redstone = RF.enumerate(Particle.class, "REDSTONE", "DUST");
-    public static final Particle particle_happy = RF.enumerate(Particle.class, "VILLAGER_HAPPY", "HAPPY_VILLAGER");
-    public static final Particle particle_angry = RF.enumerate(Particle.class, "VILLAGER_ANGRY", "ANGRY_VILLAGER");
-    public static final Particle particle_firework = RF.enumerate(Particle.class, "FIREWORKS_SPARK", "FIREWORK");
+    public static final Particle particle_sharpness =
+            Objects.requireNonNull(RF.enumerate(Particle.class, "CRIT_MAGIC", "ENCHANTED_HIT"));
+    public static final Particle particle_redstone =
+            Objects.requireNonNull(RF.enumerate(Particle.class, "REDSTONE", "DUST"));
+    public static final Particle particle_happy =
+            Objects.requireNonNull(RF.enumerate(Particle.class, "VILLAGER_HAPPY", "HAPPY_VILLAGER"));
+    public static final Particle particle_angry =
+            Objects.requireNonNull(RF.enumerate(Particle.class, "VILLAGER_ANGRY", "ANGRY_VILLAGER"));
+    public static final Particle particle_firework =
+            Objects.requireNonNull(RF.enumerate(Particle.class, "FIREWORKS_SPARK", "FIREWORK"));
 
     @SuppressWarnings("deprecation")
-    public static final Enchantment enchantment_power = RF.enumerate(Enchantment::getByName, "ARROW_DAMAGE", "POWER");
+    public static final Enchantment enchantment_power =
+            Objects.requireNonNull(RF.enumerate(Enchantment::getByName, "ARROW_DAMAGE", "POWER"));
 
     // Attributes
 
-    public static final Attribute attribute_damage = RF.fielded(Attribute.class, "GENERIC_ATTACK_DAMAGE", "ATTACK_DAMAGE");
-    public static final Attribute attribute_speed = RF.fielded(Attribute.class, "GENERIC_MOVEMENT_SPEED", "MOVEMENT_SPEED");
+    public static final Attribute attribute_damage =
+            Objects.requireNonNull(RF.fielded(Attribute.class, "GENERIC_ATTACK_DAMAGE", "ATTACK_DAMAGE"));
+    public static final Attribute attribute_speed =
+            Objects.requireNonNull(RF.fielded(Attribute.class, "GENERIC_MOVEMENT_SPEED", "MOVEMENT_SPEED"));
 
     // Version check
 

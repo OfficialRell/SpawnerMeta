@@ -6,9 +6,9 @@ import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.text.content.Content;
 
-public class Hologram extends AbstractHologram {
+public class HologramIdentity extends HologramImpl {
 	
-	public Hologram(IGenerator generator) {
+	public HologramIdentity(IGenerator generator) {
 		super(generator, false, Settings.settings.holograms_regular_radius);
 	}
 	
@@ -17,10 +17,12 @@ public class Hologram extends AbstractHologram {
 		SpawnerType type = generator.cache().type();
 		String r = type == SpawnerType.EMPTY ? "empty" : "regular";
 		int stack = generator.cache().stack();
-		return stack > 1 ? Language.get("Holograms." + r + ".multiple",
-				"name", type, "stack", stack)
+		return stack > 1
+				? Language.get("Holograms." + r + ".multiple",
+				"name", type,
+				"stack", stack)
 				: Language.get("Holograms." + r + ".single",
-						"name", type);
+				"name", type);
 	}
 
 }

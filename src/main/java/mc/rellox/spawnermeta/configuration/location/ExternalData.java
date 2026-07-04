@@ -33,7 +33,7 @@ public class ExternalData {
 	}
 	
 	public void load(IFile file) {
-		LocationRegistry.EXTERNA_DATA.forEach(data -> {
+		LocationRegistry.EXTERNAL_DATA.forEach(data -> {
 			Object value = data.load(file);
 			if(value == null) values.remove(data.id());
 			else values.put(data.id(), value);
@@ -41,7 +41,7 @@ public class ExternalData {
 	}
 	
 	public void save(IFile file) {
-		LocationRegistry.EXTERNA_DATA.forEach(data -> {
+		LocationRegistry.EXTERNAL_DATA.forEach(data -> {
 			data.save(file, values.get(data.id()));
 		});
 	}

@@ -1,36 +1,6 @@
 package mc.rellox.spawnermeta.configuration;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.IntPredicate;
-import java.util.function.IntSupplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import io.github.rvskele.paperlib.PaperLib;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.CreatureSpawner;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-
 import mc.rellox.spawnermeta.api.configuration.IFileValues;
 import mc.rellox.spawnermeta.api.events.SpawnerExplodeEvent.ExplosionType;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
@@ -46,6 +16,25 @@ import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.CreatureSpawner;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.IntPredicate;
+import java.util.function.IntSupplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class Settings {
 	
@@ -362,7 +351,7 @@ public final class Settings {
 		this.charges_requires_as_minimum = new SingleIntegerMap("Modifiers.charges.requires-as-minimum");
 	}
 	
-	protected void reload0() {
+	private void reload0() {
 		IFileValues file = CF.s;
 		
 		debug = file.getBoolean("Debug-errors");
@@ -476,7 +465,7 @@ public final class Settings {
 			String name = file.getString("Modifiers.changing.material-type." + type.name());
 			Material m = RF.enumerate(Material.class, name);
 			if(m == null
-					|| changing_materials.values().contains(m) == true) return;
+					|| changing_materials.containsValue(m)) return;
 			changing_materials.put(type, m);
 		});
 		changing_deny_from.clear();
@@ -506,7 +495,7 @@ public final class Settings {
 		stacking_permissions.clear();
 		CF.s.keys("Modifiers.stacking.limit-permissions")
 		.forEach(key -> {
-			if(key.equals("example") == true) return;
+			if(key.equals("example")) return;
 			String perm = "spawnermeta.stacking.permission." + key;
 			int limit = file.getInteger("Modifiers.stacking.limit-permissions." + key);
 			stacking_permissions.put(perm, limit);
@@ -537,7 +526,7 @@ public final class Settings {
 		chance_permissions.clear();
 		CF.s.keys("Modifiers.breaking.chance-permissions")
 		.forEach(key -> {
-			if(key.equals("example") == true) return;
+			if(key.equals("example")) return;
 			String perm = "spawnermeta.breaking.permission." + key;
 			double chance = file.getDouble("Modifiers.breaking.chance-permissions." + key);
 			chance_permissions.put(perm, chance);
@@ -580,7 +569,7 @@ public final class Settings {
 		ownership_permissions.clear();
 		CF.s.keys("Modifiers.players.owned.limit-permissions")
 		.forEach(key -> {
-			if(key.equals("example") == true) return;
+			if(key.equals("example")) return;
 			String perm = "spawnermeta.ownership.permission." + key;
 			int limit = file.getInteger("Modifiers.players.owned.limit-permissions." + key);
 			ownership_permissions.put(perm, limit);
@@ -619,8 +608,8 @@ public final class Settings {
 		spawner_view_entities.clear();
 		spawner_view_entities.addAll(Stream.of(SpawnerType.values())
 				.filter(SpawnerType::exists)
-				.filter(s -> list.contains(s) == false)
-				.collect(Collectors.toList()));
+				.filter(s -> !list.contains(s))
+				.toList());
 		spawner_view_entities.remove(SpawnerType.EMPTY);
 		
 		command_view = file.getString("Commands.spawner-view.label");
@@ -651,12 +640,12 @@ public final class Settings {
 	}
 	
 	public boolean disabled(SpawnerType type) {
-		return spawner_disabled.contains(type) == true;
+		return spawner_disabled.contains(type);
 	}
 	
 	public double breaking_chance(Player player) {
 		double chance = breaking_dropping_chance;
-		if(chance_permissions.isEmpty() == true) return chance;
+		if(chance_permissions.isEmpty()) return chance;
 		return chance_permissions.entrySet().stream()
 				.filter(e -> player.hasPermission(e.getKey()))
 				.mapToDouble(Entry::getValue)
@@ -666,14 +655,14 @@ public final class Settings {
 	
 	public int stacking_limit(Player player, IGenerator generator) {
 		int limit;
-		if(generator.cache().natural() == true) limit = stacking_limit_natural;
+		if(generator.cache().natural()) limit = stacking_limit_natural;
 		else limit = stacking_limit_owned;
-		if(stacking_permissions.isEmpty() == true || player == null) return limit;
-		if(generator.cache().natural() == true) {
-				if(stacking_permissions_natural == false) return limit;
-		} else if(generator.spawner().isOwner(player) == true) {
-			if(stacking_permissions_owned == false) return limit;
-		} else if(stacking_permissions_not_owned == false) return limit;
+		if(stacking_permissions.isEmpty() || player == null) return limit;
+		if(generator.cache().natural()) {
+				if(!stacking_permissions_natural) return limit;
+		} else if(generator.spawner().isOwner(player)) {
+			if(!stacking_permissions_owned) return limit;
+		} else if(!stacking_permissions_not_owned) return limit;
 		return stacking_permissions.entrySet().stream()
 				.filter(e -> player.hasPermission(e.getKey()))
 				.mapToInt(Entry::getValue)
@@ -683,7 +672,7 @@ public final class Settings {
 	
 	public int owning_limit(Player player) {
 		int limit = owned_spawner_limit;
-		if(ownership_permissions.isEmpty() == true) return limit;
+		if(ownership_permissions.isEmpty()) return limit;
 		return ownership_permissions.entrySet().stream()
 				.filter(e -> player.hasPermission(e.getKey()))
 				.mapToInt(Entry::getValue)
@@ -693,8 +682,8 @@ public final class Settings {
 	
 	public boolean has_silk(Player player) {
 		ItemStack item = player.getInventory().getItemInMainHand();
-		if(item == null) return false;
-		ItemMeta meta = item.getItemMeta();
+		if(!item.hasItemMeta()) return false;
+        ItemMeta meta = item.getItemMeta();
 		if(meta == null) return false;
 		return meta.getEnchantLevel(Enchantment.SILK_TOUCH) >= breaking_silk_level;
 	}
@@ -704,10 +693,10 @@ public final class Settings {
 	}
 	
 	public boolean ignored(Block block) {
-		if(ignore_natural == true
+		if(ignore_natural
 				&& PaperLib.getBlockState(block, false).getState() instanceof CreatureSpawner spawner) {
 			PersistentDataContainer data = spawner.getPersistentDataContainer();
-			if(data.has(DataManager.ownerKey()) == false) {
+			if(!data.has(DataManager.ownerKey())) {
 				spawner.setSpawnCount(4);
 				spawner.setRequiredPlayerRange(16);
 				if(spawner.getMinSpawnDelay() <= 800) {
@@ -729,14 +718,14 @@ public final class Settings {
 		Class<? extends Entity> ec = entity.getEntityClass();
 		if(ec == null) return true;
 		var type = SpawnerType.ofAll(entity);
-		return type == null ? true : spawner_ignored.contains(type) == true;
+		return type == null || spawner_ignored.contains(type);
 	}
 	
 	public String price(int f) {
-		if(use_abbreviations == true && abbreviations.isEmpty() == false) {
+		if(use_abbreviations && !abbreviations.isEmpty()) {
 			if(f < 1_000) return f + "";
 			double i = 1;
-			String s = abbreviations.get(0);
+			String s = abbreviations.getFirst();
 			for(String a : abbreviations) {
 				i *= 1_000;
 				if(f >= i) s = a;
@@ -745,7 +734,7 @@ public final class Settings {
 			double r = f / (i * 0.001);
 			if(r == (int) r) return (int) r + s;
 			return String.format("%.1f", r) + s;
-		} else if(use_delimiter == true) {
+		} else if(use_delimiter) {
 			return String.format("%,d", f).replace(',', delimiter);
 		}
 		return f + "";
@@ -762,7 +751,7 @@ public final class Settings {
 		List<String> lore = new ArrayList<>();
 		lore.add("");
 		for(int i = 0; i < 3; i++) {
-			if(upgrades[i] == false) continue;
+			if(!upgrades[i]) continue;
 			UpgradeType u = UpgradeType.values()[i];
 			Price t = Price.of(Group.upgrades, prices[i]);
 			Price n = Price.of(Group.upgrades, increases[i]);
@@ -773,7 +762,7 @@ public final class Settings {
 			lore.add(Language.get("Spawner-view.items.maximum-level",
 					"level", levels[i]).text());
 		}
-		if(spawnable_enabled == true) {
+		if(spawnable_enabled) {
 			lore.add("");
 			lore.add(Language.get("Spawner-view.items.spawnable",
 					"spawnable", spawnable_amount.get(type)).text());
@@ -785,34 +774,32 @@ public final class Settings {
 	}
 	
 	public int charges_price(SpawnerType type, IGenerator generator) {
-		if(charges_ignore_levels == true) return charges_price.get(type) * generator.cache().stack();
+		if(charges_ignore_levels) return charges_price.get(type) * generator.cache().stack();
 		return charges_price.get(type) * generator.cache().stack() * (generator.spawner().getSpawnerLevel() + 1);
 	}
 	
 	public int charges_consume(SpawnerType type, IGenerator generator) {
-		if(charges_ignore_levels == true) return charges_consume.get(type) * generator.cache().stack();
-		return charges_consume.get(type) * generator.cache().stack() * (generator.spawner().getSpawnerLevel() + 1);
+		if(charges_ignore_levels) return charges_consume.get(type);
+		return charges_consume.get(type) * (generator.spawner().getSpawnerLevel() + 1);
 	}
 
 	public int charges_requires_as_minimum(SpawnerType type, IGenerator generator) {
-		if(charges_ignore_levels == true) return charges_requires_as_minimum.get(type) * generator.cache().stack();
-		return charges_requires_as_minimum.get(type) * generator.cache().stack() * (generator.spawner().getSpawnerLevel() + 1);
+		if(charges_ignore_levels) return charges_requires_as_minimum.get(type);
+		return charges_requires_as_minimum.get(type) * (generator.spawner().getSpawnerLevel() + 1);
 	}
 	
 	public static boolean ignored(World world) {
-		return world == null ? false : settings.world_ignored.contains(world.getName());
+		return world != null && settings.world_ignored.contains(world.getName());
 	}
 	
 	public static boolean disabled(World world) {
-		return world == null ? false : settings.world_disabled.contains(world.getName());
+		return world != null && settings.world_disabled.contains(world.getName());
 	}
 	
 	public static boolean inactive(World world) {
-		return ignored(world) == true || disabled(world) == true;
+		return ignored(world) || disabled(world);
 	}
 
-
-	
 	public static class TripleIntegerMap {
 		
 		private final String path;
@@ -846,7 +833,7 @@ public final class Settings {
 		}
 		
 		private int a(String path, int i) {
-			if(CF.s.exists(path) == false) return is[i];
+			if(!CF.s.exists(path)) return is[i];
 			int a = CF.s.file.getInt(path);
 			return a == 0 ? is[i] : a;
 		}
@@ -915,27 +902,27 @@ public final class Settings {
 		}
 		
 		private IRange a(String path, int i, int def) {
-			if(CF.s.exists(path) == false) return is[i];
+			if(!CF.s.exists(path)) return is[i];
 			String a = CF.s.file.getString(path);
-			return a == null || a.isEmpty() == true ? is[i] : parse(a, def);
+			return a == null || a.isEmpty() ? is[i] : parse(a, def);
 		}
 		
 	}
 	
-	public static interface IRange {
+	public interface IRange {
 		
 		int roll(int hash);
 		
 	}
 	
-	private static record RangeConstant(int roll) implements IRange {
+	private record RangeConstant(int roll) implements IRange {
 		@Override
 		public int roll(int hash) {
 			return roll;
 		}
 	}
 	
-	private static record RangeOf(int minimum, int maximum) implements IRange {
+	private record RangeOf(int minimum, int maximum) implements IRange {
 		@Override
 		public int roll(int hash) {
 			int a = maximum - minimum + 1;
@@ -976,7 +963,7 @@ public final class Settings {
 		}
 		
 		private boolean b(String path, int i) {
-			if(CF.s.exists(path) == false) return is[i];
+			if(!CF.s.exists(path)) return is[i];
 			return CF.s.file.getBoolean(path);
 		}
 		
@@ -1009,7 +996,7 @@ public final class Settings {
 		}
 		
 		public void check(IntPredicate predicate, int def, String warning) {
-			if(predicate.test(i) == true) return;
+			if(predicate.test(i)) return;
 			Text.failure(warning);
 			i = def;
 		}
@@ -1032,13 +1019,13 @@ public final class Settings {
 		
 		public void load() {
 			map.clear();
-			if((u = CF.s.file.getBoolean(tp + ".use-price")) == false) return;
+			if(!(u = CF.s.file.getBoolean(tp + ".use-price"))) return;
 			super.load();
 		}
 		
 	}
 	
-	public static record ValueChanger(double change, ChangerType type) {
+	public record ValueChanger(double change, ChangerType type) {
 		
 		public double change(double value) {
 			return type.change(value, change);
@@ -1059,7 +1046,7 @@ public final class Settings {
 		
 	}
 	
-	public static enum ChangerType {
+	public enum ChangerType {
 
 		NONE {
 			@Override

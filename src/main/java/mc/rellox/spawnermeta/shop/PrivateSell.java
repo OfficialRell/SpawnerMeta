@@ -47,34 +47,36 @@ public class PrivateSell {
 	}
 	
 	protected boolean click(InventoryClickEvent event) {
-		if(player.equals(event.getWhoClicked()) == false) return false;
+		if(!player.equals(event.getWhoClicked())) return false;
 		Inventory n = event.getInventory();
-		if(v.equals(n) == false) return false;
+		if(!v.equals(n)) return false;
 		event.setCancelled(true);
 		Inventory c = event.getClickedInventory();
 		if(c == null) return false;
 		int s = event.getSlot();
-		if(c.equals(v) == true) {
+		if(c.equals(v)) {
 			if(s == v.getSize() - 6) {
 				give();
 				sell.remove(player);
 				player.closeInventory();
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			} else if(s == v.getSize() - 4) {
-				if(spawners.isEmpty() == true) {
+				if(spawners.isEmpty()) {
 					player.sendMessage(Language.get("Shop-sell.selling.empty").text());
 					return true;
 				}
 				player.sendMessage(Language.get("Shop-sell.selling.success").text());
 				Price[] cs = total();
-				for(Price cc : cs) player.sendMessage(Language.get("Shop-sell.items.selling.price",
-						"price", cc).text());
+				if(cs != null) {
+					for(Price cc : cs) player.sendMessage(Language.get("Shop-sell.items.selling.price",
+							"price", cc).text());
+				}
 				spawners.forEach(si -> si.refund(player));
 				spawners.clear();
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_GRINDSTONE_USE, 2f, 1.5f);
 				sell.remove(player);
 				player.closeInventory();
-			} else if(spawners.isEmpty() == false) {
+			} else if(!spawners.isEmpty()) {
 				if(s >= 9 && s < 9 + spawners.size()) {
 					int i = s - 9;
 					SpawnerItem si = spawners.remove(i);
@@ -88,7 +90,7 @@ public class PrivateSell {
 			ItemStack item = c.getItem(s);
 			IVirtual sd = IVirtual.of(item);
 			if(sd == null) return true;
-			if(sd.isEmpty() == true) {
+			if(sd.isEmpty()) {
 				player.sendMessage(Language.get("Shop-sell.selling.unable").text());
 				return true;
 			}
@@ -97,14 +99,14 @@ public class PrivateSell {
 				player.sendMessage(Language.get("Shop-sell.selling.unable").text());
 				return true;
 			}
-			if(ShopRegistry.canSell(player, sell.type) == false) {
+			if(!ShopRegistry.canSell(player, sell.type)) {
 				player.sendMessage(Language.get("Shop-sell.permission.selling").text());
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 				return true;
 			}
 			int m = item.getAmount();
 			int a;
-			if(event.isShiftClick() == true) {
+			if(event.isShiftClick()) {
 				a = m;
 				c.setItem(s, null);
 			} else {
@@ -139,7 +141,7 @@ public class PrivateSell {
 	}
 	
 	private void give() {
-		if(spawners.isEmpty() == false) {
+		if(!spawners.isEmpty()) {
 			spawners.forEach(si -> ItemMatcher.add(player, si.item));
 			spawners.clear();
 		}
@@ -147,8 +149,8 @@ public class PrivateSell {
 	
 	protected boolean close(Player player) {
 		give();
-		return this.player.equals(player) == true
-				|| v.getViewers().size() == 0;
+		return this.player.equals(player)
+				|| v.getViewers().isEmpty();
 	}
 	
 	private void update() {
@@ -191,7 +193,7 @@ public class PrivateSell {
 		return item;
 	}
 	
-	private class SpawnerItem {
+	private static class SpawnerItem {
 		
 		private final SellData sell;
 		public final ItemStack item;
@@ -248,7 +250,7 @@ public class PrivateSell {
 			int[] ls = spawner.getUpgradeLevels();
 			int a = 0;
 			for(int i = 0; i < 3; i++) {
-				if(bs[i] == true) {
+				if(bs[i]) {
 					int c = vs[i];
 					for(int j = 1; j < ls[i]; j++) {
 						a += c;

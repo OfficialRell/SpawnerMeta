@@ -1,14 +1,10 @@
 package mc.rellox.spawnermeta.configuration.location;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Pattern;
-
+import mc.rellox.spawnermeta.SpawnerMeta;
+import mc.rellox.spawnermeta.api.configuration.IData;
+import mc.rellox.spawnermeta.api.configuration.IPlayerData;
+import mc.rellox.spawnermeta.api.spawner.ISpawner;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -18,15 +14,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.api.configuration.IData;
-import mc.rellox.spawnermeta.api.configuration.IPlayerData;
-import mc.rellox.spawnermeta.api.spawner.ISpawner;
-import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
+import java.io.File;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public final class LocationRegistry implements Listener {
 	
-	protected static final File parent = new File(SpawnerMeta.instance().getDataFolder(), "spawners");
+	static final File parent = new File(SpawnerMeta.instance().getDataFolder(), "spawners");
 	static {
 		parent.mkdirs();
 	}
@@ -36,18 +30,17 @@ public final class LocationRegistry implements Listener {
 	
 	private static final Map<UUID, IPlayerData> LOCATIONS = new HashMap<>();
 	
-	protected static final List<IData<?>> EXTERNA_DATA = new ArrayList<>();
+	static final List<IData<?>> EXTERNAL_DATA = new ArrayList<>();
 	
-	@SuppressWarnings("deprecation")
 	public static void initialize() {
 		convert();
 		SpawnerMeta.scheduler().runTimer(() -> {
 			var it = LOCATIONS.values().iterator();
-			while(it.hasNext() == true) {
+			while(it.hasNext() ) {
 				IPlayerData il = it.next();
-				if(il.using() == true) continue;
+				if(il.using() ) continue;
 				if(il instanceof LocationFile file) {
-					if(EXTERNA_DATA.isEmpty() == false) file.saveExternal();
+					if(!EXTERNAL_DATA.isEmpty()) file.saveExternal();
 					file.cached = false;
 				}
 				il.infinite(false);
@@ -63,14 +56,14 @@ public final class LocationRegistry implements Listener {
 	
 	public static void clear() {
 		LOCATIONS.values().forEach(il -> {
-			if(il.using() == false) return;
+			if(!il.using()) return;
 			if(il instanceof LocationFile file) file.update();
 		});
 		LOCATIONS.clear();
 	}
 	
 	/**
-	 * @param playe - player
+	 * @param player - player
 	 * @return {@code true} if the player file exists
 	 */
 	
@@ -85,7 +78,7 @@ public final class LocationRegistry implements Listener {
 	
 	public static boolean exists(UUID id) {
 		File file = new File(parent, id.toString() + ".yml");
-		return file.exists() == true;
+		return file.exists();
 	}
 	
 	/**
@@ -95,12 +88,12 @@ public final class LocationRegistry implements Listener {
 	 */
 	
 	public static void submit(IData<?> data) {
-		if(EXTERNA_DATA.stream()
+		if(EXTERNAL_DATA.stream()
 				.map(IData::id)
-				.anyMatch(data.id()::equals) == true)
+				.anyMatch(data.id()::equals) )
 			throw new IllegalArgumentException("Data parser with this id ("
 					+ data.id() + ") already exists");
-		EXTERNA_DATA.add(data);
+		EXTERNAL_DATA.add(data);
 	}
 	
 	/**
@@ -113,7 +106,7 @@ public final class LocationRegistry implements Listener {
 		List<String> names = new ArrayList<>();
 		for(String file : list) {
 			file = file.replace(".yml", "");
-			if(uuid_validation.matcher(file).matches() == false) continue;
+			if(!uuid_validation.matcher(file).matches()) continue;
 			try {
 				UUID id = UUID.fromString(file);
 				String name = Bukkit.getOfflinePlayer(id).getName();
@@ -135,14 +128,14 @@ public final class LocationRegistry implements Listener {
 	
 	public static IPlayerData find(String player) {
 		String[] list = parent.list();
-		if(list == null || list.length <= 0) return null;
+		if(list == null) return null;
 		for(String file : list) {
 			file = file.replace(".yml", "");
-			if(uuid_validation.matcher(file).matches() == false) continue;
+			if(!uuid_validation.matcher(file).matches()) continue;
 			try {
 				UUID id = UUID.fromString(file);
 				String name = Bukkit.getOfflinePlayer(id).getName();
-				if(name != null && name.equalsIgnoreCase(player) == true)
+				if(name != null && name.equalsIgnoreCase(player) )
 					return get(id);
 			} catch (Exception e) {
 				RF.debug(e);
@@ -217,7 +210,7 @@ public final class LocationRegistry implements Listener {
 	public static IPlayerData raw(UUID id) {
 		IPlayerData il = LOCATIONS.get(id);
 		if(il != null) return il;
-		if(exists(id) == false) return null;
+		if(!exists(id)) return null;
 		return get(id);
 	}
 	
@@ -263,25 +256,23 @@ public final class LocationRegistry implements Listener {
 	
 	public static boolean trusted(UUID owner, Player player) {
 		IPlayerData il = raw(owner);
-		return il == null ? false : il.trusts(player);
+		return il != null && il.trusts(player);
 	}
 	
 	@EventHandler
-	private final void onQuit(PlayerQuitEvent event) {
+	private void onQuit(PlayerQuitEvent event) {
 		UUID id = event.getPlayer().getUniqueId();
 		IPlayerData il = LOCATIONS.get(id);
 		if(il == null) return;
 		il.infinite(false);
 	}
 	
-	@SuppressWarnings("deprecation")
 	private static void convert() {
 		SpawnerMeta.scheduler().runLater(() -> {
 			File f = new File(parent.getParentFile(), "locations.yml");
-			if(f.exists() == false) return;
+			if(!f.exists()) return;
 			var file = YamlConfiguration.loadConfiguration(f);
-			if(file == null) return;
-			ConfigurationSection cs = file.getConfigurationSection("Locations");
+            ConfigurationSection cs = file.getConfigurationSection("Locations");
 			if(cs == null) return;
 			Set<String> keys = cs.getKeys(false);
 			keys.forEach(key -> {

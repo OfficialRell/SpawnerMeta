@@ -1,11 +1,11 @@
 package mc.rellox.spawnermeta.spawner;
 
-import java.util.UUID;
-
 import mc.rellox.spawnermeta.api.spawner.ICache;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.hook.HookRegistry;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+
+import java.util.UUID;
 
 public class ActiveCache implements ICache {
 	

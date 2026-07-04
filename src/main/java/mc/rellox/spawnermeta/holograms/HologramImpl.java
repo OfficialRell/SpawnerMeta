@@ -12,14 +12,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public abstract class AbstractHologram implements IHologram {
+public abstract class HologramImpl implements IHologram {
 	
 	protected final IGenerator generator;
 	private final Object hologram;
 	private final IBox box;
 	private final Set<Player> players;
 	
-	public AbstractHologram(IGenerator generator, boolean above, int radius) {
+	public HologramImpl(IGenerator generator, boolean above, int radius) {
 		this.generator = generator;
 		String title = title().text();
 		Block block = generator.block();

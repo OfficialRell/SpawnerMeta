@@ -1,13 +1,12 @@
 package mc.rellox.spawnermeta.spawner;
 
-import java.util.Arrays;
-
-import org.bukkit.inventory.ItemStack;
-
 import mc.rellox.spawnermeta.api.spawner.IVirtual;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.utility.DataManager;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.Arrays;
 
 public class ActiveVirtual implements IVirtual {
 	
@@ -67,8 +66,8 @@ public class ActiveVirtual implements IVirtual {
 	}
 	
 	@Override
-	public ItemStack getItem(int a) {
-		return DataManager.getSpawner(this, a);
+	public ItemStack getItem(int amount) {
+		return DataManager.getSpawner(this, amount);
 	}
 	
 }

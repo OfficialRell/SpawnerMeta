@@ -1,63 +1,12 @@
 package mc.rellox.spawnermeta.events;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
-
 import io.github.rvskele.paperlib.PaperLib;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Color;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Particle;
-import org.bukkit.Particle.DustOptions;
-import org.bukkit.Sound;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.CreatureSpawner;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.EnderCrystal;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.LargeFireball;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.TNTPrimed;
-import org.bukkit.entity.Wither;
-import org.bukkit.entity.WitherSkull;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.SpawnerSpawnEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.util.Vector;
-
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.APIInstance;
 import mc.rellox.spawnermeta.api.APIRegistry;
 import mc.rellox.spawnermeta.api.configuration.IPlayerData;
-import mc.rellox.spawnermeta.api.events.IEvent;
-import mc.rellox.spawnermeta.api.events.SpawnerBreakEvent;
-import mc.rellox.spawnermeta.api.events.SpawnerChangeEvent;
-import mc.rellox.spawnermeta.api.events.SpawnerEmptyEvent;
-import mc.rellox.spawnermeta.api.events.SpawnerExplodeEvent;
+import mc.rellox.spawnermeta.api.events.*;
 import mc.rellox.spawnermeta.api.events.SpawnerExplodeEvent.ExplosionType;
-import mc.rellox.spawnermeta.api.events.SpawnerOpenEvent;
-import mc.rellox.spawnermeta.api.events.SpawnerPlaceEvent;
-import mc.rellox.spawnermeta.api.events.SpawnerStackEvent;
 import mc.rellox.spawnermeta.api.spawner.ICache;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
@@ -78,6 +27,26 @@ import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.Messagable;
 import mc.rellox.spawnermeta.utility.Utility;
+import org.bukkit.*;
+import org.bukkit.Particle.DustOptions;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.CreatureSpawner;
+import org.bukkit.entity.*;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.SpawnerSpawnEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Vector;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 public final class EventRegistry {
 	
@@ -699,9 +668,8 @@ public final class EventRegistry {
 			if(items.isEmpty()) {
 				items.add(DataManager.getSpawner(cache.type(), cache.stack()));
 			}
-			items.forEach(item -> {
-				player.getWorld().dropItem(bl, item).setVelocity(new Vector());
-			});
+			items.forEach(item ->
+					player.getWorld().dropItem(bl, item).setVelocity(new Vector()));
 			player.spawnParticle(Particle.CLOUD, bl, 25, 0.25, 0.25, 0.25, 0);
 			player.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.35f, 0f);
 			m.send(Language.list("Spawners.breaking.success"));
@@ -820,7 +788,7 @@ public final class EventRegistry {
 				player.spawnParticle(Particle.SQUID_INK, center, 25, 0.25, 0.25, 0.25, 0.1);
 				player.playSound(player.getEyeLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 0.2f, 0f);
 				mm = Language.list("Spawners.breaking.failure");
-				spawnXP(block, event, give);
+				spawnXP(block, event, false);
 			}
 		} else {
 			player.spawnParticle(Particle.SQUID_INK, center, 25, 0.25, 0.25, 0.25, 0.1);
@@ -906,11 +874,12 @@ public final class EventRegistry {
 	public static boolean destroy(IGenerator generator, boolean drop, boolean particles) {
 		Block block = generator.block();
 		if(block == null || block.getType() != Material.SPAWNER) return false;
-		Location loc = block.getLocation().add(0.5, 0.5, 0.5);
+		Location at = block.getLocation().add(0.5, 0.5, 0.5);
 		if(drop) {
-			DataManager.getSpawners(block, false).forEach(item -> {
-				loc.getWorld().dropItem(loc, item).setVelocity(new Vector());
-			});
+			DataManager.getSpawners(block, false)
+					.forEach(item ->
+							at.getWorld().dropItem(at, item)
+									.setVelocity(new Vector()));
 			dropAfterChanging(null, generator);
 		}
 		
@@ -918,7 +887,7 @@ public final class EventRegistry {
 		
 		HookRegistry.SUPERIOR_SKYBLOCK_2.breaking(block);
 		
-		if(particles) loc.getWorld().spawnParticle(Particle.CLOUD, loc, 25, 0.25, 0.25, 0.25, 0);
+		if(particles) at.getWorld().spawnParticle(Particle.CLOUD, at, 25, 0.25, 0.25, 0.25, 0);
 		return true;
 	}
 	

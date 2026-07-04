@@ -18,17 +18,17 @@ public final class Text {
 	
 	public static void logLoad() {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta " + ChatColor.AQUA + "v"
-				+ SpawnerMeta.PLUGIN_VERSION + ChatColor.DARK_PURPLE + "]" + ChatColor.GREEN + " enabled!");
+				+ SpawnerMeta.version() + ChatColor.DARK_PURPLE + "]" + ChatColor.GREEN + " enabled!");
 	}
 	
 	public static void logUnload() {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta " + ChatColor.AQUA + "v"
-				+ SpawnerMeta.PLUGIN_VERSION + ChatColor.DARK_PURPLE + "]" + ChatColor.RED + " disabled!");
+				+ SpawnerMeta.version() + ChatColor.DARK_PURPLE + "]" + ChatColor.RED + " disabled!");
 	}
 	
 	public static void logOutdated(double v) {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "Spawner Meta "
-				+ ChatColor.AQUA + "v" + SpawnerMeta.PLUGIN_VERSION + ChatColor.DARK_PURPLE + "] "
+				+ ChatColor.AQUA + "v" + SpawnerMeta.version() + ChatColor.DARK_PURPLE + "] "
 				+ ChatColor.YELLOW + "New version is available: v" + v + "! " + ChatColor.GOLD + "To download visit: "
 				+ "https://www.spigotmc.org/resources/spawnermeta.74188/");
 	}
@@ -40,7 +40,7 @@ public final class Text {
 	
 	public static void logFail(String fail) {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "SpawnerMeta " + ChatColor.AQUA + "v"
-				+ SpawnerMeta.PLUGIN_VERSION + ChatColor.DARK_PURPLE + "] " + ChatColor.DARK_RED + fail);
+				+ SpawnerMeta.version() + ChatColor.DARK_PURPLE + "] " + ChatColor.DARK_RED + fail);
 	}
 	
 	public static void success(String success, Object... os) {
@@ -96,7 +96,7 @@ public final class Text {
 	public static String fromLegacy(String s) {
 		StringBuilder sb = new StringBuilder();
 		boolean l = false, h = false, i = false;
-		String x = "";
+		StringBuilder x = new StringBuilder();
 		for(char c : s.toCharArray()) {
 			if(c == '<') i = true;
 			else if(c == '&') l = true;
@@ -119,10 +119,10 @@ public final class Text {
 					sb.append(o);
 					l = false;
 				} else if(h) {
-					x += "" + c;
+					x.append(c);
 					if(x.length() >= 6) {
 						sb.append("<#").append(x).append('>');
-						x = "";
+						x = new StringBuilder();
 						h = false;
 					}
 				} else sb.append(c);

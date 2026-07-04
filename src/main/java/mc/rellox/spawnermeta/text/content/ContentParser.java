@@ -1,5 +1,8 @@
 package mc.rellox.spawnermeta.text.content;
 
+import mc.rellox.spawnermeta.text.content.Colorer.Colors;
+import mc.rellox.spawnermeta.text.content.Content.Variable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -7,20 +10,17 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import mc.rellox.spawnermeta.text.content.Colorer.Colors;
-import mc.rellox.spawnermeta.text.content.Content.Variable;
-
 public final class ContentParser {
 	
-	protected static final Pattern colors, variables;
+	private static final Pattern colors, variables;
 	static {
-		colors = Pattern.compile("<(?:(?:#[a-f\\d]{6}(?:-#[a-f\\d]{6})*)|(?:![a-z]+))>",
+		colors = Pattern.compile("<(?:(#[a-f\\d]{6}(?:-#[a-f\\d]{6})*)|(![a-z]+))>",
 				Pattern.CASE_INSENSITIVE);
 		variables = Pattern.compile("%[a-z_]+%", Pattern.CASE_INSENSITIVE);
 	}
 	
 	public static Content parse(String text) {
-		return text == null || text.isEmpty() == true
+		return text == null || text.isEmpty()
 				? Content.empty() : new ContentParser(text).parse();
 	}
 	
@@ -38,7 +38,7 @@ public final class ContentParser {
 	}
 	
 	public Content parse() {
-		if(text == null || text.isEmpty() == true) return Content.empty();
+		if(text == null || text.isEmpty()) return Content.empty();
 		List<Text> list = text();
 		List<Content> result = new ArrayList<>();
 		ContentBuilder builder = new ContentBuilder();
@@ -51,15 +51,15 @@ public final class ContentParser {
 			else if(t.type == Type.gradient) builder.gradient(t.text);
 			else builder.format(t.text);
 		}
-		return result.isEmpty() == true ? Content.empty()
-				: result.size() == 1 ? result.get(0) : Content.of(result);
+		return result.isEmpty() ? Content.empty()
+				: result.size() == 1 ? result.getFirst() : Content.of(result);
 	}
 	
 	private List<Text> text() {
 		List<Text> list = new ArrayList<>();
 		Matcher m = colors.matcher(text);
 		int e = 0, s;
-		while(m.find() == true) {
+		while(m.find()) {
 			s = m.start();
 			if(s > e) list.add(new Text(text.substring(e, s), Type.text));
 			e = m.end();
@@ -74,11 +74,11 @@ public final class ContentParser {
 	}
 	
 	private Content variabled(String t) {
-		if(t.isEmpty() == true) return Content.empty();
+		if(t.isEmpty()) return Content.empty();
 		List<Content> list = new ArrayList<>();
 		Matcher m = variables.matcher(t);
 		int e = 0, s;
-		while(m.find() == true) {
+		while(m.find()) {
 			s = m.start();
 			if(s > e) list.add(Content.of(t.substring(e, s)));
 			e = m.end();
@@ -86,10 +86,10 @@ public final class ContentParser {
 			list.add(Content.of(Variable.of(g.substring(1, g.length() - 1))));
 		}
 		if(e < t.length()) list.add(Content.of(t.substring(e))); 
-		return list.size() == 1 ? list.get(0) : Content.of(list);
+		return list.size() == 1 ? list.getFirst() : Content.of(list);
 	}
 	
-	private class ContentBuilder {
+	private static class ContentBuilder {
 		private int[] is;
 		private final List<Format> fs = new ArrayList<>();
 		private void reset() {
@@ -99,14 +99,14 @@ public final class ContentParser {
 		private void color(String s) {
 			try {
 				is = new int[] {Integer.parseInt(s.substring(1), 16)};
-			} catch (Exception e) {}
+			} catch(Exception ignored) {}
 		}
 		private void gradient(String s) {
 			try {
 				is = Stream.of(s.split("-"))
 						.mapToInt(t -> Integer.parseInt(t.substring(1), 16))
 						.toArray();
-			} catch (Exception e) {}
+			} catch(Exception ignored) {}
 		}
 		private void format(String s) {
 			Format f = switch(s.substring(1)) {
@@ -123,13 +123,13 @@ public final class ContentParser {
 			Colorer color;
 			if(is != null) {
 				if(is.length == 1) {
-					if(fs.isEmpty() == true) color = Colorer.of(is[0]);
+					if(fs.isEmpty()) color = Colorer.of(is[0]);
 					else color = Colorer.of(is[0], Format.of(fs));
 				} else {
-					if(fs.isEmpty() == true) color = Colorer.of(Colors.of(is));
+					if(fs.isEmpty()) color = Colorer.of(Colors.of(is));
 					else color = Colorer.of(Colors.of(is), Format.of(fs));
 				}
-			} else if(fs.isEmpty() == false) color = Colorer.of(Colors.white, Format.of(fs));
+			} else if(!fs.isEmpty()) color = Colorer.of(Colors.white, Format.of(fs));
 			else color = null;
 			return color == null ? input : Content.of(color, input);
 		}
@@ -138,7 +138,7 @@ public final class ContentParser {
 	private record Text(String text, Type type) {}
 	
 	private enum Type {
-		text, color, gradient, format;
-	}
+		text, color, gradient, format
+    }
 
 }

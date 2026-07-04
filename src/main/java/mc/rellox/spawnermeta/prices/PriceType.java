@@ -20,10 +20,10 @@ public enum PriceType {
 	
 	public static PriceType of(String name) {
 		try {
-			if(name.equalsIgnoreCase("MONEY") == true) return ECONOMY;
-			if(name.equalsIgnoreCase("ITEM") == true) return MATERIAL;
+			if(name.equalsIgnoreCase("MONEY")) return ECONOMY;
+			if(name.equalsIgnoreCase("ITEM")) return MATERIAL;
 			return valueOf(name.toUpperCase());
-		} catch (Exception e) {}
+		} catch(Exception ignored) {}
 		return EXPERIENCE;
 	}
 

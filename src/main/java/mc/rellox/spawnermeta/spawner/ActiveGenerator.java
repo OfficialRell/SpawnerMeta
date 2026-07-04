@@ -1,26 +1,6 @@
 package mc.rellox.spawnermeta.spawner;
 
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Stream;
-
 import mc.rellox.spawnermeta.SpawnerMeta;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Particle;
-import org.bukkit.World;
-import org.bukkit.Particle.DustOptions;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Damageable;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-
 import mc.rellox.spawnermeta.api.events.SpawnerPostSpawnEvent;
 import mc.rellox.spawnermeta.api.events.SpawnerPreSpawnEvent;
 import mc.rellox.spawnermeta.api.hologram.IHologram;
@@ -45,6 +25,19 @@ import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.utility.reflect.type.Invoker;
 import mc.rellox.spawnermeta.view.ActiveUpgrades;
+import org.bukkit.*;
+import org.bukkit.Particle.DustOptions;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Damageable;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 public class ActiveGenerator implements IGenerator {
 	

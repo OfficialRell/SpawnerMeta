@@ -1,15 +1,5 @@
 package mc.rellox.spawnermeta.api.spawner;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.spawner.ActiveSpawner;
 import mc.rellox.spawnermeta.spawner.ActiveVirtual;
@@ -17,6 +7,15 @@ import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 import mc.rellox.spawnermeta.utility.DataManager;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 public interface ISpawner {
 	
@@ -116,13 +115,6 @@ public interface ISpawner {
 	 */
 
 	void setType(SpawnerType type);
-
-	/**
-	 * Use {@code getStack()} method instead
-	 */
-	
-	@Deprecated(forRemoval = true)
-	int getStackSize();
 	
 	/**
 	 * @return Stack size of this spawner
@@ -131,39 +123,18 @@ public interface ISpawner {
 	int getStack();
 
 	/**
-	 * Use {@code setStack()} method instead
-	 */
-
-	@Deprecated(forRemoval = true)
-	void setStackSize(int stack);
-	
-	/**
 	 * Sets the stack size to this spawner.
 	 * 
 	 * @param stack - new stack size
 	 */
 	
 	void setStack(int stack);
-
-	/**
-	 * Use {@code getSpawnable()} method instead
-	 */
-	
-	@Deprecated(forRemoval = true)
-	int getSpawnableSize();
 	
 	/**
 	 * @return Spawnable entity limit of this spawner
 	 */
 	
 	int getSpawnable();
-
-	/**
-	 * Use {@code setSpawnable()} method instead
-	 */
-
-	@Deprecated(forRemoval = true)
-	void setSpawnableSize(int spawnable);
 	
 	/**
 	 * Sets the spawnable entity limit to this spawner.
@@ -340,22 +311,25 @@ public interface ISpawner {
 		
 		public Builder levelled(int i0, int i1, int i2) {
 			int[] ms = Settings.settings.upgrades_levels.get(type);
-			this.levels = new int[] {a(i0, 1, ms[0]),
-					a(i1, 1, ms[1]), a(i2, 1, ms[2])};
+			this.levels = new int[] {
+					fix(i0, ms[0]),
+					fix(i1, ms[1]),
+					fix(i2, ms[2])
+			};
 			return this;
 		}
 		
-		private int a(int i, int m, int x) {
-			return i < m ? m : i > x ? x : i;
+		private int fix(int i, int x) {
+			return Math.clamp(i, 1, x);
 		}
 		
 		public Builder charged(int i) {
-			this.charges = i < 0 ? 0 : i;
+			this.charges = Math.max(i, 0);
 			return this;
 		}
 		
 		public Builder spawnable(int i) {
-			this.spawnable = i < 0 ? 0 : i;
+			this.spawnable = Math.max(i, 0);
 			return this;
 		}
 		

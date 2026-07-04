@@ -1,36 +1,33 @@
 package mc.rellox.spawnermeta.holograms;
 
-import java.util.Set;
-
+import mc.rellox.spawnermeta.version.IVersion;
+import mc.rellox.spawnermeta.version.Version;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import mc.rellox.spawnermeta.version.IVersion;
-import mc.rellox.spawnermeta.version.Version;
+import java.util.Set;
 
-public class HologramModifier {
-	
-	private final IVersion v;
-	
+public record HologramModifier(IVersion version) {
+
 	public HologramModifier() {
-		this.v = Version.v;
+		this(Version.v);
 	}
 	
-	public Object create(Location l, String name) {
-		return v.hologram(l, name);
+	public Object create(Location location, String name) {
+		return version.hologram(location, name);
 	}
 	
 	public void spawn(Player player, Object entity) {
-		v.send(player, v.spawn(entity), v.meta(entity));
+		version.send(player, version.spawn(entity), version.meta(entity));
 	}
 
 	public void destroy(Player player, Object entity) {
-		v.send(player, v.destroy(entity));
+		version.send(player, version.destroy(entity));
 	}
 
 	public void update(Set<Player> players, Object entity, String name) {
-		v.name(entity, name);
-		v.send(players, v.meta(entity));
+		version.name(entity, name);
+		version.send(players, version.meta(entity));
 	}
 
 }

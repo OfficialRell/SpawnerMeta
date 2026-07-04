@@ -1,29 +1,26 @@
 package mc.rellox.spawnermeta.api;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
 import mc.rellox.spawnermeta.api.configuration.IPlayerData;
 import mc.rellox.spawnermeta.api.events.EventExecutor;
 import mc.rellox.spawnermeta.api.events.IEvent;
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.api.spawner.ISpawner;
 import mc.rellox.spawnermeta.api.spawner.IVirtual;
-import mc.rellox.spawnermeta.api.spawner.SpawnerBuilder;
 import mc.rellox.spawnermeta.configuration.Settings;
 import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
 import mc.rellox.spawnermeta.events.EventRegistry;
 import mc.rellox.spawnermeta.spawner.generator.GeneratorRegistry;
-import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public final class APIRegistry implements APIInstance {
 	
@@ -43,13 +40,13 @@ public final class APIRegistry implements APIInstance {
 	}
 	
 	@Override
-	public <E extends IEvent> void register(Class<E> c, EventExecutor<E> executor) {
-		Objects.requireNonNull(c, "Event class cannot be null");
+	public <E extends IEvent> void register(Class<E> clazz, EventExecutor<E> executor) {
+		Objects.requireNonNull(clazz, "Event class cannot be null");
 		Objects.requireNonNull(executor, "Event executor cannot be null");
-		WrappedExecutor<?> wrapper = new WrappedExecutor<>(c, executor);
+		WrappedExecutor<?> wrapper = new WrappedExecutor<>(clazz, executor);
 		int j = 0;
 		for(int i = 0; i < executors.size(); i++) {
-			if(executors.get(i).subclass(c)) {
+			if(executors.get(i).subclass(clazz)) {
 				j = i + 1;
 				break;
 			}
@@ -130,13 +127,6 @@ public final class APIRegistry implements APIInstance {
 	public IPlayerData getLocations(UUID id) throws IllegalArgumentException {
 		Objects.requireNonNull(id, "ID cannot be null");
 		return LocationRegistry.get(id);
-	}
-	
-	@Override
-	@Deprecated(forRemoval = true)
-	public SpawnerBuilder buildSpawner(SpawnerType type) {
-		Objects.requireNonNull(type, "Spawner type cannot be null");
-		return new SpawnerBuilder(type);
 	}
 	
 	public void execute(IEvent event) {

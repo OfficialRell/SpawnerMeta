@@ -1,9 +1,9 @@
 package mc.rellox.spawnermeta.api.spawner;
 
-import java.util.UUID;
-
 import mc.rellox.spawnermeta.spawner.ActiveCache;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+
+import java.util.UUID;
 
 public interface ICache {
 	

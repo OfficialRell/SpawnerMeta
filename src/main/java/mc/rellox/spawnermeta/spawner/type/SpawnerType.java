@@ -69,6 +69,7 @@ public enum SpawnerType {
 	MINECART_TNT(_e("MINECART_TNT", "TNT_MINECART"), "Minecart with TNT", Material.TNT_MINECART, true, EntityBox.single()),
 	MULE(EntityType.MULE, "Mule", Material.MULE_SPAWN_EGG, EntityBox.box(2, 2, 2)),
 	MUSHROOM_COW(_e("MUSHROOM_COW", "MOOSHROOM"), "Mushroom Cow", Material.MOOSHROOM_SPAWN_EGG, EntityBox.box(1, 2, 1)),
+	NAUTILUS(_e("NAUTILUS"), "Nautilus", _m("NAUTILUS_SPAWN_EGG"), EntityBox.single()),
 	OCELOT(EntityType.OCELOT, "Ocelot", Material.OCELOT_SPAWN_EGG, EntityBox.single()),
 	PANDA(_e("PANDA"), "Panda", _m("PANDA_SPAWN_EGG"), EntityBox.box(2, 2, 2)),
 	PARROT(EntityType.PARROT, "Parrot", Material.PARROT_SPAWN_EGG, EntityBox.single()),
@@ -95,6 +96,7 @@ public enum SpawnerType {
 	SQUID(EntityType.SQUID, "Squid", Material.SQUID_SPAWN_EGG, EntityBox.single()),
 	STRAY(EntityType.STRAY, "Stray", Material.STRAY_SPAWN_EGG, EntityBox.box(1, 2, 1)),
 	STRIDER(_e("STRIDER"), "Strider", _m("STRIDER_SPAWN_EGG"), EntityBox.box(1, 2, 1)),
+	SULFUR_CUBE(_e("SULFUR_CUBE"), "Sulfur Cube", _m("SULFUR_CUBE_SPAWN_EGG"), EntityBox.single()),
 	TADPOLE(_e("TADPOLE"), "Tadpole", _m("TADPOLE_SPAWN_EGG"), EntityBox.single()),
 	TRADER_LLAMA(_e("TRADER_LLAMA"), "Trader Llama", _m("TRADER_LLAMA_SPAWN_EGG"), EntityBox.box(1, 2, 1)),
 	TROPICAL_FISH(EntityType.TROPICAL_FISH, "Tropical Fish", Material.TROPICAL_FISH_SPAWN_EGG, EntityBox.single()),
@@ -111,6 +113,7 @@ public enum SpawnerType {
 	ZOGLIN(_e("ZOGLIN"), "Zoglin", _m("ZOGLIN_SPAWN_EGG"), EntityBox.box(2, 2, 2)),
 	ZOMBIE(EntityType.ZOMBIE, "Zombie", Material.ZOMBIE_SPAWN_EGG, EntityBox.box(1, 2, 1)),
 	ZOMBIE_HORSE(EntityType.ZOMBIE_HORSE, "Zombie Horse", Material.ZOMBIE_HORSE_SPAWN_EGG, EntityBox.box(2, 2, 2)),
+	ZOMBIE_NAUTILUS(_e("ZOMBIE_NAUTILUS"), "Zombie Nautilus", _m("ZOMBIE_NAUTILUS_SPAWN_EGG"), EntityBox.single()),
 	ZOMBIE_VILLAGER(EntityType.ZOMBIE_VILLAGER, "Zombie Villager", Material.ZOMBIE_VILLAGER_SPAWN_EGG, EntityBox.box(1, 2, 1)),
 	ZOMBIFIED_PIGLIN(_e("ZOMBIFIED_PIGLIN"), "Zombified Piglin", _m("ZOMBIFIED_PIGLIN_SPAWN_EGG"), EntityBox.box(1, 2, 1));
 

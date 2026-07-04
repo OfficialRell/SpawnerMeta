@@ -50,7 +50,7 @@ public class LocationFile extends AbstractFile implements IPlayerData {
 		this.trust = new HashSet<>();
 		this.stored = new ArrayList<>();
 		
-		this.external = LocationRegistry.EXTERNA_DATA.isEmpty()
+		this.external = LocationRegistry.EXTERNAL_DATA.isEmpty()
 				? null : new ExternalData();
 		
 		use();

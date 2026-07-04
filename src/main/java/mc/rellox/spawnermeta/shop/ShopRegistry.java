@@ -1,15 +1,10 @@
 package mc.rellox.spawnermeta.shop;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
+import mc.rellox.spawnermeta.SpawnerMeta;
+import mc.rellox.spawnermeta.spawner.type.SpawnerType;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
+import mc.rellox.spawnermeta.version.Version;
+import mc.rellox.spawnermeta.version.Version.VersionType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -18,11 +13,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.spawner.type.SpawnerType;
-import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
-import mc.rellox.spawnermeta.version.Version;
-import mc.rellox.spawnermeta.version.Version.VersionType;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
 
 public final class ShopRegistry {
 	
@@ -87,16 +81,16 @@ public final class ShopRegistry {
 	private static void loadBuy() {
 		if(shop_buy != null) shop_buy.unregister();
 		shop_buy = null;
-		if(file.getBoolean("Settings.Buy.Enabled") == false) return;
+		if(!file.getBoolean("Settings.Buy.Enabled")) return;
 		int rows = file.getInt("Settings.Buy.Rows");
-		if(rows <= 1 && rows > 6) {
+		if(rows <= 1 || rows > 6) {
 			log("Unable to create buy shop, invalid row amount (" + rows + ")! "
 					+ "Rows must be greater than 1 and less or equal than 6!");
 			return;
 		}
 		List<BuyData> list = new ArrayList<>();
 		for(SpawnerType type : SpawnerType.values()) {
-			if(type.exists() == false || file.getBoolean("Shop.Buy." + type.name() + ".Toggle") == false) continue;
+			if(!type.exists() || !file.getBoolean("Shop.Buy." + type.name() + ".Toggle")) continue;
 			int cost = file.getInt("Shop.Buy." + type.name() + ".Cost");
 			if(cost <= 0) {
 				log("Unable to create buy shop, invalid spawner (" + type.formated() + ") cost (" + cost + ")!");
@@ -104,7 +98,7 @@ public final class ShopRegistry {
 			}
 			list.add(new BuyData(type, cost));
 		}
-		if(list.isEmpty() == true) {
+		if(list.isEmpty()) {
 			log("Unable to create buy shop, no spawners to sell!");
 			return;
 		}
@@ -118,8 +112,8 @@ public final class ShopRegistry {
 				file.getBoolean("Settings.Buy.Buyable.Third"), file.getBoolean("Settings.Buy.Buyable.Maximum")
 		};
 		boolean f = false;
-		for(boolean b : bs) if((f |= b) == true) break;
-		if(f == false) {
+		for(boolean b : bs) if(f |= b) break;
+		if(!f) {
 			log("Unable to create buy shop, shop must allow at least one buying option!");
 			return;
 		}
@@ -129,7 +123,7 @@ public final class ShopRegistry {
 	
 	private static void order(List<BuyData> list) {
 		List<SpawnerType> order = RF.enumerates(SpawnerType.class, file.getStringList("Settings.Buy.Order"));
-		if(order.isEmpty() == true) return;
+		if(order.isEmpty()) return;
 		List<BuyData> newest = new ArrayList<>();
 		for(SpawnerType  type : order) {
 			for(int i = 0; i < list.size(); i++) {
@@ -147,9 +141,9 @@ public final class ShopRegistry {
 	private static void loadSell() {
 		if(shop_sell != null) shop_sell.unregister();
 		shop_sell = null;
-		if(file.getBoolean("Settings.Sell.Enabled") == false) return;
+		if(!file.getBoolean("Settings.Sell.Enabled")) return;
 		int rows = file.getInt("Settings.Sell.Rows");
-		if(rows <= 1 && rows > 6) {
+		if(rows <= 1 || rows > 6) {
 			log("Unable to create sell shop, invalid row amount (" + rows + ")! "
 					+ "Rows must be greater than 1 and less or equal than 6!");
 			return;
@@ -171,7 +165,7 @@ public final class ShopRegistry {
 		}
 		List<SellData> list = new ArrayList<>();
 		for(SpawnerType type : SpawnerType.values()) {
-			if(type.exists() == false || file.getBoolean("Shop.Sell." + type.name() + ".Toggle") == false) continue;
+			if(!type.exists() || !file.getBoolean("Shop.Sell." + type.name() + ".Toggle")) continue;
 			int refund = file.getInt("Shop.Sell." + type.name() + ".Refund");
 			if(refund <= 0) {
 				log("Unable to create sell shop, refund amount must be greater than 0 (" + type.name() + ")!");
@@ -199,17 +193,17 @@ public final class ShopRegistry {
 			log("Unable to create selection shop, invalid inventory filler!");
 			return;
 		}
-		Material mbuy = RF.enumerate(Material.class, file.getString("Settings.Selection.Buy"));
-		if(mbuy == null) {
+		Material material_buy = RF.enumerate(Material.class, file.getString("Settings.Selection.Buy"));
+		if(material_buy == null) {
 			log("Unable to create selection shop, invalid buy material!");
 			return;
 		}
-		Material msell = RF.enumerate(Material.class, file.getString("Settings.Selection.Sell"));
-		if(msell == null) {
+		Material material_sell = RF.enumerate(Material.class, file.getString("Settings.Selection.Sell"));
+		if(material_sell == null) {
 			log("Unable to create selection shop, invalid sell material!");
 			return;
 		}
-		shop_selection = new ShopSelection(shop_buy, shop_sell, filler, mbuy, msell);
+		shop_selection = new ShopSelection(shop_buy, shop_sell, filler, material_buy, material_sell);
 	}
 	
 	public static boolean open(Player player) {
@@ -230,11 +224,11 @@ public final class ShopRegistry {
 			keys.forEach(key -> {
 				String p = path + "." + key;
 				List<String> list = file.getStringList(p + ".entities");
-				if(list.isEmpty() == true) {
+				if(list.isEmpty()) {
 					log("Missing entity list for shop buy permission (" + key + ")");
 					return;
 				}
-				Set<SpawnerType> set = list.contains("ALL") == true
+				Set<SpawnerType> set = list.contains("ALL")
 						? Set.of(SpawnerType.values()) : new HashSet<>(RF.enumerates(SpawnerType.class, list));
 				String sub = file.getString(p + ".sub-permission");
 				BUY_PERMISSIONS.put("spawnermeta.shop.buy.permission." + key, new PermissionHolder(set, sub));
@@ -247,11 +241,11 @@ public final class ShopRegistry {
 			keys.forEach(key -> {
 				String p = path + "." + key;
 				List<String> list = file.getStringList(p + ".entities");
-				if(list.isEmpty() == true) {
+				if(list.isEmpty()) {
 					log("Missing entity list for shop sell permission (" + key + ")");
 					return;
 				}
-				Set<SpawnerType> set = list.contains("ALL") == true
+				Set<SpawnerType> set = list.contains("ALL")
 						? Set.of(SpawnerType.values()) : new HashSet<>(RF.enumerates(SpawnerType.class, list));
 				String sub = file.getString(p + ".sub-permission");
 				SELL_PERMISSIONS.put("spawnermeta.shop.sell.permission." + key, new PermissionHolder(set, sub));
@@ -268,34 +262,26 @@ public final class ShopRegistry {
 	}
 	
 	private static boolean permissions(Player player, SpawnerType type, Map<String, PermissionHolder> map) {
-		if(map.isEmpty() == true) return true;
+		if(map.isEmpty()) return true;
 		for(Entry<String, PermissionHolder> e : map.entrySet()) {
 			String perm = e.getKey();
-			if(player.isPermissionSet(perm) == true && player.hasPermission(perm) == true)
-				if(e.getValue().is(type, map) == true) return true;
+			if(player.isPermissionSet(perm) && player.hasPermission(perm))
+				if(e.getValue().is(type, map)) return true;
 		}
 		return false;
 	}
-	
-	private static class PermissionHolder {
-		
-		private final Set<SpawnerType> set;
-		private final String sub;
-		
-		public PermissionHolder(Set<SpawnerType> list, String sub) {
-			this.set = list;
-			this.sub = sub;
-		}
-		
+
+	private record PermissionHolder(Set<SpawnerType> set, String sub) {
+
 		public boolean is(SpawnerType type, Map<String, PermissionHolder> map) {
-			if(set.contains(type) == true) return true;
-			if(sub != null) {
-				PermissionHolder subholder = map.get(sub);
-				return subholder == null ? false : subholder.is(type, map);
+				if(set.contains(type)) return true;
+				if(sub != null) {
+					PermissionHolder subholder = map.get(sub);
+					return subholder != null && subholder.is(type, map);
+				}
+				return false;
 			}
-			return false;
-		}
-		
+
 	}
 	
 	private static void log(String s) {
@@ -305,30 +291,29 @@ public final class ShopRegistry {
 	
 	private static void initializeConfig() {
 		lf = new File(SpawnerMeta.instance().getDataFolder(), "shop.yml");
-		if(lf.getParentFile().exists() == false) lf.getParentFile().mkdirs();
-		if(lf.exists() == true) file = YamlConfiguration.loadConfiguration(lf);
-		else {
+		if(!lf.getParentFile().exists()) lf.getParentFile().mkdirs();
+		if(!lf.exists()) {
 			try {
 				lf.createNewFile();
-			} catch(IOException e) {}
-			file = YamlConfiguration.loadConfiguration(lf);
-		}
-		
-		Map<Integer, SpawnerType[]> map = new HashMap<>();
+			} catch(IOException ignored) {}
+        }
+        file = YamlConfiguration.loadConfiguration(lf);
+
+        Map<Integer, SpawnerType[]> map = new HashMap<>();
 		map.put(500, FRIENDLY_TYPES);
 		map.put(1000, HOSTILE_TYPES);
 		map.forEach((i, ts) -> {
 			for(SpawnerType t : ts) {
-				if(t.exists() == false) continue;
+				if(!t.exists()) continue;
 				
 				String old_path = "Shop." + t.name();
 				String new_path = "Shop.Buy." + t.name();
-				if(file.isBoolean(old_path + ".Toggle") == true) {
+				if(file.isBoolean(old_path + ".Toggle")) {
 					boolean b = file.getBoolean(old_path + ".Toggle");
 					file.set(new_path + ".Toggle", b);
 					file.set(old_path + ".Toggle", null);
 				} else file.addDefault(new_path + ".Toggle", true);
-				if(file.isInt(old_path + ".Cost") == true) {
+				if(file.isInt(old_path + ".Cost")) {
 					int c = file.getInt(old_path + ".Cost");
 					file.set(new_path + ".Cost", c);
 					file.set(old_path + ".Cost", null);
@@ -342,12 +327,12 @@ public final class ShopRegistry {
 		file.addDefault(path_empty + ".Cost", 1000);
 		
 		file.addDefault("Settings.Buy.Enabled", true);
-		if(file.isInt("Rows") == true) {
+		if(file.isInt("Rows")) {
 			int r = file.getInt("Rows");
 			file.set("Settings.Buy.Rows", r);
 			file.set("Rows", null);
 		} else file.addDefault("Settings.Buy.Rows", 4);
-		if(file.isString("Filler") == true) {
+		if(file.isString("Filler")) {
 			String s = file.getString("Filler");
 			file.set("Settings.Buy.Filler", s);
 			file.set("Filler", null);
@@ -457,8 +442,8 @@ public final class ShopRegistry {
 		save();
 	}
 	
-	protected static Commenter commenter() {
-		return Version.version.atleast(VersionType.v_18_1) == true
+	private static Commenter commenter() {
+		return Version.version.atleast(VersionType.v_18_1)
 				? new Commenter() : null;
 	}
 	
@@ -474,7 +459,7 @@ public final class ShopRegistry {
 	public static void save() {
 		try {
 			file.save(lf);
-		} catch(IOException e) {}
+		} catch(IOException ignored) {}
 	}
 	
 }

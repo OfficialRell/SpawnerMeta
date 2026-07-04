@@ -66,22 +66,10 @@ public record ActiveSpawner(Block block) implements ISpawner {
 	public void setType(SpawnerType type) {
 		DataManager.setType(block(), type);
 	}
-
-	@Deprecated(forRemoval = true)
-	@Override
-	public int getStackSize() {
-		return getStack();
-	}
 	
 	@Override
 	public int getStack() {
 		return DataManager.getStack(block());
-	}
-
-	@Deprecated(forRemoval = true)
-	@Override
-	public void setStackSize(int s) {
-		setStack(s);
 	}
 	
 	@Override
@@ -89,21 +77,9 @@ public record ActiveSpawner(Block block) implements ISpawner {
 		DataManager.setStack(block(), s);
 	}
 	
-	@Deprecated(forRemoval = true)
-	@Override
-	public int getSpawnableSize() {
-		return getSpawnable();
-	}
-	
 	@Override
 	public int getSpawnable() {
 		return DataManager.getSpawnable(block());
-	}
-
-	@Deprecated(forRemoval = true)
-	@Override
-	public void setSpawnableSize(int s) {
-		setSpawnable(s);
 	}
 	
 	@Override
