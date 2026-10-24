@@ -40,197 +40,197 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 public class ActiveGenerator implements IGenerator {
-	
-	private static final DustOptions dust_warn = new DustOptions(Color.MAROON, 1.5f);
-	private static final DustOptions dust_owner = new DustOptions(Color.ORANGE, 1.5f);
-	
-	private final ISpawner spawner;
-	private final IFinder finder;
-	private final ICache cache;
-	
-	private IBox box = IBox.empty;
-	
-	private int delay, ticks;
-	private boolean online, rotating;
-	
-	private final Set<SpawnerWarning> warnings;
-	
-	public IUpgrades upgrades;
-	private final IHologram hologram;
-	private IHologram warning;
-	
-	private int validation = 1;
-	private int checking = 1;
-	
-	private boolean active = true;
-	
-	public ActiveGenerator(ISpawner spawner) {
-		DataManager.validateEmpty(spawner.block());
-		
-		this.spawner = spawner;
-		this.cache = ICache.of(spawner);
-		cache.cache();
-		this.finder = new ActiveFinder(this);
-		this.warnings = EnumSet.noneOf(SpawnerWarning.class);
-		
-		DataManager.setNewSpawner(null, spawner.block(), false);
-		
-		update();
-		this.hologram = Settings.settings.holograms_regular_enabled
-				&& !(!Settings.settings.holograms_regular_show_natural
-				&& cache.natural()) ? IHologram.hologram(this) : null;
-		if(hologram != null) hologram.update();
-		refresh();
-		if(Settings.settings.tick_until_zero) ticks = 0;
-	}
-	
-	@Override
-	public ICache cache() {
-		return cache;
-	}
-	
-	@Override
-	public ISpawner spawner() {
-		return spawner;
-	}
-	
-	@Override
-	public Block block() {
-		return spawner.block();
-	}
-	
-	@Override
-	public World world() {
-		return block().getWorld();
-	}
-	
-	@Override
-	public boolean active() {
-		return active;
-	}
-	
-	@Override
-	public boolean present() {
-		if(!Settings.settings.check_present_enabled) return true;
-		Block block = block();
-		boolean loaded = block.getWorld()
-				.isChunkLoaded(block.getX() >> 4, block.getZ() >> 4);
-		if(!loaded) return false;
-		return block.getType() == Material.SPAWNER;
-	}
-	
-	@Override
-	public void remove(boolean fully) {
-		active = false;
-		clear();
-		if(fully) {
-			Block block = block();
-			LocationRegistry.remove(block);
-			block.setType(Material.AIR);
-			HookRegistry.SUPERIOR_SKYBLOCK_2.breaking(block);
-		}
-	}
-	
-	@Override
-	public void update() {
-		if(!active) return;
 
-		cache.cache();
-		retime();
-		
-		spawner.setDelay(ticks);
-		finder.update();
-		int r = cache.range();
-		if(box.radius() != r) box = IBox.sphere(spawner.block(), r);
+    private static final DustOptions dust_warn = new DustOptions(Color.MAROON, 1.5f);
+    private static final DustOptions dust_owner = new DustOptions(Color.ORANGE, 1.5f);
 
-		boolean emptied = cache.type() == SpawnerType.EMPTY;
-		if(!online || !cache.enabled() || emptied) spawner.setRotating(rotating = false);
-		else spawner.setRotating(rotating);
-		check();
-	}
-	
-	private void retime() {
-		delay = cache.delay() / Settings.settings.ticking_interval;
-		int next = delay;
-		double offset = Settings.settings.delay_offset;
-		if(offset > 0) {
-			int o = (int) (delay * offset);
-			if(o > 0) next += Utility.random(o << 1) - o;
-		}
-		if(ticks <= 0 || ticks > delay) ticks = next;
-	}
-	
-	@Override
-	public void rewrite() {
-		if(!active) return;
-		if(hologram != null) hologram.rewrite();
-		if(warning != null) warning.rewrite();
-	}
-	
-	@Override
-	public void refresh() {
-		if(!active) return;
-		update();
-		valid();
-		rewrite();
-		control();
-		if(!online) spawner.setRotating(rotating = false);
-		else check();
-	}
-	
-	@Override
-	public void control() {
-		Settings s = Settings.settings;
-		
-		UUID id;
-		if(!s.owned_if_online
-				|| cache.natural()
-				|| (id = spawner.getOwnerID()) == null
-				|| s.owned_offline_ignore.contains(id)) {
-			online = true;
-			return;
-		}
-		
-		Player owner = Bukkit.getPlayer(id);
-		if(owner != null && owner.isOnline()) {
-			online = true;
-			return;
-		}
-		
-		int time = s.owned_offline_time;
-		if(time <= 0) online = false;
-		else {
-			OfflinePlayer op = Bukkit.getOfflinePlayer(id);
-			long last = op.getLastPlayed();
-			if(last == 0) {
-				online = false;
-				return;
-			}
-			long sub = System.currentTimeMillis() - last;
-			sub /= 1000; // to seconds
-			sub /= 60; // to minutes
-			
-			online = sub <= time;
-		}
-	}
-	
-	@Override
-	public int ticks() {
-		return ticks;
-	}
-	
-	@Override
-	public void ticks(int ticks) {
-		this.ticks = Math.max(0, ticks);
-	}
+    private final ISpawner spawner;
+    private final IFinder finder;
+    private final ICache cache;
+
+    private IBox box = IBox.empty;
+
+    private int delay, ticks;
+    private boolean online, rotating;
+
+    private final Set<SpawnerWarning> warnings;
+
+    public IUpgrades upgrades;
+    private final IHologram hologram;
+    private IHologram warning;
+
+    private int validation = 1;
+    private int checking = 1;
+
+    private boolean active = true;
+
+    public ActiveGenerator(ISpawner spawner) {
+        DataManager.validateEmpty(spawner.block());
+
+        this.spawner = spawner;
+        this.cache = ICache.of(spawner);
+        cache.cache();
+        this.finder = new ActiveFinder(this);
+        this.warnings = EnumSet.noneOf(SpawnerWarning.class);
+
+        DataManager.setNewSpawner(null, spawner.block(), false);
+
+        update();
+        this.hologram = Settings.settings.holograms_regular_enabled
+                && !(!Settings.settings.holograms_regular_show_natural
+                && cache.natural()) ? IHologram.hologram(this) : null;
+        if(hologram != null) hologram.update();
+        refresh();
+        if(Settings.settings.tick_until_zero) ticks = 0;
+    }
+
+    @Override
+    public ICache cache() {
+        return cache;
+    }
+
+    @Override
+    public ISpawner spawner() {
+        return spawner;
+    }
+
+    @Override
+    public Block block() {
+        return spawner.block();
+    }
+
+    @Override
+    public World world() {
+        return block().getWorld();
+    }
+
+    @Override
+    public boolean active() {
+        return active;
+    }
+
+    @Override
+    public boolean present() {
+        if(!Settings.settings.check_present_enabled) return true;
+        Block block = block();
+        boolean loaded = block.getWorld()
+                .isChunkLoaded(block.getX() >> 4, block.getZ() >> 4);
+        if(!loaded) return false;
+        return block.getType() == Material.SPAWNER;
+    }
+
+    @Override
+    public void remove(boolean fully) {
+        active = false;
+        clear();
+        if(fully) {
+            Block block = block();
+            LocationRegistry.remove(block);
+            block.setType(Material.AIR);
+            HookRegistry.SUPERIOR_SKYBLOCK_2.reschedule(block);
+        }
+    }
+
+    @Override
+    public void update() {
+        if(!active) return;
+
+        cache.cache();
+        retime();
+
+        spawner.setDelay(ticks);
+        finder.update();
+        int r = cache.range();
+        if(box.radius() != r) box = IBox.sphere(spawner.block(), r);
+
+        boolean emptied = cache.type() == SpawnerType.EMPTY;
+        if(!online || !cache.enabled() || emptied) spawner.setRotating(rotating = false);
+        else spawner.setRotating(rotating);
+        check();
+    }
+
+    private void retime() {
+        delay = cache.delay() / Settings.settings.ticking_interval;
+        int next = delay;
+        double offset = Settings.settings.delay_offset;
+        if(offset > 0) {
+            int o = (int) (delay * offset);
+            if(o > 0) next += Utility.random(o << 1) - o;
+        }
+        if(ticks <= 0 || ticks > delay) ticks = next;
+    }
+
+    @Override
+    public void rewrite() {
+        if(!active) return;
+        if(hologram != null) hologram.rewrite();
+        if(warning != null) warning.rewrite();
+    }
+
+    @Override
+    public void refresh() {
+        if(!active) return;
+        update();
+        valid();
+        rewrite();
+        control();
+        if(!online) spawner.setRotating(rotating = false);
+        else check();
+    }
+
+    @Override
+    public void control() {
+        Settings s = Settings.settings;
+
+        UUID id;
+        if(!s.owned_if_online
+                || cache.natural()
+                || (id = spawner.getOwnerID()) == null
+                || s.owned_offline_ignore.contains(id)) {
+            online = true;
+            return;
+        }
+
+        Player owner = Bukkit.getPlayer(id);
+        if(owner != null && owner.isOnline()) {
+            online = true;
+            return;
+        }
+
+        int time = s.owned_offline_time;
+        if(time <= 0) online = false;
+        else {
+            OfflinePlayer op = Bukkit.getOfflinePlayer(id);
+            long last = op.getLastPlayed();
+            if(last == 0) {
+                online = false;
+                return;
+            }
+            long sub = System.currentTimeMillis() - last;
+            sub /= 1000; // to seconds
+            sub /= 60; // to minutes
+
+            online = sub <= time;
+        }
+    }
+
+    @Override
+    public int ticks() {
+        return ticks;
+    }
+
+    @Override
+    public void ticks(int ticks) {
+        this.ticks = Math.max(0, ticks);
+    }
 
     @Override
     public void tickFolia() {
         SpawnerMeta.scheduler().runAtLocation(spawner.block().getLocation(), task -> this.tick());
     }
 
-	@Override
-	public void tick() {
+    @Override
+    public void tick() {
         if(--validation < 0) validation = Settings.settings.validation_interval - 1;
         if(!active) return;
         holograms();
@@ -247,311 +247,312 @@ public class ActiveGenerator implements IGenerator {
             spawn();
             update();
         }
-	}
+    }
 
-	private void tick_until_zero() {
-		if(!Settings.settings.tick_until_zero || ticks <= 0) return;
-		ticks--;
-	}
-	
-	private void holograms() {
-		if(validation != 0 || !active) return;
-		if(hologram != null) hologram.update();
-		if(warning != null) warning.update();
-	}
-	
-	private boolean check() {
-		if(--checking < 0) checking = Settings.settings.checking_interval - 1;
-		if(!cache.enabled() || cache.type() == SpawnerType.EMPTY) return false;
-		if(checking != 0) return rotating;
-		
-		boolean rotate = box.any(spawner.world().getPlayers());
-		
-		if(Settings.settings.redstone_power_disable_with_power
-				&& rotate)
-			rotate = block().getBlockPower() <= 0;
-		
-		if(rotate != rotating) spawner.setRotating(rotating = rotate);
-		return rotating;
-	}
+    private void tick_until_zero() {
+        if(!Settings.settings.tick_until_zero || ticks <= 0) return;
+        ticks--;
+    }
 
-	@Override
-	public boolean spawn() {
-		Settings s = Settings.settings;
-		if(!s.spawning || !active) return false;
-		List<Location> list = finder.find();
-		validation(finder.errors());
-		if(!warnings.isEmpty()) return false;
-		
-		int count = cache.stack() * cache.amount();
-		if(count > s.safety_limit) count = s.safety_limit;
-		
-		int limit = s.nearby_limit;
-		if(limit > 0) {
-			int r_h = s.radius_horizontal, r_v = s.radius_vertical;
-			int nearby = spawner.world().getNearbyEntities(spawner.center(), r_h, r_v, r_h,
-					entity -> entity instanceof LivingEntity
-					&& !(entity instanceof Player))
-					.size();
-			if(nearby >= limit) return false;
-			if(s.nearby_reduce) {
-				int left = limit - nearby;
-				if(count > left) count = left;
-			}
-		}
+    private void holograms() {
+        if(validation != 0 || !active) return;
+        if(hologram != null) hologram.update();
+        if(warning != null) warning.update();
+    }
 
-		Block block = spawner.block();
-		int chuck = s.chunk_entity_limit;
-		if(chuck > 0) {
-			long total = Stream.of(block.getChunk().getEntities())
-					.filter(e -> e instanceof LivingEntity)
-					.filter(e -> !(e instanceof Player))
-					.count();
-			if(total >= chuck) return false;
-		}
-		
-		SpawnerPreSpawnEvent call = EventRegistry.call(new SpawnerPreSpawnEvent(this, count));
-		if(call.cancelled() || count < 1) return false;
-		
-		count = call.count;
-		
-		if(!call.bypass_checks && s.charges_enabled && cache.charges() <= 0) {
-			boolean ignore = s.charges_ignore_natural
-					&& cache.natural()
-					&& cache.charges() >= s.charges_requires_as_minimum(cache.type(), this);
-			if(ignore) warnings.remove(SpawnerWarning.CHARGES);
-			else {
-				warn(SpawnerWarning.CHARGES);
-				return false;
-			}
-		}
-		
-		boolean clear = false;
-		int spawned = -1;
-		x: if(!call.bypass_checks && s.spawnable_enabled) {
-			int spawnable = cache.spawnable();
-			if(spawnable >= 1_000_000_000) break x;
-			if(spawnable <= 0) {
-				clear = true;
-				count = 0;
-				break x;
-			}
-			if(spawnable < count) {
-				count = spawnable;
-				spawnable = 0;
-			} else spawnable -= count;
-			spawned = spawnable;
-		}
-		
-		if(count <= 0) {
-			block.getWorld().spawnParticle(Utility.particle_redstone, block.getLocation().add(0.5, 0.5, 0.5),
-					25, 0.45, 0.45, 0.45, 0.075, new DustOptions(Color.MAROON, 2.5f));
-			return false;
-		}
+    private boolean check() {
+        if(--checking < 0) checking = Settings.settings.checking_interval - 1;
+        if(!cache.enabled() || cache.type() == SpawnerType.EMPTY) return false;
+        if(checking != 0) return rotating;
 
-		List<Entity> entities = SpawningManager.spawn(spawner, cache.type(), ISelector.of(list), count);
-		
-		if(entities.isEmpty()) return false;
-		
-		if(upgrades != null) upgrades.update();
-		
-		EventRegistry.call(new SpawnerPostSpawnEvent(this, entities));
-		
-		if(s.instant_kill_enabled) {
-			if(s.instant_kill_drop_xp) {
-				Entity killer = block.getWorld()
-						.getNearbyEntities(block.getLocation(), 32, 32, 32)
-						.stream()
-						.filter(n -> n instanceof Player)
-						.findAny()
-						.orElse(null);
-				entities.forEach(e -> {
-					if(e instanceof LivingEntity living) kill(living, killer);
-				});
-			} else {
-				entities.forEach(e -> {
-					if(e instanceof LivingEntity living) kill(living, null);
-				});
-			}
-		}
+        boolean rotate = box.any(spawner.world().getPlayers());
 
-		if(!call.bypass_checks && s.charges_enabled
-				&& cache.charges() < 1_000_000_000)
-			spawner.setCharges(cache.charges() - s.charges_consume(cache.type(), this));
+        if(Settings.settings.redstone_power_disable_with_power
+                && rotate)
+            rotate = block().getBlockPower() <= 0;
 
-		if(spawned >= 0) {
-			spawner.setSpawnable(spawned);
-			if(spawned < cache.stack()) {
-				if(spawned == 0) clear = true;
-				else {
-					spawner.setStack(spawned);
-					if(hologram != null) hologram.rewrite();
-				}
-			}
-		}
-		
-		if(clear) {
-			remove(true);
-			block.getWorld().spawnParticle(Particle.LAVA, Utility.center(block),
-					25, 0.1, 0.1, 0.1, 0);
-		}
-		return true;
-	}
-	
-	private void kill(LivingEntity entity, Entity killer) {
-		entity.getPassengers().forEach(e -> damage(e, killer));
-		damage(entity.getVehicle(), killer);
-		damage(entity, killer);
-	}
-	
-	private static final Invoker<?> _damage = RF.order(Damageable.class, "damage", double.class, Entity.class);
-	
-	private void damage(Entity entity, Entity killer) {
-		if(entity instanceof LivingEntity living) {
-			_damage.objected(living, 10_000_000, killer);
-			living.setHealth(0);
-			if(!Settings.settings.instant_kill_death_animation)
-				living.remove();
-		}
-	}
+        if(rotate != rotating) spawner.setRotating(rotating = rotate);
+        return rotating;
+    }
 
-	@Override
-	public void warn(SpawnerWarning warn) {
-		if(!active) return;
-		warnings.add(warn);
-		if(warning == null
-				&& Settings.settings.holograms_warning_enabled) {
-			warning = IHologram.warning(this, hologram != null);
-			warning.update();
-		}
-		if(upgrades != null) upgrades.update();
-	}
-	
-	@Override
-	public boolean warned(SpawnerWarning warn) {
-		return warnings.contains(warn);
-	}
-	
-	@Override
-	public boolean warned() {
-		return !warnings.isEmpty();
-	}
-	
-	private boolean validate() {
-		if(warnings.isEmpty() || !rotating || !active) return true;
-		Block block = spawner.block();
-		if(!online) {
-			block.getWorld().spawnParticle(Utility.particle_redstone, Utility.center(block),
-					1, 0.5, 0.5, 0.5, 0, dust_owner);
-		}
-		if(rotating && Settings.settings.warning_particles ) {
-			block.getWorld().spawnParticle(Utility.particle_redstone, Utility.center(block),
-					1, 0.5, 0.5, 0.5, 0, dust_warn);
-		}
-		if(validation == 0 && cache.enabled()) valid();
-		return false;
-	}
-	
-	@Override
-	public boolean valid() {
-		if(cache.type() == SpawnerType.EMPTY) {
-			warnings.clear();
-			if(warning != null) warning.clear();
-			warning = null;
-			if(upgrades != null) upgrades.update();
-			return false;
-		}
-		finder.find();
-		validation(finder.errors());
-		boolean empty = warnings.isEmpty();
-		if(empty && warning != null) {
-			warning.clear();
-			warning = null;
-			if(upgrades != null) upgrades.update();
-		}
-		return empty;
-	}
-	
-	private void validation(ErrorCounter errors) {
-		warnings.clear();
-		if(!errors.valid()) {
-			int a = errors.light();
-			int b = errors.lighted();
-			int c = errors.ground();
-			int d = errors.environment();
-			
-			if(a > 0) {
-				if(c <= 0) warn(SpawnerWarning.GROUND);
-				if(a == b) warn(SpawnerWarning.LIGHT);
-				if(b == d) {
-					if(b > 0) warn(SpawnerWarning.LIGHT);
-					else warn(SpawnerWarning.ENVIRONMENT);
-				}
-			} else if(b <= 0 && d <= 0) warn(SpawnerWarning.ENVIRONMENT);
-			
-			// safety check
-			if(warnings.isEmpty()) warn(SpawnerWarning.UNKNOWN);
-		}
-		var s = Settings.settings;
+    @Override
+    public boolean spawn() {
+        Settings s = Settings.settings;
+        if(!s.spawning || !active) return false;
+        List<Location> list = finder.find();
+        validation(finder.errors());
+        if(!warnings.isEmpty()) return false;
 
-		if (s.charges_enabled) {
-			boolean ignore = s.charges_ignore_natural && cache.natural();
-		
-			boolean shouldWarn = s.charges_comparison
-				? cache.charges() < s.charges_requires_as_minimum.get(cache.type())
-				: cache.charges() <= s.charges_requires_as_minimum.get(cache.type());
-		
-			if (shouldWarn && !ignore) {
-				warn(SpawnerWarning.CHARGES);
-			}
-		}
+        int count = cache.stack() * cache.amount();
+        if(count > s.safety_limit) count = s.safety_limit;
 
-		if(!s.redstone_power_disable_with_power) {
-			int power = s.redstone_power_required;
-			if(power > 0 && spawner.block().getBlockPower() < power
-					&& !(s.redstone_power_ignore_natural && cache.natural()))
-				warn(SpawnerWarning.POWER);
-		}
-	}
-	
-	@Override
-	public boolean online() {
-		return online;
-	}
-	
-	@Override
-	public IUpgrades upgrades() {
-		return upgrades;
-	}
-	
-	@Override
-	public void open(Player player) {
-		if(upgrades == null) upgrades = new ActiveUpgrades(this);
-		upgrades.open(player);
-	}
-	
-	@Override
-	public void close() {
-		if(upgrades == null) return;
-		if(upgrades.active()) upgrades.close();
-		upgrades = null;
-	}
-	
-	@Override
-	public void clear() {
-		if(upgrades != null) upgrades.close();
-		upgrades = null;
-		if(hologram != null) hologram.clear();
-		if(warning != null) warning.clear();
-		warning = null;
-		SpawningManager.unlink(spawner.block());
-		unload();
-	}
-	
-	@Override
-	public void unload() {
-		if(!Settings.settings.reset_spawner_values) return;
-		spawner.reset();
-	}
+        int limit = s.nearby_limit;
+        if(limit > 0) {
+            int r_h = s.radius_horizontal, r_v = s.radius_vertical;
+            int nearby = spawner.world().getNearbyEntities(spawner.center(), r_h, r_v, r_h,
+                            entity -> entity instanceof LivingEntity
+                                    && !(entity instanceof Player))
+                    .size();
+            if(nearby >= limit) return false;
+            if(s.nearby_reduce) {
+                int left = limit - nearby;
+                if(count > left) count = left;
+            }
+        }
+
+        Block block = spawner.block();
+        int chuck = s.chunk_entity_limit;
+        if(chuck > 0) {
+            long total = Stream.of(block.getChunk().getEntities())
+                    .filter(e -> e instanceof LivingEntity)
+                    .filter(e -> !(e instanceof Player))
+                    .count();
+            if(total >= chuck) return false;
+        }
+
+        SpawnerPreSpawnEvent call = EventRegistry.call(new SpawnerPreSpawnEvent(this, count));
+        if(call.cancelled() || count < 1) return false;
+
+        count = call.count;
+
+        if(!call.bypass_checks && s.charges_enabled && cache.charges() <= 0) {
+            boolean ignore = s.charges_ignore_natural
+                    && cache.natural()
+                    && cache.charges() >= s.charges_requires_as_minimum(cache.type(), this);
+            if(ignore) warnings.remove(SpawnerWarning.CHARGES);
+            else {
+                warn(SpawnerWarning.CHARGES);
+                return false;
+            }
+        }
+
+        boolean clear = false;
+        int spawned = -1;
+        x:
+        if(!call.bypass_checks && s.spawnable_enabled) {
+            int spawnable = cache.spawnable();
+            if(spawnable >= 1_000_000_000) break x;
+            if(spawnable <= 0) {
+                clear = true;
+                count = 0;
+                break x;
+            }
+            if(spawnable < count) {
+                count = spawnable;
+                spawnable = 0;
+            } else spawnable -= count;
+            spawned = spawnable;
+        }
+
+        if(count <= 0) {
+            block.getWorld().spawnParticle(Utility.particle_redstone, block.getLocation().add(0.5, 0.5, 0.5),
+                    25, 0.45, 0.45, 0.45, 0.075, new DustOptions(Color.MAROON, 2.5f));
+            return false;
+        }
+
+        List<Entity> entities = SpawningManager.spawn(spawner, cache.type(), ISelector.of(list), count);
+
+        if(entities.isEmpty()) return false;
+
+        if(upgrades != null) upgrades.update();
+
+        EventRegistry.call(new SpawnerPostSpawnEvent(this, entities));
+
+        if(s.instant_kill_enabled) {
+            if(s.instant_kill_drop_xp) {
+                Entity killer = block.getWorld()
+                        .getNearbyEntities(block.getLocation(), 32, 32, 32)
+                        .stream()
+                        .filter(n -> n instanceof Player)
+                        .findAny()
+                        .orElse(null);
+                entities.forEach(e -> {
+                    if(e instanceof LivingEntity living) kill(living, killer);
+                });
+            } else {
+                entities.forEach(e -> {
+                    if(e instanceof LivingEntity living) kill(living, null);
+                });
+            }
+        }
+
+        if(!call.bypass_checks && s.charges_enabled
+                && cache.charges() < 1_000_000_000)
+            spawner.setCharges(cache.charges() - s.charges_consume(cache.type(), this));
+
+        if(spawned >= 0) {
+            spawner.setSpawnable(spawned);
+            if(spawned < cache.stack()) {
+                if(spawned == 0) clear = true;
+                else {
+                    spawner.setStack(spawned);
+                    if(hologram != null) hologram.rewrite();
+                }
+            }
+        }
+
+        if(clear) {
+            remove(true);
+            block.getWorld().spawnParticle(Particle.LAVA, Utility.center(block),
+                    25, 0.1, 0.1, 0.1, 0);
+        }
+        return true;
+    }
+
+    private void kill(LivingEntity entity, Entity killer) {
+        entity.getPassengers().forEach(e -> damage(e, killer));
+        damage(entity.getVehicle(), killer);
+        damage(entity, killer);
+    }
+
+    private static final Invoker<?> _damage = RF.order(Damageable.class, "damage", double.class, Entity.class);
+
+    private void damage(Entity entity, Entity killer) {
+        if(entity instanceof LivingEntity living) {
+            _damage.objected(living, 10_000_000, killer);
+            living.setHealth(0);
+            if(!Settings.settings.instant_kill_death_animation)
+                living.remove();
+        }
+    }
+
+    @Override
+    public void warn(SpawnerWarning warn) {
+        if(!active) return;
+        warnings.add(warn);
+        if(warning == null
+                && Settings.settings.holograms_warning_enabled) {
+            warning = IHologram.warning(this, hologram != null);
+            warning.update();
+        }
+        if(upgrades != null) upgrades.update();
+    }
+
+    @Override
+    public boolean warned(SpawnerWarning warn) {
+        return warnings.contains(warn);
+    }
+
+    @Override
+    public boolean warned() {
+        return !warnings.isEmpty();
+    }
+
+    private boolean validate() {
+        if(warnings.isEmpty() || !rotating || !active) return true;
+        Block block = spawner.block();
+        if(!online) {
+            block.getWorld().spawnParticle(Utility.particle_redstone, Utility.center(block),
+                    1, 0.5, 0.5, 0.5, 0, dust_owner);
+        }
+        if(rotating && Settings.settings.warning_particles) {
+            block.getWorld().spawnParticle(Utility.particle_redstone, Utility.center(block),
+                    1, 0.5, 0.5, 0.5, 0, dust_warn);
+        }
+        if(validation == 0 && cache.enabled()) valid();
+        return false;
+    }
+
+    @Override
+    public boolean valid() {
+        if(cache.type() == SpawnerType.EMPTY) {
+            warnings.clear();
+            if(warning != null) warning.clear();
+            warning = null;
+            if(upgrades != null) upgrades.update();
+            return false;
+        }
+        finder.find();
+        validation(finder.errors());
+        boolean empty = warnings.isEmpty();
+        if(empty && warning != null) {
+            warning.clear();
+            warning = null;
+            if(upgrades != null) upgrades.update();
+        }
+        return empty;
+    }
+
+    private void validation(ErrorCounter errors) {
+        warnings.clear();
+        if(!errors.valid()) {
+            int a = errors.light();
+            int b = errors.lighted();
+            int c = errors.ground();
+            int d = errors.environment();
+
+            if(a > 0) {
+                if(c <= 0) warn(SpawnerWarning.GROUND);
+                if(a == b) warn(SpawnerWarning.LIGHT);
+                if(b == d) {
+                    if(b > 0) warn(SpawnerWarning.LIGHT);
+                    else warn(SpawnerWarning.ENVIRONMENT);
+                }
+            } else if(b <= 0 && d <= 0) warn(SpawnerWarning.ENVIRONMENT);
+
+            // safety check
+            if(warnings.isEmpty()) warn(SpawnerWarning.UNKNOWN);
+        }
+        var s = Settings.settings;
+
+        if(s.charges_enabled) {
+            boolean ignore = s.charges_ignore_natural && cache.natural();
+
+            boolean shouldWarn = s.charges_comparison
+                    ? cache.charges() < s.charges_requires_as_minimum.get(cache.type())
+                    : cache.charges() <= s.charges_requires_as_minimum.get(cache.type());
+
+            if(shouldWarn && !ignore) {
+                warn(SpawnerWarning.CHARGES);
+            }
+        }
+
+        if(!s.redstone_power_disable_with_power) {
+            int power = s.redstone_power_required;
+            if(power > 0 && spawner.block().getBlockPower() < power
+                    && !(s.redstone_power_ignore_natural && cache.natural()))
+                warn(SpawnerWarning.POWER);
+        }
+    }
+
+    @Override
+    public boolean online() {
+        return online;
+    }
+
+    @Override
+    public IUpgrades upgrades() {
+        return upgrades;
+    }
+
+    @Override
+    public void open(Player player) {
+        if(upgrades == null) upgrades = new ActiveUpgrades(this);
+        upgrades.open(player);
+    }
+
+    @Override
+    public void close() {
+        if(upgrades == null) return;
+        if(upgrades.active()) upgrades.close();
+        upgrades = null;
+    }
+
+    @Override
+    public void clear() {
+        if(upgrades != null) upgrades.close();
+        upgrades = null;
+        if(hologram != null) hologram.clear();
+        if(warning != null) warning.clear();
+        warning = null;
+        SpawningManager.unlink(spawner.block());
+        unload();
+    }
+
+    @Override
+    public void unload() {
+        if(!Settings.settings.reset_spawner_values) return;
+        spawner.reset();
+    }
 
 }

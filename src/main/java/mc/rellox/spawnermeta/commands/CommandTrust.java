@@ -3,7 +3,7 @@ package mc.rellox.spawnermeta.commands;
 import mc.rellox.spawnermeta.api.configuration.IPlayerData;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
-import mc.rellox.spawnermeta.utility.Messagable;
+import mc.rellox.spawnermeta.utility.Receiver;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
@@ -24,37 +24,37 @@ public class CommandTrust extends Command {
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull String label, String[] args) {
         if(!(sender instanceof Player player)) return false;
-        Messagable messagable = new Messagable(player);
+        Receiver receiver = new Receiver(player);
         IPlayerData data = LocationRegistry.get(player);
 
-        if(args.length < 1) messagable.send(Language.list("Trusted.help.primary"));
+        if(args.length < 1) receiver.send(Language.list("Trusted.help.primary"));
         else if(args[0].equalsIgnoreCase("add")) {
-            if(args.length < 2) messagable.send(Language.list("Trusted.help.add"));
+            if(args.length < 2) receiver.send(Language.list("Trusted.help.add"));
             else {
                 Player other = Bukkit.getPlayer(args[1]);
-                if(other == null) messagable.send(Language.get("Trusted.info.unknow-player"));
-                else if(other.equals(player)) messagable.send(Language.get("Trusted.info.already-trusted"));
+                if(other == null) receiver.send(Language.get("Trusted.info.unknow-player"));
+                else if(other.equals(player)) receiver.send(Language.get("Trusted.info.already-trusted"));
                 else {
                     if(data.trust(other.getUniqueId())) {
-                        messagable.send(Language.get("Trusted.info.added"));
+                        receiver.send(Language.get("Trusted.info.added"));
                         player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 1.5f);
                     } else {
-                        messagable.send(Language.get("Trusted.info.already-trusted"));
+                        receiver.send(Language.get("Trusted.info.already-trusted"));
                         player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 0.5f);
                     }
                 }
             }
         } else if(args[0].equalsIgnoreCase("remove")) {
-            if(args.length < 2) messagable.send(Language.list("Trusted.help.remove"));
+            if(args.length < 2) receiver.send(Language.list("Trusted.help.remove"));
             else {
                 UUID id = data.trusted(args[1]);
-                if(id == null) messagable.send(Language.get("Trusted.info.unknow-player"));
+                if(id == null) receiver.send(Language.get("Trusted.info.unknow-player"));
                 else {
                     if(data.untrust(id)) {
-                        messagable.send(Language.get("Trusted.info.removed"));
+                        receiver.send(Language.get("Trusted.info.removed"));
                         player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 2f, 1.5f);
                     } else {
-                        messagable.send(Language.get("Trusted.info.not-trusted"));
+                        receiver.send(Language.get("Trusted.info.not-trusted"));
                         player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 0.5f);
                     }
                 }
@@ -62,10 +62,10 @@ public class CommandTrust extends Command {
         } else if(args[0].equalsIgnoreCase("clear")) {
             int s = data.untrust();
             if(s > 0) {
-                messagable.send(Language.get("Trusted.info.cleared", "count", s));
+                receiver.send(Language.get("Trusted.info.cleared", "count", s));
                 player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 2f, 1.5f);
             } else {
-                messagable.send(Language.get("Trusted.info.empty"));
+                receiver.send(Language.get("Trusted.info.empty"));
                 player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 0.5f);
             }
         } else if(args[0].equalsIgnoreCase("view")) {
@@ -77,16 +77,16 @@ public class CommandTrust extends Command {
                     .sorted()
                     .toList();
             if(list.isEmpty()) {
-                messagable.send(Language.get("Trusted.info.empty"));
+                receiver.send(Language.get("Trusted.info.empty"));
                 player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 0.5f);
             } else {
-                messagable.send(Language.get("Trusted.header", "count", list.size()));
+                receiver.send(Language.get("Trusted.header", "count", list.size()));
                 int i = 1;
                 for(String name : list)
-                    messagable.send(Language.get("Trusted.player", "index", i++, "player", name));
+                    receiver.send(Language.get("Trusted.player", "index", i++, "player", name));
                 player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1f, 1.5f);
             }
-        } else messagable.send(Language.list("Trusted.help.primary"));
+        } else receiver.send(Language.list("Trusted.help.primary"));
         return true;
     }
 

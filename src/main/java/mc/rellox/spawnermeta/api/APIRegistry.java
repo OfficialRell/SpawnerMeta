@@ -23,134 +23,134 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public final class APIRegistry implements APIInstance {
-	
-	private boolean registered;
-	
-	private final List<WrappedExecutor<?>> executors;
-	
-	private Function<Player, Boolean> silk_touch_provider;
-	
-	public APIRegistry() {
-		this.executors = new ArrayList<>();
-		this.silk_touch_provider = Settings.settings::has_silk;
-	}
 
-	public boolean registered() {
-		return registered;
-	}
-	
-	@Override
-	public <E extends IEvent> void register(Class<E> clazz, EventExecutor<E> executor) {
-		Objects.requireNonNull(clazz, "Event class cannot be null");
-		Objects.requireNonNull(executor, "Event executor cannot be null");
-		WrappedExecutor<?> wrapper = new WrappedExecutor<>(clazz, executor);
-		int j = 0;
-		for(int i = 0; i < executors.size(); i++) {
-			if(executors.get(i).subclass(clazz)) {
-				j = i + 1;
-				break;
-			}
-		}
-		executors.add(j, wrapper);
-		registered = true;
-	}
-	
-	@Override
-	public void setSilkTouchProvider(Function<Player, Boolean> provider) {
-		Objects.requireNonNull(provider, "Silk touch provider cannot be null");
-		silk_touch_provider = provider;
-	}
-	
-	@Override
-	public boolean hasSilkTouch(Player player) {
-		return silk_touch_provider.apply(player);
-	}
-	
-	@Override
-	public boolean breakSpawner(Block block, boolean drop, boolean particles) {
-		Objects.requireNonNull(block, "Block cannot be null");
-		return EventRegistry.destroy(block, drop, particles);
-	}
-	
-	@Override
-	public boolean placeSpawner(Block block, Player player, IVirtual spawner) {
-		Objects.requireNonNull(block, "Block cannot be null");
-		Objects.requireNonNull(spawner, "Virtual spawner cannot be null");
-		return EventRegistry.place(block, player, spawner);
-	}
-	
-	@Override
-	public IVirtual getVirtual(ItemStack item) {
-		Objects.requireNonNull(item, "Item cannot be null");
-		return IVirtual.of(item);
-	}
-	
-	@Override
-	public IVirtual getVirtual(Block block) {
-		Objects.requireNonNull(block, "Block cannot be null");
-		return IVirtual.of(block);
-	}
-	
-	@Override
-	public ISpawner getSpawner(Block block) {
-		Objects.requireNonNull(block, "Block cannot be null");
-		return ISpawner.of(block);
-	}
-	
-	@Override
-	public IGenerator getGenerator(Block block) {
-		Objects.requireNonNull(block, "Block cannot be null");
-		return GeneratorRegistry.get(block);
-	}
-	
-	@Override
-	public List<IGenerator> getGenerators() {
-		return GeneratorRegistry.list(null);
-	}
-	
-	@Override
-	public List<IGenerator> getGenerators(World world) {
-		return GeneratorRegistry.list(world);
-	}
-	
-	@Override
-	public int remove(boolean fully, Predicate<IGenerator> filter) {
-		return GeneratorRegistry.remove(null, fully, filter);
-	}
-	
-	@Override
-	public int remove(World world, boolean fully, Predicate<IGenerator> filter) {
-		return GeneratorRegistry.remove(world, fully, filter);
-	}
-	
-	@Override
-	public IPlayerData getLocations(UUID id) throws IllegalArgumentException {
-		Objects.requireNonNull(id, "ID cannot be null");
-		return LocationRegistry.get(id);
-	}
-	
-	public void execute(IEvent event) {
-		executors.forEach(wrapper -> {
-			if(!wrapper.castable(event)) return;
-			wrapper.execute(event);
-		});
-	}
+    private boolean registered;
 
-	private record WrappedExecutor<E>(Class<E> type, EventExecutor<E> executor) {
+    private final List<WrappedExecutor<?>> executors;
 
-		public boolean subclass(Class<?> a) {
-			return type.isAssignableFrom(a);
-		}
+    private Function<Player, Boolean> silk_touch_provider;
 
-		public boolean castable(Object o) {
-			return type.isInstance(o);
-		}
+    public APIRegistry() {
+        this.executors = new ArrayList<>();
+        this.silk_touch_provider = Settings.settings::has_silk;
+    }
 
-		@SuppressWarnings("unchecked")
-		public void execute(Object o) {
-			executor.execute((E) o);
-		}
+    public boolean registered() {
+        return registered;
+    }
 
-	}
+    @Override
+    public <E extends IEvent> void register(Class<E> clazz, EventExecutor<E> executor) {
+        Objects.requireNonNull(clazz, "Event class cannot be null");
+        Objects.requireNonNull(executor, "Event executor cannot be null");
+        WrappedExecutor<?> wrapper = new WrappedExecutor<>(clazz, executor);
+        int j = 0;
+        for(int i = 0; i < executors.size(); i++) {
+            if(executors.get(i).subclass(clazz)) {
+                j = i + 1;
+                break;
+            }
+        }
+        executors.add(j, wrapper);
+        registered = true;
+    }
+
+    @Override
+    public void setSilkTouchProvider(Function<Player, Boolean> provider) {
+        Objects.requireNonNull(provider, "Silk touch provider cannot be null");
+        silk_touch_provider = provider;
+    }
+
+    @Override
+    public boolean hasSilkTouch(Player player) {
+        return silk_touch_provider.apply(player);
+    }
+
+    @Override
+    public boolean breakSpawner(Block block, boolean drop, boolean particles) {
+        Objects.requireNonNull(block, "Block cannot be null");
+        return EventRegistry.destroy(block, drop, particles);
+    }
+
+    @Override
+    public boolean placeSpawner(Block block, Player player, IVirtual spawner) {
+        Objects.requireNonNull(block, "Block cannot be null");
+        Objects.requireNonNull(spawner, "Virtual spawner cannot be null");
+        return EventRegistry.place(block, player, spawner);
+    }
+
+    @Override
+    public IVirtual getVirtual(ItemStack item) {
+        Objects.requireNonNull(item, "Item cannot be null");
+        return IVirtual.of(item);
+    }
+
+    @Override
+    public IVirtual getVirtual(Block block) {
+        Objects.requireNonNull(block, "Block cannot be null");
+        return IVirtual.of(block);
+    }
+
+    @Override
+    public ISpawner getSpawner(Block block) {
+        Objects.requireNonNull(block, "Block cannot be null");
+        return ISpawner.of(block);
+    }
+
+    @Override
+    public IGenerator getGenerator(Block block) {
+        Objects.requireNonNull(block, "Block cannot be null");
+        return GeneratorRegistry.get(block);
+    }
+
+    @Override
+    public List<IGenerator> getGenerators() {
+        return GeneratorRegistry.list(null);
+    }
+
+    @Override
+    public List<IGenerator> getGenerators(World world) {
+        return GeneratorRegistry.list(world);
+    }
+
+    @Override
+    public int remove(boolean fully, Predicate<IGenerator> filter) {
+        return GeneratorRegistry.remove(null, fully, filter);
+    }
+
+    @Override
+    public int remove(World world, boolean fully, Predicate<IGenerator> filter) {
+        return GeneratorRegistry.remove(world, fully, filter);
+    }
+
+    @Override
+    public IPlayerData getLocations(UUID id) throws IllegalArgumentException {
+        Objects.requireNonNull(id, "ID cannot be null");
+        return LocationRegistry.get(id);
+    }
+
+    public void execute(IEvent event) {
+        executors.forEach(wrapper -> {
+            if(!wrapper.castable(event)) return;
+            wrapper.execute(event);
+        });
+    }
+
+    private record WrappedExecutor<E>(Class<E> type, EventExecutor<E> executor) {
+
+        public boolean subclass(Class<?> a) {
+            return type.isAssignableFrom(a);
+        }
+
+        public boolean castable(Object o) {
+            return type.isInstance(o);
+        }
+
+        @SuppressWarnings("unchecked")
+        public void execute(Object o) {
+            executor.execute((E) o);
+        }
+
+    }
 
 }

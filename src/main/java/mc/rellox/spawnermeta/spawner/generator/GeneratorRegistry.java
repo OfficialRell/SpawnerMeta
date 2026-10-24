@@ -1,11 +1,10 @@
 package mc.rellox.spawnermeta.spawner.generator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
-
+import com.tcoded.folialib.wrapper.task.WrappedTask;
+import mc.rellox.spawnermeta.SpawnerMeta;
+import mc.rellox.spawnermeta.api.spawner.IGenerator;
+import mc.rellox.spawnermeta.configuration.Settings;
+import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -20,12 +19,11 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 
-import com.tcoded.folialib.wrapper.task.WrappedTask;
-
-import mc.rellox.spawnermeta.SpawnerMeta;
-import mc.rellox.spawnermeta.api.spawner.IGenerator;
-import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 public final class GeneratorRegistry implements Listener {
 
@@ -42,7 +40,7 @@ public final class GeneratorRegistry implements Listener {
 
     public static void retime() {
         if(active_task != null) active_task.cancel();
-        int[] t = {0};
+        int[] t = { 0 };
         final int f = Math.max(100, Settings.settings.check_present_interval / Settings.settings.ticking_interval);
         active_task = SpawnerMeta.scheduler().runTimer(() -> {
             for(SpawnerWorld sw : SPAWNERS.values()) {

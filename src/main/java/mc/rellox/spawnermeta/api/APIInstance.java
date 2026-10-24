@@ -209,25 +209,24 @@ public interface APIInstance {
     /**
      * Returns spawner location file of the specified player. Never {@code null}.
      *
-     * @param id player's ID
+     * @param id identifier of the player
      * @return Spawner location file
      * @throws IllegalArgumentException thrown if the player with
-     *                                  the specified ID has never player before
+     *                                  the specified ID has never played before
      */
 
     IPlayerData getLocations(UUID id) throws IllegalArgumentException;
 
     /**
      * Submits a new data parser for the player file.
-     * With this data parser you can save additional data for each player.<br><br>
+     * With this data parser you can save additional data for each player.
      * <p>
      * Creating you own data parser:
-     *
      * <pre>
      * {@code
      * IData<Integer> data = new IData<Integer>() {
      *   // Value parameter will always be the data type.
-     *   // In this example an integer
+     *   // In this example - an integer
      *   public void save(IFile file, Object value) {
      *     if(value != null) {
      *       file.set("Other-data", value);
@@ -255,7 +254,7 @@ public interface APIInstance {
      * Integer i = file.get(data);
      * }</pre>
      *
-     * @param data - data parser
+     * @param data data parser
      */
 
     default void submitFileData(IData<?> data) {

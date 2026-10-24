@@ -2,7 +2,7 @@ package mc.rellox.spawnermeta.commands;
 
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.Settings;
-import mc.rellox.spawnermeta.utility.Messagable;
+import mc.rellox.spawnermeta.utility.Receiver;
 import mc.rellox.spawnermeta.view.SpawnerView;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -21,12 +21,12 @@ public class CommandSpawners extends Command {
     @Override
     public boolean execute(CommandSender sender, String lable, String[] args) {
         if(!(sender instanceof Player player)) return false;
-        Messagable m = new Messagable(player);
-        if(Settings.settings.spawner_view_entities.isEmpty()) m.send(Language.get("Spawners.view.empty"));
-        else if(!Settings.settings.spawner_view_enabled) m.send(Language.get("Spawners.view.disabled"));
+        Receiver receiver = new Receiver(player);
+        if(Settings.settings.spawner_view_entities.isEmpty()) receiver.send(Language.get("Spawners.view.empty"));
+        else if(!Settings.settings.spawner_view_enabled) receiver.send(Language.get("Spawners.view.disabled"));
         else {
             if(!player.hasPermission("spawnermeta.spawners")) {
-                m.send(Language.get("Inventory.spawner-view.permission"));
+                receiver.send(Language.get("Inventory.spawner-view.permission"));
                 player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
             } else new SpawnerView(player);
         }

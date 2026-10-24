@@ -2,6 +2,7 @@ package mc.rellox.spawnermeta.utility;
 
 import mc.rellox.spawnermeta.SpawnerMeta;
 import mc.rellox.spawnermeta.api.spawner.location.Pos;
+import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.utility.reflect.Reflect.RF;
 import mc.rellox.spawnermeta.version.Version;
 import mc.rellox.spawnermeta.version.Version.VersionType;
@@ -22,30 +23,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.function.Consumer;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 public final class Utility {
 
-    private static final Random R = new Random();
+    private static final Random RANDOM = ThreadLocalRandom.current();
 
     public static boolean op(Player player) {
         return player.isOp() && player.getGameMode() == GameMode.CREATIVE;
     }
 
-    private static final EntityType ITEM_ENTITY;
-
-    static {
-        EntityType found;
-        try {
-            // Newer versions (1.20.6+)
-            found = EntityType.valueOf("ITEM");
-        } catch(IllegalArgumentException ex) {
-            // Older versions
-            found = EntityType.valueOf("DROPPED_ITEM");
-        }
-        ITEM_ENTITY = found;
-    }
+    private static final EntityType ITEM_ENTITY = RF.enumerate(EntityType.class, "ITEM", "DROPPED_ITEM");
 
     // Experience
 
@@ -78,7 +67,7 @@ public final class Utility {
     }
 
     public static int[] location(Block block) {
-        return new int[] {block.getX(), block.getY(), block.getZ()};
+        return new int[] { block.getX(), block.getY(), block.getZ() };
     }
 
     // Roman numerals
@@ -178,11 +167,11 @@ public final class Utility {
     }
 
     public static boolean chance(double chance) {
-        return R.nextDouble() * 100 < chance;
+        return RANDOM.nextDouble() * 100 < chance;
     }
 
     public static int random(int r) {
-        return R.nextInt(r);
+        return RANDOM.nextInt(r);
     }
 
     public static int between(int a, int b) {
@@ -191,7 +180,7 @@ public final class Utility {
 
     public static <E> E random(List<E> list) {
         int size = list.size();
-        return size > 0 ? list.get(R.nextInt(size)) : null;
+        return size > 0 ? list.get(RANDOM.nextInt(size)) : null;
     }
 
     // Validation
@@ -212,12 +201,6 @@ public final class Utility {
         } catch(Exception e) {
             return false;
         }
-    }
-
-    public static boolean isInteger(String... l) {
-        if(l == null) return false;
-        for(String s : l) if(!isInteger(s)) return false;
-        return true;
     }
 
     public static boolean isLetter(char c) {

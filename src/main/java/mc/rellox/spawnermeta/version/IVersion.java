@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 public interface IVersion {
 	
-	void send(Collection<? extends Player> players, Object... os);
+	void send(Collection<? extends Player> players, Object... packets);
 	
 	Object spawn(Object entity);
 	
@@ -17,16 +17,16 @@ public interface IVersion {
 	
 	Object destroy(Object entity);
 	
-	Object hologram(Location l, String name);
+	Object hologram(Location location, String name);
 	
 	void name(Object entity, String name);
 	
-	default void send(Player player, Object... os) {
-		send(List.of(player), os);
+	default void send(Player player, Object... packets) {
+		send(List.of(player), packets);
 	}
 	
-	default void send(Object... os) {
-		send(Bukkit.getOnlinePlayers(), os);
+	default void send(Object... packets) {
+		send(Bukkit.getOnlinePlayers(), packets);
 	}
 
 }

@@ -14,13 +14,13 @@ import java.util.stream.Stream;
 public class IVersion26 implements IVersion {
 
 	@Override
-	public void send(Collection<? extends Player> players, Object... os) {
+	public void send(Collection<? extends Player> players, Object... packets) {
 		players.forEach(player -> {
 			Object a = RF.direct(player, "getHandle");
 			Object b = RF.access(a, "connection").get();
 			Class<?> c = RF.get("net.minecraft.network.protocol.Packet");
 			Invoker<?> d = RF.order(b, "send", c);
-			Stream.of(os).forEach(d::invoke);
+			Stream.of(packets).forEach(d::invoke);
 		});
 	}
 
@@ -59,12 +59,12 @@ public class IVersion26 implements IVersion {
 	}
 
 	@Override
-	public Object hologram(Location l, String name) {
+	public Object hologram(Location location, String name) {
 		Class<?> a = RF.get("net.minecraft.world.level.Level");
-		Object b = RF.direct(l.getWorld(), "getHandle");
+		Object b = RF.direct(location.getWorld(), "getHandle");
 		Class<?> c = RF.get("net.minecraft.world.entity.decoration.ArmorStand");
 		Object d = RF.build(c, a, double.class, double.class, double.class)
-				.instance(b, l.getX(), l.getY(), l.getZ());
+				.instance(b, location.getX(), location.getY(), location.getZ());
 		RF.order(d, "setMarker", boolean.class).invoke(true);
 		RF.order(d, "setInvisible", boolean.class).invoke(true);
 		name(d, name);

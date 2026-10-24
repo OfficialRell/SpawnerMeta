@@ -14,7 +14,7 @@ import mc.rellox.spawnermeta.version.IVersion;
 public class IVersion1_19_3 implements IVersion {
 
 	@Override
-	public void send(Collection<? extends Player> players, Object... os) {
+	public void send(Collection<? extends Player> players, Object... packets) {
 		players.forEach(player -> {
 			
 			Object a = RF.direct(player, "getHandle");
@@ -25,7 +25,7 @@ public class IVersion1_19_3 implements IVersion {
 			
 			Invoker<?> d = RF.order(b, "a", c);
 			
-			Stream.of(os).forEach(d::invoke);
+			Stream.of(packets).forEach(d::invoke);
 		});
 	}
 
@@ -70,16 +70,16 @@ public class IVersion1_19_3 implements IVersion {
 	}
 
 	@Override
-	public Object hologram(Location l, String name) {
+	public Object hologram(Location location, String name) {
 		
 		Class<?> a = RF.get("net.minecraft.world.level.World");
 		
-		Object b = RF.direct(l.getWorld(), "getHandle");
+		Object b = RF.direct(location.getWorld(), "getHandle");
 		
 		Class<?> c = RF.get("net.minecraft.world.entity.decoration.EntityArmorStand");
 		
 		Object d = RF.build(c, a, double.class, double.class, double.class)
-				.instance(b, l.getX(), l.getY(), l.getZ());
+				.instance(b, location.getX(), location.getY(), location.getZ());
 		
 		RF.order(d, "u", boolean.class).invoke(true);
 		RF.order(d, "j", boolean.class).invoke(true);

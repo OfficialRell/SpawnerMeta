@@ -7,13 +7,13 @@ import mc.rellox.spawnermeta.text.content.Content;
 
 public class HologramWarning extends HologramImpl {
 
-	public HologramWarning(IGenerator generator, boolean above) {
-		super(generator, above, Settings.settings.holograms_warning_radius);
-	}
+    public HologramWarning(IGenerator generator, boolean above) {
+        super(generator, above, Settings.settings.holograms_warning_radius);
+    }
 
-	@Override
-	public Content title() {
-		return Language.get("Holograms.warning");
-	}
+    @Override
+    public Content title() {
+        return Language.get("Holograms.warning");
+    }
 
 }

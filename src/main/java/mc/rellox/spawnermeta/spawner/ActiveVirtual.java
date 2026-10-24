@@ -9,65 +9,65 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Arrays;
 
 public class ActiveVirtual implements IVirtual {
-	
-	private final SpawnerType type;
-	private final int[] levels;
-	private final int charges, spawnable;
-	private final boolean empty;
 
-	public ActiveVirtual(SpawnerType type, int[] levels, int charges,
-			int spawnable, boolean empty) {
-		this.type = type;
-		this.levels = levels == null || levels.length != 3
-				? new int[] {1, 1, 1} : levels;
-		this.charges = charges;
-		this.spawnable = spawnable;
-		this.empty = empty;
-	}
+    private final SpawnerType type;
+    private final int[] levels;
+    private final int charges, spawnable;
+    private final boolean empty;
 
-	@Override
-	public boolean exact(IVirtual other) {
-		if(type != other.getType()) return false;
-		if(empty != other.isEmpty()) return false;
-		if(Settings.settings.charges_enabled) {
-			int oc = other.getCharges();
-			if(!Settings.settings.charges_allow_stacking
-					&& charges != oc) return false;
-			boolean a = charges >= 1_000_000_000,
-					b = oc >= 1_000_000_000;
-			if(a != b) return false;
-		}
-		return Arrays.equals(levels, other.getUpgradeLevels());
-	}
-	
-	@Override
-	public SpawnerType getType() {
-		return type;
-	}
+    public ActiveVirtual(SpawnerType type, int[] levels, int charges,
+                         int spawnable, boolean empty) {
+        this.type = type;
+        this.levels = levels == null || levels.length != 3
+                ? new int[] { 1, 1, 1 } : levels;
+        this.charges = charges;
+        this.spawnable = spawnable;
+        this.empty = empty;
+    }
 
-	@Override
-	public int[] getUpgradeLevels() {
-		return levels;
-	}
+    @Override
+    public boolean exact(IVirtual other) {
+        if(type != other.getType()) return false;
+        if(empty != other.isEmpty()) return false;
+        if(Settings.settings.charges_enabled) {
+            int oc = other.getCharges();
+            if(!Settings.settings.charges_allow_stacking
+                    && charges != oc) return false;
+            boolean a = charges >= 1_000_000_000,
+                    b = oc >= 1_000_000_000;
+            if(a != b) return false;
+        }
+        return Arrays.equals(levels, other.getUpgradeLevels());
+    }
 
-	@Override
-	public int getCharges() {
-		return charges;
-	}
+    @Override
+    public SpawnerType getType() {
+        return type;
+    }
 
-	@Override
-	public int getSpawnable() {
-		return spawnable;
-	}
+    @Override
+    public int[] getUpgradeLevels() {
+        return levels;
+    }
 
-	@Override
-	public boolean isEmpty() {
-		return empty;
-	}
-	
-	@Override
-	public ItemStack getItem(int amount) {
-		return DataManager.getSpawner(this, amount);
-	}
-	
+    @Override
+    public int getCharges() {
+        return charges;
+    }
+
+    @Override
+    public int getSpawnable() {
+        return spawnable;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return empty;
+    }
+
+    @Override
+    public ItemStack getItem(int amount) {
+        return DataManager.getSpawner(this, amount);
+    }
+
 }

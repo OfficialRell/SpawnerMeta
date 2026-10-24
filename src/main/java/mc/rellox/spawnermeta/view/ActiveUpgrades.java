@@ -23,7 +23,7 @@ import mc.rellox.spawnermeta.spawner.type.UpgradeType;
 import mc.rellox.spawnermeta.text.Text;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.text.order.IOrder;
-import mc.rellox.spawnermeta.utility.Messagable;
+import mc.rellox.spawnermeta.utility.Receiver;
 import mc.rellox.spawnermeta.utility.Utility;
 import mc.rellox.spawnermeta.view.layout.LayoutRegistry;
 import org.bukkit.Bukkit;
@@ -126,7 +126,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		Inventory clicked = event.getClickedInventory();
 		Player player = (Player) event.getWhoClicked();
 		if(clicked == null || !clicked.equals(v) || !players.contains(player)) return;
-		Messagable m = new Messagable(player);
+		Receiver m = new Receiver(player);
 		try {
 			long now = System.currentTimeMillis();
 			if(now - pause < 250) return;
@@ -158,21 +158,21 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		}
 	}
 
-	private void upgrade0(Player player, Messagable m, UpgradeType upgrade) {
+	private void upgrade0(Player player, Receiver receiver, UpgradeType upgrade) {
 		int i = upgrade.ordinal();
 		if(!player.hasPermission("spawnermeta.upgrades.buy")) {
-			m.send(Language.list("Spawners.upgrades.permission.purchase"));
+			receiver.send(Language.list("Spawners.upgrades.permission.purchase"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
 		if(!allowed(i)) {
-			m.send(Language.list("Upgrade-GUI.disabled-upgrade"));
+			receiver.send(Language.list("Upgrade-GUI.disabled-upgrade"));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 			return;
 		}
 		if(!Settings.settings.natural_can_upgrade && cache.natural()) {
 			if(!player.hasPermission("spawnermeta.ownership.bypass.upgrading")) {
-				m.send(Language.list("Spawners.natural.upgrading.warning"));
+				receiver.send(Language.list("Spawners.natural.upgrading.warning"));
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 				return;
 			}
@@ -183,7 +183,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 				if(!player.hasPermission("spawnermeta.ownership.bypass.upgrading")) {
 					if(Settings.settings.trusted_can_upgrade
 							&& LocationRegistry.trusted(owner, player)) break x;
-					m.send(Language.list("Spawners.ownership.upgrading.warning"));
+					receiver.send(Language.list("Spawners.ownership.upgrading.warning"));
 					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 					return;
 				}
@@ -200,7 +200,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			
 			if(!price.has(player)) {
 				price = call.getUnsafePrice();
-				m.send(Language.list("Prices.insufficient", 
+				receiver.send(Language.list("Prices.insufficient",
 						"insufficient", price.insufficient(), "price", price.requires(player)));
 				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 				return;
@@ -213,7 +213,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			spawner.setUpgradeLevels(ls);
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
 			UpgradeType ut = UpgradeType.of(i);
-			m.send(Language.list("Upgrade-GUI.purchase." + ut.lower(),
+			receiver.send(Language.list("Upgrade-GUI.purchase." + ut.lower(),
 					"level", Utility.roman(ls[i])));
 			DustOptions d = new DustOptions(ut.color, 2f);
 			player.spawnParticle(Utility.particle_redstone, Utility.center(spawner.block()), 50, 0.25, 0.25, 0.25, 0, d);
@@ -222,7 +222,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 		} else player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
 	}
 
-	private void charge0(InventoryClickEvent event, Player player, Messagable m, int o) {
+	private void charge0(InventoryClickEvent event, Player player, Receiver receiver, int o) {
 		if(Settings.settings.charges_enabled
 				&& layout.is(o, SlotField.upgrade_charges)) {
 			if(Settings.settings.charges_ignore_natural
@@ -248,7 +248,7 @@ public final class ActiveUpgrades implements Listener, IUpgrades {
 			
 			int charges = cache.charges() + call.charges;
 			spawner.setCharges(charges);
-			m.send(Language.list("Upgrade-GUI.charges.purchase", "charges", call.charges));
+			receiver.send(Language.list("Upgrade-GUI.charges.purchase", "charges", call.charges));
 			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2f, 2f);
 			update();
 		}

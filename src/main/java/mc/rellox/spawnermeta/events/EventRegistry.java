@@ -25,7 +25,7 @@ import mc.rellox.spawnermeta.spawner.generator.SpawningManager;
 import mc.rellox.spawnermeta.spawner.type.SpawnerType;
 import mc.rellox.spawnermeta.text.content.Content;
 import mc.rellox.spawnermeta.utility.DataManager;
-import mc.rellox.spawnermeta.utility.Messagable;
+import mc.rellox.spawnermeta.utility.Receiver;
 import mc.rellox.spawnermeta.utility.Utility;
 import org.bukkit.*;
 import org.bukkit.Particle.DustOptions;
@@ -49,1058 +49,1071 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 public final class EventRegistry {
-	
-	private static long time, chunk;
-	
-	private static Block verify;
-	
-	public static APIInstance getAPI() {
-		return SpawnerMeta.instance().getAPI();
-	}
-	
-	public static boolean registered() {
-		return ((APIRegistry) getAPI()).registered();
-	}
-	
-	public static <E extends IEvent> E call(E event) {
-		APIRegistry api = (APIRegistry) getAPI();
-		api.execute(event);
-		return event;
-	}
 
-	private static void open_upgrades(Player player, Messagable m, IGenerator generator) {
-		if(!Settings.settings.upgrade_interface_enabled) return;
-		if(!player.hasPermission("spawnermeta.upgrades.open")) {
-			m.send(Language.list("Spawners.upgrades.permission.opening"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		if(!Settings.settings.natural_can_open && generator.cache().natural()) {
-			if(!player.hasPermission("spawnermeta.natural.bypass.interact")) {
-				m.send(Language.list("Spawners.natural.opening.warning"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return;
-			}
-		}
-		x: if(!Settings.settings.owned_can_open) {
-			UUID owner = generator.spawner().getOwnerID();
-			if(owner != null && !owner.equals(player.getUniqueId())) {
-				if(!player.hasPermission("spawnermeta.ownership.bypass.interact")) {
-					if(Settings.settings.trusted_can_open
-							&& LocationRegistry.trusted(owner, player)) break x;
-					m.send(Language.list("Spawners.ownership.opening.warning"));
-					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-					return;
-				}
-			}
-		}
-		
-		SpawnerOpenEvent call = call(new SpawnerOpenEvent(player, generator));
-		if(call.cancelled()) return;
-		
-		generator.open(player);
-	}
+    private static long time, chunk;
 
-	private static void changing_regular(Player player, Messagable m, IGenerator generator,
-                                         ItemStack item, SpawnerType change) {
-		if(!Settings.settings.changing_enabled) return;
-		if(change.unique() && !(player.isOp() && player.getGameMode() == GameMode.CREATIVE)) return;
-		if(!player.hasPermission("spawnermeta.eggs")) {
-			m.send(Language.list("Spawners.changing.permission"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		ICache cache = generator.cache();
-		if(!Settings.settings.natural_can_change && cache.natural()) {
-			if(!player.hasPermission("spawnermeta.natural.bypass.changing")) {
-				m.send(Language.list("Spawners.natural.changing.warning"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return;
-			}
-		}
-		ISpawner spawner = generator.spawner();
-		x: if(!Settings.settings.owned_can_change) {
-			UUID owner = generator.spawner().getOwnerID();
-			if(owner != null && !owner.equals(player.getUniqueId())) {
-				if(!player.hasPermission("spawnermeta.ownership.bypass.changing")) {
-					if(Settings.settings.trusted_can_change
-							&& LocationRegistry.trusted(owner, player)) break x;
-					m.send(Language.list("Spawners.ownership.changing.warning"));
-					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-					return;
-				}
-			}
-		}
-		SpawnerType type = cache.type();
-		if(type == change) {
-			m.send(Language.list("Spawners.changing.same-type"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		if(Settings.settings.changing_deny_from.contains(type)) {
-			m.send(Language.list("Spawners.changing.dany.from"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		if(Settings.settings.changing_deny_to.contains(change)) {
-			m.send(Language.list("Spawners.changing.dany.to"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		int stack = cache.stack();
-		if(!ItemMatcher.has(player, item, stack)) {
-			m.send(Language.list("Spawners.changing.eggs.insufficient", "required", stack));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		Price price = null;
-		if(Settings.settings.changing_price.using())
-			price = Price.of(Group.changing, Settings.settings.changing_price.get(type) * stack);
-		
-		SpawnerChangeEvent call = call(new SpawnerChangeEvent(player, generator, price, change, false));
-		if(call.cancelled()) return;
-		
-		if(!call.withdraw(player)) {
-			price = call.getUnsafePrice();
-			m.send(Language.list("Prices.insufficient", 
-					"insufficient", price.insufficient(), "price", price.requires(player)));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		m.send(Language.list("Spawners.changing.type-changed", "type", call.getNewType()));
-		player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 2f, 2f);
-		player.spawnParticle(Utility.particle_happy, spawner.center(), 25, 0.25, 0.25, 0.25, 0.1);
-		ItemMatcher.remove(player, item, stack);
-		
-		spawner.setType(change);
-		if(Settings.settings.changing_reset_regular) spawner.resetUpgradeLevels();
-		spawner.update();
-		
-		generator.refresh();
-		SpawningManager.unlink(generator.block());
-	}
+    private static Block verify;
 
-	private static void changing_empty(Player player, Messagable m, IGenerator generator, ItemStack item,
-                                       SpawnerType change) {
-		if(!change.unique() && Utility.op(player)) return;
-		ICache cache = generator.cache();
-		SpawnerType type = cache.type();
-		if(type != SpawnerType.EMPTY) return;
-		if(!Settings.settings.natural_can_change && cache.natural()) {
-			if(!player.hasPermission("spawnermeta.natural.bypass.changing")) {
-				m.send(Language.list("Spawners.natural.changing.warning"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return;
-			}
-		}
-		ISpawner spawner = generator.spawner();
-		x: if(!Settings.settings.owned_can_change) {
-			UUID owner = generator.spawner().getOwnerID();
-			if(owner != null && !owner.equals(player.getUniqueId())) {
-				if(!player.hasPermission("spawnermeta.ownership.bypass.changing")) {
-					if(Settings.settings.trusted_can_change
-							&& LocationRegistry.trusted(owner, player)) break x;
-					m.send(Language.list("Spawners.ownership.changing.warning"));
-					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-					return;
-				}
-			}
-		}
-		int stack = cache.stack();
-		if(!ItemMatcher.has(player, item, stack)) {
-			m.send(Language.list("Spawners.changing.eggs.insufficient", "required", stack));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		if(Settings.settings.changing_deny_to.contains(change)) {
-			m.send(Language.list("Spawners.changing.dany.to"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		Price price = null;
-		if(Settings.settings.changing_price.using())
-			price = Price.of(Group.changing, Settings.settings.changing_price.get(type) * stack);
+    public static APIInstance getAPI() {
+        return SpawnerMeta.instance().getAPI();
+    }
 
-		SpawnerChangeEvent call = call(new SpawnerChangeEvent(player, generator, price, change, true));
-		if(call.cancelled()) return;
-		
-		if(!call.withdraw(player)) {
-			price = call.getUnsafePrice();
-			m.send(Language.list("Prices.insufficient", 
-					"insufficient", price.insufficient(), "price", price.requires(player)));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		m.send(Language.list("Spawners.changing.type-changed", "type", change));
-		player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 2f, 2f);
-		player.spawnParticle(Utility.particle_happy, spawner.center(), 25, 0.25, 0.25, 0.25, 0.1);
-		
-		ItemMatcher.remove(player, item, stack);
-		spawner.setType(change);
-		if(Settings.settings.changing_reset_empty) spawner.resetUpgradeLevels();
-		spawner.update();
-		
-		generator.refresh();
-		SpawningManager.unlink(generator.block());
-	}
-	
-	private static boolean remove_eggs_from_regular(PlayerInteractEvent event, Player player, Messagable m, ItemStack item, IGenerator generator) {
-		if(generator.cache().empty()) return true;
-		if(!Settings.settings.empty_remove_from_regular) return true;
-		if(item != null && item.getType() == Material.SPAWNER) return true;
-		
-		event.setCancelled(true);
-		
-		if(!Settings.settings.empty_enabled) {
-			m.send(Language.list("Spawners.empty.disabled"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return false;
-		}
-		if(!player.isSneaking()) return true;
-		
-		x: if(!Settings.settings.owned_can_change) {
-			UUID owner = generator.spawner().getOwnerID();
-			if(owner != null && !owner.equals(player.getUniqueId())) {
-				if(!player.hasPermission("spawnermeta.ownership.bypass.changing")) {
-					if(Settings.settings.trusted_can_change
-							&& LocationRegistry.trusted(owner, player)) break x;
-					m.send(Language.list("Spawners.ownership.changing.warning"));
-					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-					return false;
-				}
-			}
-		}
-		boolean b = !Utility.nulled(player.getInventory().getItemInMainHand());
-		if(b) {
-			m.send(Language.list("Spawners.empty.hand-full"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return false;
-		}
-		if(Settings.settings.empty_verify_removing) {
-			Block block = generator.block();
-			verify = block;
-			SpawnerMeta.scheduler().runAtLocationLater(block.getLocation(), () -> {
-				if(block.equals(verify)) {
-					verify = null;
-					player.spawnParticle(Utility.particle_redstone, Utility.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
-							new DustOptions(Color.MAROON, 2f));
-				}
-			}, 20);
-			m.send(Language.list("Spawners.empty.verify-removing.first"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 2f, 0f);
-			return false;
-		}
+    public static boolean registered() {
+        return ((APIRegistry) getAPI()).registered();
+    }
 
-		remove_eggs(player, generator, false);
-		
-		return false;
-	}
-	
-	private static boolean remove_eggs_empty(PlayerInteractEvent event, Player player, Messagable m, ItemStack item, IGenerator generator) {
-		ICache cache = generator.cache();
-		
-		if(!cache.empty()) return true;
-		if(item != null && item.getType() == Material.SPAWNER) return true;
-		
-		event.setCancelled(true);
-		
-		if(!Settings.settings.empty_enabled) {
-			m.send(Language.list("Spawners.empty.disabled"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return false;
-		}
-		
-		SpawnerType type = cache.type();
-		if(!player.isSneaking()) {
-			if(type == SpawnerType.EMPTY) {
-				m.send(Language.list("Spawners.empty.try-open"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return false;
-			}
-			return true;
-		}
-		if(type == SpawnerType.EMPTY) return true;
-		
-		x: if(!Settings.settings.owned_can_change) {
-			UUID owner = cache.owner();
-			if(owner != null && !owner.equals(player.getUniqueId())) {
-				if(!player.hasPermission("spawnermeta.ownership.bypass.changing")) {
-					if(Settings.settings.trusted_can_change
-							&& LocationRegistry.trusted(owner, player)) break x;
-					m.send(Language.list("Spawners.ownership.changing.warning"));
-					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-					return false;
-				}
-			}
-		}
-		
-		boolean b = !Utility.nulled(player.getInventory().getItemInMainHand());
-		if(b) {
-			m.send(Language.list("Spawners.empty.hand-full"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return false;
-		}
-		
-		if(Settings.settings.empty_verify_removing) {
-			Block block = generator.block();
-			verify = block;
-			SpawnerMeta.scheduler().runAtLocationLater(block.getLocation(), () -> {
-				if(block.equals(verify)) {
-					verify = null;
-					player.spawnParticle(Utility.particle_redstone, Utility.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
-							new DustOptions(Color.MAROON, 2f));
-				}
-			}, 20);
-			m.send(Language.list("Spawners.empty.verify-removing.first"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 2f, 0f);
-			return false;
-		}
-		remove_eggs(player, generator, true);
-		return false;
-	}
+    public static <E extends IEvent> E call(E event) {
+        APIRegistry api = (APIRegistry) getAPI();
+        api.execute(event);
+        return event;
+    }
 
-	static void stack_nearby(PlayerInteractEvent event, Player player, Messagable m, Block block) {
-		if(!Settings.settings.stacking_nearby_enabled) return;
-		
-		ItemStack item = event.getItem();
-		if(item == null || item.getType() != Material.SPAWNER
-				|| !player.isSneaking()) return;
-		event.setCancelled(true);
-		
-		IVirtual virtual = IVirtual.of(item);
-		if(virtual == null) return;
-		
-		// check before stacking() to save performance
-		if(!player.hasPermission("spawnermeta.stacking")) {
-			m.send(Language.list("Spawners.stacking.permission"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		if(Settings.settings.stacking_disabled_types.contains(virtual.getType())) {
-			m.send(Language.list("Spawners.stacking.disabled-type"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		
-		final int r = Settings.settings.stacking_nearby_radius;
-		Block valid = null;
-		int x = -r, y, z;
-		f: do {
-			y = -r;
-			do {
-				z = -r;
-				do {
-					Block rel = block.getRelative(x, y, z);
-					if(rel.getType() != Material.SPAWNER) continue;
-					IVirtual of = IVirtual.of(rel);
-					if(of == null) continue;
-					if(virtual.exact(of)) {
-						valid = rel;
-						break f;
-					}
-				} while(++z <= r);
-			} while(++y <= r);
-		} while(++x <= r);
-		if(valid == null) {
-			m.send(Language.list("Spawners.stacking.nearby.none-match"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		
-		IGenerator generator = GeneratorRegistry.get(valid);
-		stacking(player, m, generator, item, false);
-	}
+    private static void open_upgrades(Player player, Receiver receiver, IGenerator generator) {
+        if(!Settings.settings.upgrade_interface_enabled) return;
+        if(!player.hasPermission("spawnermeta.upgrades.open")) {
+            receiver.send(Language.list("Spawners.upgrades.permission.opening"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        if(!Settings.settings.natural_can_open && generator.cache().natural()) {
+            if(!player.hasPermission("spawnermeta.natural.bypass.interact")) {
+                receiver.send(Language.list("Spawners.natural.opening.warning"));
+                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                return;
+            }
+        }
+        x:
+        if(!Settings.settings.owned_can_open) {
+            UUID owner = generator.spawner().getOwnerID();
+            if(owner != null && !owner.equals(player.getUniqueId())) {
+                if(!player.hasPermission("spawnermeta.ownership.bypass.interact")) {
+                    if(Settings.settings.trusted_can_open
+                            && LocationRegistry.trusted(owner, player)) break x;
+                    receiver.send(Language.list("Spawners.ownership.opening.warning"));
+                    player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                    return;
+                }
+            }
+        }
 
-	static void verify_removing(PlayerInteractEvent event, Player player, Messagable m) {
-		if(!Settings.settings.empty_verify_removing) return;
-		Block block = event.getClickedBlock();
-		
-		if(!player.isSneaking() || block.getType() != Material.SPAWNER) return;
-		
-		IGenerator generator = GeneratorRegistry.get(block);
-		if(generator == null) return;
-		
-		SpawnerType type = generator.cache().type();
-		if(type == SpawnerType.EMPTY) return;
-		
-		boolean empty = generator.cache().empty();
-		if(!Settings.settings.empty_remove_from_regular && !empty) return;
-		
-		boolean holding = !Utility.nulled(player.getInventory().getItemInMainHand());
-		if(!holding && Utility.op(player)) event.setCancelled(true);
-		
-		if(verify == null) {
-			m.send(Language.list("Spawners.empty.verify-removing.try-again"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		if(holding) {
-			m.send(Language.list("Spawners.empty.hand-full"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		remove_eggs(player, generator, empty);
-	}
+        SpawnerOpenEvent call = call(new SpawnerOpenEvent(player, generator));
+        if(call.cancelled()) return;
 
-	private static boolean stacking(Player player, Messagable m, IGenerator generator, ItemStack item, boolean direct) {
-		int stack = generator.cache().stack();
-		Settings s = Settings.settings;
-		int limit = s.stacking_limit(player, generator);
-		if(!s.stacking_ignore_limit) {
-			if(stack >= limit) {
-				m.send(Language.list("Spawners.stacking.limit-reached"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return true;
-			}
-		}
-		int tt = s.stacking_ticks;
-		if(tt > 0) {
-			long b = System.currentTimeMillis() / 50;
-			if(time >= b - tt) return false;
-			time = b;
-		}
-		
-		IVirtual virtual = IVirtual.of(item);
-		if(virtual == null) return false;
-		
-		if(!player.hasPermission("spawnermeta.stacking")) {
-			m.send(Language.list("Spawners.stacking.permission"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return false;
-		}
-		if(s.stacking_disabled_types.contains(virtual.getType())) {
-			m.send(Language.list("Spawners.stacking.disabled-type"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return false;
-		}
-		if(!s.natural_can_stack && generator.cache().natural()) {
-			if(!player.hasPermission("spawnermeta.natural.bypass.stacking")) {
-				m.send(Language.list("Spawners.natural.breaking.warning"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return false;
-			}
-		}
-		x: if(!s.owned_can_stack) {
-			UUID owner = generator.spawner().getOwnerID();
-			if(owner != null && !owner.equals(player.getUniqueId())) {
-				if(!player.hasPermission("spawnermeta.ownership.bypass.stacking")) {
-					if(s.trusted_can_stack
-							&& LocationRegistry.trusted(owner, player)) break x;
-					m.send(Language.list("Spawners.ownership.stacking.warning"));
-					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-					return false;
-				}
-			}
-		}
-		IVirtual other = IVirtual.of(generator.block());
-		if(!virtual.exact(other)) {
-			m.send(Language.list("Spawners.stacking.unequal-spawner"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return false;
-		}
-		Price price = null;
-		if(s.stacking_price.using())
-			price = Price.of(Group.stacking, s.stacking_price.get(generator.cache().type()));
+        generator.open(player);
+    }
 
-		SpawnerStackEvent call = call(new SpawnerStackEvent(player, generator, price, virtual, direct));
-		if(call.cancelled()) return false;
-		
-		if(!call.withdraw(player)) {
-			price = call.getUnsafePrice();
-			m.send(Language.list("Prices.insufficient", 
-					"insufficient", price.insufficient(), "price", price.requires(player)));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return false;
-		}
-		int stacked;
-		if(s.stacking_stack_all) {
-			int amount = item.getAmount();
-			if(!s.stacking_ignore_limit) {
-				int left = limit - stack;
-				stacked = Math.min(amount, left);
-			} else stacked = amount;
-		} else stacked = 1;
-		stack += stacked;
-		ISpawner spawner = generator.spawner();
-		ICache cache = generator.cache();
-		spawner.setStack(stack);
-		m.send((s.stacking_ignore_limit
-				? Language.list("Spawners.stacking.stacked.infinite", "stack", stack)
-						: Language.list("Spawners.stacking.stacked.finite", "stack", stack,
-								"limit", limit)));
-		player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 0.75f, 1.5f);
-		if(s.spawnable_enabled) {
-			int spawnable = cache.spawnable() + virtual.getSpawnable() * stacked;
-			spawner.setSpawnable(spawnable);
-		}
-		if(s.charges_enabled
-				&& s.charges_allow_stacking) {
-			if(cache.charges() < 1_000_000_000
-					|| virtual.getCharges() < 1_000_000_000) {
-				int b = cache.charges() * (stack - stacked) + virtual.getCharges() * stacked;
-				int r = b / stack;
-				spawner.setCharges(r);
-				int f = b % stack;
-				if(f > 0)
-					m.send(Language.list("Spawners.charges.lose-by-stacking", 
-							"charges", f));
-			}
-		}
-		if(!direct && s.stacking_nearby_particles) {
-			Location start = spawner.center();
-			Location end = player.getLocation().add(0, 1, 0);
-			Vector dis = end.toVector().subtract(start.toVector())
-					.normalize().multiply(0.25);
-			double loops = start.distance(end) / 0.25;
-			for(int i = 0; i < loops; i++) {
-				start.add(dis);
-				player.spawnParticle(Utility.particle_sharpness, start, 1, 0, 0, 0, 0);
-			}
-		}
-		ItemMatcher.remove(player, item, stacked);
+    private static void changing_regular(Player player, Receiver receiver, IGenerator generator,
+										 ItemStack item, SpawnerType change) {
+        if(!Settings.settings.changing_enabled) return;
+        if(change.unique() && !(player.isOp() && player.getGameMode() == GameMode.CREATIVE)) return;
+        if(!player.hasPermission("spawnermeta.eggs")) {
+            receiver.send(Language.list("Spawners.changing.permission"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        ICache cache = generator.cache();
+        if(!Settings.settings.natural_can_change && cache.natural()) {
+            if(!player.hasPermission("spawnermeta.natural.bypass.changing")) {
+                receiver.send(Language.list("Spawners.natural.changing.warning"));
+                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                return;
+            }
+        }
+        ISpawner spawner = generator.spawner();
+        x:
+        if(!Settings.settings.owned_can_change) {
+            UUID owner = generator.spawner().getOwnerID();
+            if(owner != null && !owner.equals(player.getUniqueId())) {
+                if(!player.hasPermission("spawnermeta.ownership.bypass.changing")) {
+                    if(Settings.settings.trusted_can_change
+                            && LocationRegistry.trusted(owner, player)) break x;
+                    receiver.send(Language.list("Spawners.ownership.changing.warning"));
+                    player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                    return;
+                }
+            }
+        }
+        SpawnerType type = cache.type();
+        if(type == change) {
+            receiver.send(Language.list("Spawners.changing.same-type"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        if(Settings.settings.changing_deny_from.contains(type)) {
+            receiver.send(Language.list("Spawners.changing.dany.from"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        if(Settings.settings.changing_deny_to.contains(change)) {
+            receiver.send(Language.list("Spawners.changing.dany.to"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        int stack = cache.stack();
+        if(!ItemMatcher.has(player, item, stack)) {
+            receiver.send(Language.list("Spawners.changing.eggs.insufficient", "required", stack));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        Price price = null;
+        if(Settings.settings.changing_price.using())
+            price = Price.of(Group.changing, Settings.settings.changing_price.get(type) * stack);
 
-		generator.refresh();
-		return false;
-	}
+        SpawnerChangeEvent call = call(new SpawnerChangeEvent(player, generator, price, change, false));
+        if(call.cancelled()) return;
 
-	static void interact(PlayerInteractEvent event, Player player, Messagable m, IGenerator generator) {
-		
-		SpawnerType type = generator.cache().type();
-		if(type.disabled()) return;
-		event.setCancelled(false);
-		
-		if(HookRegistry.PLOT_SQUARED.exists()
-				&& !HookRegistry.PLOT_SQUARED.modifiable(generator, player)) return;
+        if(!call.withdraw(player)) {
+            price = call.getUnsafePrice();
+            receiver.send(Language.list("Prices.insufficient",
+                    "insufficient", price.insufficient(), "price", price.requires(player)));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        receiver.send(Language.list("Spawners.changing.type-changed", "type", call.getNewType()));
+        player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 2f, 2f);
+        player.spawnParticle(Utility.particle_happy, spawner.center(), 25, 0.25, 0.25, 0.25, 0.1);
+        ItemMatcher.remove(player, item, stack);
+
+        spawner.setType(change);
+        if(Settings.settings.changing_reset_regular) spawner.resetUpgradeLevels();
+        spawner.update();
+
+        generator.refresh();
+        SpawningManager.unlink(generator.block());
+
+        HookRegistry.SUPERIOR_SKYBLOCK_2.recalculate(generator, type, change);
+    }
+
+    private static void changing_empty(Player player, Receiver receiver, IGenerator generator, ItemStack item,
+									   SpawnerType change) {
+        if(!change.unique() && Utility.op(player)) return;
+        ICache cache = generator.cache();
+        SpawnerType type = cache.type();
+        if(type != SpawnerType.EMPTY) return;
+        if(!Settings.settings.natural_can_change && cache.natural()) {
+            if(!player.hasPermission("spawnermeta.natural.bypass.changing")) {
+                receiver.send(Language.list("Spawners.natural.changing.warning"));
+                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                return;
+            }
+        }
+        ISpawner spawner = generator.spawner();
+        x:
+        if(!Settings.settings.owned_can_change) {
+            UUID owner = generator.spawner().getOwnerID();
+            if(owner != null && !owner.equals(player.getUniqueId())) {
+                if(!player.hasPermission("spawnermeta.ownership.bypass.changing")) {
+                    if(Settings.settings.trusted_can_change
+                            && LocationRegistry.trusted(owner, player)) break x;
+                    receiver.send(Language.list("Spawners.ownership.changing.warning"));
+                    player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                    return;
+                }
+            }
+        }
+        int stack = cache.stack();
+        if(!ItemMatcher.has(player, item, stack)) {
+            receiver.send(Language.list("Spawners.changing.eggs.insufficient", "required", stack));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        if(Settings.settings.changing_deny_to.contains(change)) {
+            receiver.send(Language.list("Spawners.changing.dany.to"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        Price price = null;
+        if(Settings.settings.changing_price.using())
+            price = Price.of(Group.changing, Settings.settings.changing_price.get(type) * stack);
+
+        SpawnerChangeEvent call = call(new SpawnerChangeEvent(player, generator, price, change, true));
+        if(call.cancelled()) return;
+
+        if(!call.withdraw(player)) {
+            price = call.getUnsafePrice();
+            receiver.send(Language.list("Prices.insufficient",
+                    "insufficient", price.insufficient(), "price", price.requires(player)));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        receiver.send(Language.list("Spawners.changing.type-changed", "type", change));
+        player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 2f, 2f);
+        player.spawnParticle(Utility.particle_happy, spawner.center(), 25, 0.25, 0.25, 0.25, 0.1);
+
+        ItemMatcher.remove(player, item, stack);
+        spawner.setType(change);
+        if(Settings.settings.changing_reset_empty) spawner.resetUpgradeLevels();
+        spawner.update();
+
+        generator.refresh();
+        SpawningManager.unlink(generator.block());
+    }
+
+    private static boolean remove_eggs_from_regular(PlayerInteractEvent event, Player player, Receiver receiver, ItemStack item, IGenerator generator) {
+        if(generator.cache().empty()) return true;
+        if(!Settings.settings.empty_remove_from_regular) return true;
+        if(item != null && item.getType() == Material.SPAWNER) return true;
+
+        event.setCancelled(true);
+
+        if(!Settings.settings.empty_enabled) {
+            receiver.send(Language.list("Spawners.empty.disabled"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return false;
+        }
+        if(!player.isSneaking()) return true;
+
+        x:
+        if(!Settings.settings.owned_can_change) {
+            UUID owner = generator.spawner().getOwnerID();
+            if(owner != null && !owner.equals(player.getUniqueId())) {
+                if(!player.hasPermission("spawnermeta.ownership.bypass.changing")) {
+                    if(Settings.settings.trusted_can_change
+                            && LocationRegistry.trusted(owner, player)) break x;
+                    receiver.send(Language.list("Spawners.ownership.changing.warning"));
+                    player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                    return false;
+                }
+            }
+        }
+        boolean b = !Utility.nulled(player.getInventory().getItemInMainHand());
+        if(b) {
+            receiver.send(Language.list("Spawners.empty.hand-full"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return false;
+        }
+        if(Settings.settings.empty_verify_removing) {
+            Block block = generator.block();
+            verify = block;
+            SpawnerMeta.scheduler().runAtLocationLater(block.getLocation(), () -> {
+                if(block.equals(verify)) {
+                    verify = null;
+                    player.spawnParticle(Utility.particle_redstone, Utility.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
+                            new DustOptions(Color.MAROON, 2f));
+                }
+            }, 20);
+            receiver.send(Language.list("Spawners.empty.verify-removing.first"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 2f, 0f);
+            return false;
+        }
+
+        remove_eggs(player, generator, false);
+
+        return false;
+    }
+
+    private static boolean remove_eggs_empty(PlayerInteractEvent event, Player player, Receiver receiver, ItemStack item, IGenerator generator) {
+        ICache cache = generator.cache();
+
+        if(!cache.empty()) return true;
+        if(item != null && item.getType() == Material.SPAWNER) return true;
+
+        event.setCancelled(true);
+
+        if(!Settings.settings.empty_enabled) {
+            receiver.send(Language.list("Spawners.empty.disabled"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return false;
+        }
+
+        SpawnerType type = cache.type();
+        if(!player.isSneaking()) {
+            if(type == SpawnerType.EMPTY) {
+                receiver.send(Language.list("Spawners.empty.try-open"));
+                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                return false;
+            }
+            return true;
+        }
+        if(type == SpawnerType.EMPTY) return true;
+
+        x:
+        if(!Settings.settings.owned_can_change) {
+            UUID owner = cache.owner();
+            if(owner != null && !owner.equals(player.getUniqueId())) {
+                if(!player.hasPermission("spawnermeta.ownership.bypass.changing")) {
+                    if(Settings.settings.trusted_can_change
+                            && LocationRegistry.trusted(owner, player)) break x;
+                    receiver.send(Language.list("Spawners.ownership.changing.warning"));
+                    player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                    return false;
+                }
+            }
+        }
+
+        boolean b = !Utility.nulled(player.getInventory().getItemInMainHand());
+        if(b) {
+            receiver.send(Language.list("Spawners.empty.hand-full"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return false;
+        }
+
+        if(Settings.settings.empty_verify_removing) {
+            Block block = generator.block();
+            verify = block;
+            SpawnerMeta.scheduler().runAtLocationLater(block.getLocation(), () -> {
+                if(block.equals(verify)) {
+                    verify = null;
+                    player.spawnParticle(Utility.particle_redstone, Utility.center(block).add(0, 0.52, 0), 5, 0.1, 0.1, 0.1, 0,
+                            new DustOptions(Color.MAROON, 2f));
+                }
+            }, 20);
+            receiver.send(Language.list("Spawners.empty.verify-removing.first"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 2f, 0f);
+            return false;
+        }
+        remove_eggs(player, generator, true);
+        return false;
+    }
+
+    static void stack_nearby(PlayerInteractEvent event, Player player, Receiver receiver, Block block) {
+        if(!Settings.settings.stacking_nearby_enabled) return;
+
+        ItemStack item = event.getItem();
+        if(item == null || item.getType() != Material.SPAWNER
+                || !player.isSneaking()) return;
+        event.setCancelled(true);
+
+        IVirtual virtual = IVirtual.of(item);
+        if(virtual == null) return;
+
+        // check before stacking() to save performance
+        if(!player.hasPermission("spawnermeta.stacking")) {
+            receiver.send(Language.list("Spawners.stacking.permission"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        if(Settings.settings.stacking_disabled_types.contains(virtual.getType())) {
+            receiver.send(Language.list("Spawners.stacking.disabled-type"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+
+        final int r = Settings.settings.stacking_nearby_radius;
+        Block valid = null;
+        int x = -r, y, z;
+        f:
+        do {
+            y = -r;
+            do {
+                z = -r;
+                do {
+                    Block rel = block.getRelative(x, y, z);
+                    if(rel.getType() != Material.SPAWNER) continue;
+                    IVirtual of = IVirtual.of(rel);
+                    if(of == null) continue;
+                    if(virtual.exact(of)) {
+                        valid = rel;
+                        break f;
+                    }
+                } while(++z <= r);
+            } while(++y <= r);
+        } while(++x <= r);
+        if(valid == null) {
+            receiver.send(Language.list("Spawners.stacking.nearby.none-match"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+
+        IGenerator generator = GeneratorRegistry.get(valid);
+        stacking(player, receiver, generator, item, false);
+    }
+
+    static void verify_removing(PlayerInteractEvent event, Player player, Receiver receiver) {
+        if(!Settings.settings.empty_verify_removing) return;
+        Block block = event.getClickedBlock();
+
+        if(!player.isSneaking() || block.getType() != Material.SPAWNER) return;
+
+        IGenerator generator = GeneratorRegistry.get(block);
+        if(generator == null) return;
+
+        SpawnerType type = generator.cache().type();
+        if(type == SpawnerType.EMPTY) return;
+
+        boolean empty = generator.cache().empty();
+        if(!Settings.settings.empty_remove_from_regular && !empty) return;
+
+        boolean holding = !Utility.nulled(player.getInventory().getItemInMainHand());
+        if(!holding && Utility.op(player)) event.setCancelled(true);
+
+        if(verify == null) {
+            receiver.send(Language.list("Spawners.empty.verify-removing.try-again"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        if(holding) {
+            receiver.send(Language.list("Spawners.empty.hand-full"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        remove_eggs(player, generator, empty);
+    }
+
+    private static boolean stacking(Player player, Receiver receiver, IGenerator generator, ItemStack item, boolean direct) {
+        int stack = generator.cache().stack();
+        Settings s = Settings.settings;
+        int limit = s.stacking_limit(player, generator);
+        if(!s.stacking_ignore_limit) {
+            if(stack >= limit) {
+                receiver.send(Language.list("Spawners.stacking.limit-reached"));
+                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                return true;
+            }
+        }
+        int tt = s.stacking_ticks;
+        if(tt > 0) {
+            long b = System.currentTimeMillis() / 50;
+            if(time >= b - tt) return false;
+            time = b;
+        }
+
+        IVirtual virtual = IVirtual.of(item);
+        if(virtual == null) return false;
+
+        if(!player.hasPermission("spawnermeta.stacking")) {
+            receiver.send(Language.list("Spawners.stacking.permission"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return false;
+        }
+        if(s.stacking_disabled_types.contains(virtual.getType())) {
+            receiver.send(Language.list("Spawners.stacking.disabled-type"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return false;
+        }
+        if(!s.natural_can_stack && generator.cache().natural()) {
+            if(!player.hasPermission("spawnermeta.natural.bypass.stacking")) {
+                receiver.send(Language.list("Spawners.natural.breaking.warning"));
+                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                return false;
+            }
+        }
+        x:
+        if(!s.owned_can_stack) {
+            UUID owner = generator.spawner().getOwnerID();
+            if(owner != null && !owner.equals(player.getUniqueId())) {
+                if(!player.hasPermission("spawnermeta.ownership.bypass.stacking")) {
+                    if(s.trusted_can_stack
+                            && LocationRegistry.trusted(owner, player)) break x;
+                    receiver.send(Language.list("Spawners.ownership.stacking.warning"));
+                    player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                    return false;
+                }
+            }
+        }
+        IVirtual other = IVirtual.of(generator.block());
+        if(!virtual.exact(other)) {
+            receiver.send(Language.list("Spawners.stacking.unequal-spawner"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return false;
+        }
+        Price price = null;
+        if(s.stacking_price.using())
+            price = Price.of(Group.stacking, s.stacking_price.get(generator.cache().type()));
+
+        SpawnerStackEvent call = call(new SpawnerStackEvent(player, generator, price, virtual, direct));
+        if(call.cancelled()) return false;
+
+        if(!call.withdraw(player)) {
+            price = call.getUnsafePrice();
+            receiver.send(Language.list("Prices.insufficient",
+                    "insufficient", price.insufficient(), "price", price.requires(player)));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return false;
+        }
+        int stacked;
+        if(s.stacking_stack_all) {
+            int amount = item.getAmount();
+            if(!s.stacking_ignore_limit) {
+                int left = limit - stack;
+                stacked = Math.min(amount, left);
+            } else stacked = amount;
+        } else stacked = 1;
+        stack += stacked;
+        ISpawner spawner = generator.spawner();
+        ICache cache = generator.cache();
+        spawner.setStack(stack);
+        receiver.send((s.stacking_ignore_limit
+                ? Language.list("Spawners.stacking.stacked.infinite", "stack", stack)
+                : Language.list("Spawners.stacking.stacked.finite", "stack", stack,
+                "limit", limit)));
+        player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 0.75f, 1.5f);
+        if(s.spawnable_enabled) {
+            int spawnable = cache.spawnable() + virtual.getSpawnable() * stacked;
+            spawner.setSpawnable(spawnable);
+        }
+        if(s.charges_enabled
+                && s.charges_allow_stacking) {
+            if(cache.charges() < 1_000_000_000
+                    || virtual.getCharges() < 1_000_000_000) {
+                int b = cache.charges() * (stack - stacked) + virtual.getCharges() * stacked;
+                int r = b / stack;
+                spawner.setCharges(r);
+                int f = b % stack;
+                if(f > 0)
+                    receiver.send(Language.list("Spawners.charges.lose-by-stacking",
+                            "charges", f));
+            }
+        }
+        if(!direct && s.stacking_nearby_particles) {
+            Location start = spawner.center();
+            Location end = player.getLocation().add(0, 1, 0);
+            Vector dis = end.toVector().subtract(start.toVector())
+                    .normalize().multiply(0.25);
+            double loops = start.distance(end) / 0.25;
+            for(int i = 0; i < loops; i++) {
+                start.add(dis);
+                player.spawnParticle(Utility.particle_sharpness, start, 1, 0, 0, 0, 0);
+            }
+        }
+        ItemMatcher.remove(player, item, stacked);
+
+        generator.refresh();
+
+        HookRegistry.SUPERIOR_SKYBLOCK_2.recalculate(generator);
+        return false;
+    }
+
+    static void interact(PlayerInteractEvent event, Player player, Receiver receiver, IGenerator generator) {
+
+        SpawnerType type = generator.cache().type();
+        if(type.disabled()) return;
+        event.setCancelled(false);
+
+        if(HookRegistry.PLOT_SQUARED.exists()
+                && !HookRegistry.PLOT_SQUARED.modifiable(generator, player)) return;
         if(HookRegistry.GRIEF_PREVENTION.exists()
                 && !HookRegistry.GRIEF_PREVENTION.hasAccessTrust(generator, player)) return;
-		
-		ItemStack item = event.getItem();
-		
-		if(!EventRegistry.remove_eggs_empty(event, player, m, item, generator)) return;
-		if(!EventRegistry.remove_eggs_from_regular(event, player, m, item, generator)) return;
-		
-		if(item != null) {
-			if(player.isSneaking()) {
-				y: if(Settings.settings.stacking_enabled) {
-					/*
-					 * Stacking
-					 */
-					if(item.getType() != Material.SPAWNER) break y;
-					event.setCancelled(true);
-					
-					if(EventRegistry.stacking(player, m, generator, item, true)) break y;
-					return;
-				}
-				SpawnerType change = SpawnerType.of(item.getType());
-				if(change == null) {
-					if(item.getType().name().endsWith("_EGG")) event.setCancelled(true);
-					return;
-				}
-				event.setCancelled(true);
-				if(change.disabled()) return;
-				if(generator.cache().empty()) {
-					/*
-					 * Empty spawner type changing
-					 */
-					EventRegistry.changing_empty(player, m, generator, item, change);
-				} else {
-					/*
-					 * Regular spawner type changing
-					 */
-					EventRegistry.changing_regular(player, m, generator, item, change);
-				}
-				return;
-			} else if(item.getType().name().endsWith("_EGG")) event.setCancelled(true);
-		}
-		if(generator.cache().empty() && type == SpawnerType.EMPTY) return;
-		if(item != null && item.getType() == Material.SPAWNER) return;
-		if(item != null) {
-			if(item.getType() == Material.SPAWNER) return;
+
+        ItemStack item = event.getItem();
+
+        if(!EventRegistry.remove_eggs_empty(event, player, receiver, item, generator)) return;
+        if(!EventRegistry.remove_eggs_from_regular(event, player, receiver, item, generator)) return;
+
+        if(item != null) {
+            if(player.isSneaking()) {
+                y:
+                if(Settings.settings.stacking_enabled) {
+                    /*
+                     * Stacking
+                     */
+                    if(item.getType() != Material.SPAWNER) break y;
+                    event.setCancelled(true);
+
+                    if(EventRegistry.stacking(player, receiver, generator, item, true)) break y;
+                    return;
+                }
+                SpawnerType change = SpawnerType.of(item.getType());
+                if(change == null) {
+                    if(item.getType().name().endsWith("_EGG")) event.setCancelled(true);
+                    return;
+                }
+                event.setCancelled(true);
+                if(change.disabled()) return;
+                if(generator.cache().empty()) {
+                    /*
+                     * Empty spawner type changing
+                     */
+                    EventRegistry.changing_empty(player, receiver, generator, item, change);
+                } else {
+                    /*
+                     * Regular spawner type changing
+                     */
+                    EventRegistry.changing_regular(player, receiver, generator, item, change);
+                }
+                return;
+            } else if(item.getType().name().endsWith("_EGG")) event.setCancelled(true);
+        }
+        if(generator.cache().empty() && type == SpawnerType.EMPTY) return;
+        if(item != null && item.getType() == Material.SPAWNER) return;
+        if(item != null) {
+            if(item.getType() == Material.SPAWNER) return;
 //			Checks if player tries to open spawner with a block placement
 //			if(!Settings.settings.cancel_placement_when_opening && event.isBlockInHand()) return;
-		}
-		EventRegistry.open_upgrades(player, m, generator);
-		event.setCancelled(true);
-	}
+        }
+        EventRegistry.open_upgrades(player, receiver, generator);
+        event.setCancelled(true);
+    }
 
-	private static void remove_eggs(Player player, IGenerator generator, boolean empty) {
-		ISpawner spawner = generator.spawner();
-		
-		ItemStack refund = null;
-		if(!Settings.settings.empty_destroy_eggs_removing) {
-			Material m = generator.cache().type().material();
-			if(m != null) refund = new ItemStack(m, spawner.getStack());
-		}
+    private static void remove_eggs(Player player, IGenerator generator, boolean empty) {
+        ISpawner spawner = generator.spawner();
 
-		SpawnerEmptyEvent call = call(new SpawnerEmptyEvent(player, generator, refund));
-		if(call.cancelled()) return;
+        ItemStack refund = null;
+        if(!Settings.settings.empty_destroy_eggs_removing) {
+            Material m = generator.cache().type().material();
+            if(m != null) refund = new ItemStack(m, spawner.getStack());
+        }
 
-		call.getRefund().ifPresent(i -> player.getInventory().setItemInMainHand(i));
-		
-		player.playSound(player.getEyeLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 2f, 1f);
-		player.spawnParticle(Utility.particle_firework, spawner.center(), 25, 0.3, 0.3, 0.3, 0.1);
-		
-		spawner.setType(SpawnerType.EMPTY);
-		if(!empty) spawner.setEmpty();
-		if(Settings.settings.changing_reset_empty) spawner.resetUpgradeLevels();
-		spawner.update();
-		
-		generator.refresh();
-		
-		if(generator.block().equals(verify)) verify = null;
-	}
+        SpawnerEmptyEvent call = call(new SpawnerEmptyEvent(player, generator, refund));
+        if(call.cancelled()) return;
 
-	public static void breaking(BlockBreakEvent event, IGenerator generator) {
-		if(Settings.settings.ignore_break_event) return;
-		ICache cache = generator.cache();
-		SpawnerType type = cache.type();
-		boolean ce = Settings.settings.cancel_break_event;
-		event.setCancelled(true);
-		event.setExpToDrop(0);
-		if(type.disabled()) return;
-		Player player = event.getPlayer();
-		Messagable m = new Messagable(player);
-		
-		ISpawner spawner = generator.spawner();
-		if(Utility.op(player)) {
-			Location bl = spawner.center();
-			List<ItemStack> items = DataManager.getSpawners(generator, false);
-			if(items.isEmpty()) {
-				items.add(DataManager.getSpawner(cache.type(), cache.stack()));
-			}
-			items.forEach(item ->
-					player.getWorld().dropItem(bl, item).setVelocity(new Vector()));
-			player.spawnParticle(Particle.CLOUD, bl, 25, 0.25, 0.25, 0.25, 0);
-			player.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.35f, 0f);
-			m.send(Language.list("Spawners.breaking.success"));
-			event.setCancelled(false);
-			
-			dropAfterChanging(player, generator);
-			
-			generator.remove(true);
-			return;
-		}
-		
-		if(Settings.settings.unbreakable) {
-			if(!player.hasPermission("spawnermeta.unbreakable.bypass")) {
-				m.send(Language.list("Spawners.breaking.permission"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return;
-			}
-		}
-		if(!Settings.settings.ignore_permission) {
-			if(!player.hasPermission("spawnermeta.break")) {
-				m.send(Language.list("Spawners.breaking.permission"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return;
-			}
-		}
-		if(!Settings.settings.natural_can_break && cache.natural()) {
-			if(!player.hasPermission("spawnermeta.natural.bypass.breaking")) {
-				m.send(Language.list("Spawners.natural.breaking.warning"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return;
-			}
-		}
-		x: if(!Settings.settings.owned_can_break) {
-			UUID owner = spawner.getOwnerID();
-			if(owner != null && !owner.equals(player.getUniqueId())) {
-				if(!player.hasPermission("spawnermeta.ownership.bypass.breaking")) {
-					if(Settings.settings.trusted_can_break
-							&& LocationRegistry.trusted(owner, player)) break x;
-					m.send(Language.list("Spawners.ownership.breaking.warning"));
-					if(Settings.settings.breaking_show_owner) {
+        call.getRefund().ifPresent(i -> player.getInventory().setItemInMainHand(i));
+
+        player.playSound(player.getEyeLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 2f, 1f);
+        player.spawnParticle(Utility.particle_firework, spawner.center(), 25, 0.3, 0.3, 0.3, 0.1);
+
+        spawner.setType(SpawnerType.EMPTY);
+        if(!empty) spawner.setEmpty();
+        if(Settings.settings.changing_reset_empty) spawner.resetUpgradeLevels();
+        spawner.update();
+
+        generator.refresh();
+
+        if(generator.block().equals(verify)) verify = null;
+    }
+
+    public static void breaking(BlockBreakEvent event, IGenerator generator) {
+        if(Settings.settings.ignore_break_event) return;
+        ICache cache = generator.cache();
+        SpawnerType type = cache.type();
+        boolean ce = Settings.settings.cancel_break_event;
+        event.setCancelled(true);
+        event.setExpToDrop(0);
+        if(type.disabled()) return;
+        Player player = event.getPlayer();
+        Receiver receiver = new Receiver(player);
+
+        ISpawner spawner = generator.spawner();
+        if(Utility.op(player)) {
+            Location bl = spawner.center();
+            List<ItemStack> items = DataManager.getSpawners(generator, false);
+            if(items.isEmpty()) {
+                items.add(DataManager.getSpawner(cache.type(), cache.stack()));
+            }
+            items.forEach(item ->
+                    player.getWorld().dropItem(bl, item).setVelocity(new Vector()));
+            player.spawnParticle(Particle.CLOUD, bl, 25, 0.25, 0.25, 0.25, 0);
+            player.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.35f, 0f);
+            receiver.send(Language.list("Spawners.breaking.success"));
+            event.setCancelled(false);
+
+            dropAfterChanging(player, generator);
+
+            generator.remove(true);
+            return;
+        }
+
+        if(Settings.settings.unbreakable) {
+            if(!player.hasPermission("spawnermeta.unbreakable.bypass")) {
+                receiver.send(Language.list("Spawners.breaking.permission"));
+                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                return;
+            }
+        }
+        if(!Settings.settings.ignore_permission) {
+            if(!player.hasPermission("spawnermeta.break")) {
+                receiver.send(Language.list("Spawners.breaking.permission"));
+                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                return;
+            }
+        }
+        if(!Settings.settings.natural_can_break && cache.natural()) {
+            if(!player.hasPermission("spawnermeta.natural.bypass.breaking")) {
+                receiver.send(Language.list("Spawners.natural.breaking.warning"));
+                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                return;
+            }
+        }
+        x:
+        if(!Settings.settings.owned_can_break) {
+            UUID owner = spawner.getOwnerID();
+            if(owner != null && !owner.equals(player.getUniqueId())) {
+                if(!player.hasPermission("spawnermeta.ownership.bypass.breaking")) {
+                    if(Settings.settings.trusted_can_break
+                            && LocationRegistry.trusted(owner, player)) break x;
+                    receiver.send(Language.list("Spawners.ownership.breaking.warning"));
+                    if(Settings.settings.breaking_show_owner) {
                         OfflinePlayer offline = Bukkit.getOfflinePlayer(owner);
                         var name = offline.getName();
-                        if(name != null) m.send(Language.list("Spawners.ownership.show-owner",
+                        if(name != null) receiver.send(Language.list("Spawners.ownership.show-owner",
                                 "player", name));
                     }
-					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-					return;
-				}
-			}
-		}
-		if(!Settings.settings.breaking_drop_on_ground) {
-			if(ItemCollector.exists(player)) {
-				m.send(Language.list("Items.spawner-drop.try-breaking"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return;
-			}
-			if(Settings.settings.breaking_cancel_if_full && ItemMatcher.free(player) <= 0) {
-				m.send(Language.list("Inventory.insufficient-space"));
-				player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-				return;
-			}
-		}
-		boolean silk = !Settings.settings.breaking_silk_enabled || getAPI().hasSilkTouch(player);
-		if(player.hasPermission("spawnermeta.breaking.bypass.silktouch"))
-			silk = true;
-		else if(!Settings.settings.breaking_silk_destroy && !silk) {
-			m.send(Language.list("Spawners.breaking.failure"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		Location center = spawner.center();
-		Price price = null;
-		if(Settings.settings.breaking_price.using())
-			price = Price.of(Group.breaking, Settings.settings.breaking_price.get(type) * cache.stack());
+                    player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                    return;
+                }
+            }
+        }
+        if(!Settings.settings.breaking_drop_on_ground) {
+            if(ItemCollector.exists(player)) {
+                receiver.send(Language.list("Items.spawner-drop.try-breaking"));
+                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                return;
+            }
+            if(Settings.settings.breaking_cancel_if_full && ItemMatcher.free(player) <= 0) {
+                receiver.send(Language.list("Inventory.insufficient-space"));
+                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                return;
+            }
+        }
+        boolean silk = !Settings.settings.breaking_silk_enabled || getAPI().hasSilkTouch(player);
+        if(player.hasPermission("spawnermeta.breaking.bypass.silktouch"))
+            silk = true;
+        else if(!Settings.settings.breaking_silk_destroy && !silk) {
+            receiver.send(Language.list("Spawners.breaking.failure"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        Location center = spawner.center();
+        Price price = null;
+        if(Settings.settings.breaking_price.using())
+            price = Price.of(Group.breaking, Settings.settings.breaking_price.get(type) * cache.stack());
 
-		double chance = Settings.settings.breaking_chance(player);
+        double chance = Settings.settings.breaking_chance(player);
 
-		if(cache.owned()) {
-			if(spawner.isOwner(player))
-				chance = Settings.settings.breaking_chance_changer_owned.change(chance);
-			else
-				chance = Settings.settings.breaking_chance_changer_not_owned.change(chance);
-		} else
-			chance = Settings.settings.breaking_chance_changer_natural.change(chance);
-		
-		SpawnerBreakEvent call = EventRegistry.call(new SpawnerBreakEvent(player, generator, price, chance));
-		if(call.cancelled()) return;
+        if(cache.owned()) {
+            if(spawner.isOwner(player))
+                chance = Settings.settings.breaking_chance_changer_owned.change(chance);
+            else
+                chance = Settings.settings.breaking_chance_changer_not_owned.change(chance);
+        } else
+            chance = Settings.settings.breaking_chance_changer_natural.change(chance);
 
-		if(!call.withdraw(player)) {
-			price = call.getUnsafePrice();
-			m.send(Language.list("Prices.insufficient", 
-					"insufficient", price.insufficient(), "price", price.requires(player)));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		Block block = generator.block();
-		List<Content> mm;
-		if(Utility.chance(call.chance)) {
-			boolean give = true;
-			if(Settings.settings.breaking_silk_enabled) {
-				give = silk;
-				if(cache.owned()) give &= Settings.settings.breaking_silk_break_owned;
-				else give &= Settings.settings.breaking_silk_break_natural;
-			}
-			if(player.getGameMode() == GameMode.CREATIVE) give = true;
-			if(give) {
-				DataManager.getSpawners(generator, false).forEach(item -> {
-					if(Settings.settings.breaking_drop_on_ground)
-						player.getWorld().dropItem(center, item).setVelocity(new Vector());
-					else ItemCollector.add(player, item);
-				});
-				player.spawnParticle(Particle.CLOUD, center, 25, 0.25, 0.25, 0.25, 0);
-				player.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.35f, 0f);
-				mm = Language.list("Spawners.breaking.success");
-			} else {
-				player.spawnParticle(Particle.SQUID_INK, center, 25, 0.25, 0.25, 0.25, 0.1);
-				player.playSound(player.getEyeLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 0.2f, 0f);
-				mm = Language.list("Spawners.breaking.failure");
-				spawnXP(block, event, false);
-			}
-		} else {
-			player.spawnParticle(Particle.SQUID_INK, center, 25, 0.25, 0.25, 0.25, 0.1);
-			player.playSound(player.getEyeLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 0.35f, 0f);
-			mm = Language.list("Spawners.breaking.failure");
-			spawnXP(block, event, ce);
-		}
-		m.send(mm);
-		if(Settings.settings.breaking_durability_enabled) {
-			if(player.getGameMode() != GameMode.CREATIVE) {
-				ItemStack item = player.getInventory().getItemInMainHand();
-				ItemMeta meta = item.getItemMeta();
-				if(meta instanceof Damageable damageable) {
-					int d = damageable.getDamage() + Settings.settings.breaking_durability_to_remove;
-					if(d >= item.getType().getMaxDurability()) {
-						player.getInventory().setItemInMainHand(null);
-						player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_BREAK, 2f, 1f);
-					} else damageable.setDamage(d);
-					item.setItemMeta(meta);
-				}
-			}
-		}
-		dropAfterChanging(player, generator);
-		
-		generator.remove(true);
-		
-		ItemCollector.execute(player);
-		event.setCancelled(ce);
-	}
+        SpawnerBreakEvent call = EventRegistry.call(new SpawnerBreakEvent(player, generator, price, chance));
+        if(call.cancelled()) return;
 
-	private static void spawnXP(Block block, BlockBreakEvent event, boolean ce) {
-		event.setExpToDrop(0);
-		int xp = Settings.settings.breaking_xp_on_failure;
-		if(xp > 0) {
-			if(ce) spawnXP(block, xp);
-			else event.setExpToDrop(xp);
-		}
-	}
+        if(!call.withdraw(player)) {
+            price = call.getUnsafePrice();
+            receiver.send(Language.list("Prices.insufficient",
+                    "insufficient", price.insufficient(), "price", price.requires(player)));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        Block block = generator.block();
+        List<Content> mm;
+        if(Utility.chance(call.chance)) {
+            boolean give = true;
+            if(Settings.settings.breaking_silk_enabled) {
+                give = silk;
+                if(cache.owned()) give &= Settings.settings.breaking_silk_break_owned;
+                else give &= Settings.settings.breaking_silk_break_natural;
+            }
+            if(player.getGameMode() == GameMode.CREATIVE) give = true;
+            if(give) {
+                DataManager.getSpawners(generator, false).forEach(item -> {
+                    if(Settings.settings.breaking_drop_on_ground)
+                        player.getWorld().dropItem(center, item).setVelocity(new Vector());
+                    else ItemCollector.add(player, item);
+                });
+                player.spawnParticle(Particle.CLOUD, center, 25, 0.25, 0.25, 0.25, 0);
+                player.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.35f, 0f);
+                mm = Language.list("Spawners.breaking.success");
+            } else {
+                player.spawnParticle(Particle.SQUID_INK, center, 25, 0.25, 0.25, 0.25, 0.1);
+                player.playSound(player.getEyeLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 0.2f, 0f);
+                mm = Language.list("Spawners.breaking.failure");
+                spawnXP(block, event, false);
+            }
+        } else {
+            player.spawnParticle(Particle.SQUID_INK, center, 25, 0.25, 0.25, 0.25, 0.1);
+            player.playSound(player.getEyeLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 0.35f, 0f);
+            mm = Language.list("Spawners.breaking.failure");
+            spawnXP(block, event, ce);
+        }
+        receiver.send(mm);
+        if(Settings.settings.breaking_durability_enabled) {
+            if(player.getGameMode() != GameMode.CREATIVE) {
+                ItemStack item = player.getInventory().getItemInMainHand();
+                ItemMeta meta = item.getItemMeta();
+                if(meta instanceof Damageable damageable) {
+                    int d = damageable.getDamage() + Settings.settings.breaking_durability_to_remove;
+                    if(d >= item.getType().getMaxDurability()) {
+                        player.getInventory().setItemInMainHand(null);
+                        player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_BREAK, 2f, 1f);
+                    } else damageable.setDamage(d);
+                    item.setItemMeta(meta);
+                }
+            }
+        }
+        dropAfterChanging(player, generator);
 
-	public static void spawnXP(Block block, int xp) {
-		ExperienceOrb orb = (ExperienceOrb) block.getWorld()
-				.spawnEntity(block.getLocation().add(0.5, 0.5, 0.5), EntityType.EXPERIENCE_ORB);
-		orb.setExperience(xp);
-	}
+        generator.remove(true);
 
-	static void explode_block(Iterator<Block> it) {
-		Block block;
-		while(it.hasNext() && (block = it.next()) != null) {
-			if(block.getType() != Material.SPAWNER) continue;
-			
-			IGenerator generator = EventListeners.fetch(block);
-			if(generator == null) continue;
-			
-			boolean[] xs = Settings.settings.explosion_types.get(ExplosionType.TNT);
+        ItemCollector.execute(player);
+        event.setCancelled(ce);
+    }
 
-			SpawnerExplodeEvent call = call(new SpawnerExplodeEvent(generator, ExplosionType.TNT, xs));
-			if(call.cancelled()) {
-				it.remove();
-				continue;
-			}
-			
-			if(generator.cache().owned()) {
-				if(xs[0]) destroy(generator, xs[1]);
-			} else {
-				if(xs[2]) destroy(generator, xs[3]);
-			}
-			block.getWorld().spawnParticle(Utility.particle_angry,
-					block.getLocation().add(0.5, 0.5, 0.5), 10, 0.2, 0.2, 0.2, 0);
-			it.remove();
-		}
-	}
-	
-	public static boolean destroy(Block block, boolean drop, boolean particles) {
-		IGenerator generator = EventListeners.fetch(block);
-		if(generator == null) return false;
-		return destroy(generator, drop, particles);
-	}
-	
-	public static boolean destroy(IGenerator generator, boolean drop) {
-		return destroy(generator, drop, true);
-	}
-	
-	public static boolean destroy(IGenerator generator, boolean drop, boolean particles) {
-		Block block = generator.block();
-		if(block == null || block.getType() != Material.SPAWNER) return false;
-		Location at = block.getLocation().add(0.5, 0.5, 0.5);
-		if(drop) {
-			DataManager.getSpawners(block, false)
-					.forEach(item ->
-							at.getWorld().dropItem(at, item)
-									.setVelocity(new Vector()));
-			dropAfterChanging(null, generator);
-		}
-		
-		generator.remove(true);
-		
-		HookRegistry.SUPERIOR_SKYBLOCK_2.breaking(block);
-		
-		if(particles) at.getWorld().spawnParticle(Particle.CLOUD, at, 25, 0.25, 0.25, 0.25, 0);
-		return true;
-	}
-	
-	public static void dropAfterChanging(Player player, IGenerator generator) {
-		Block block = generator.block();
-		if(Settings.settings.empty_destroy_eggs_breaking
-				|| Settings.settings.empty_store_inside) {
-			block.getWorld().spawnParticle(Particle.CRIT, Utility.center(block), 10, 0, 0, 0, 0.1);
-			return;
-		}
-		ICache cache = generator.cache();
-		SpawnerType type = cache.type();
-		if(cache.empty() && type != SpawnerType.EMPTY) {
-			if(!type.unique()) {
-				Material mat = type.material();
-				if(mat != null) {
-					int s = cache.stack();
-					if(Settings.settings.breaking_drop_on_ground) {
-						ItemStack item = new ItemStack(mat, s);
-						block.getWorld().dropItem(block.getLocation().add(0.5, 0.5, 0.5), item)
-							.setVelocity(new Vector());
-					} else if(player != null) {
-						while(s > 0) {
-							ItemStack item = new ItemStack(mat, Math.min(s, 64));
-							ItemCollector.add(player, item);
-							s -= 64;
-						}
-					}
-				}
-			}
-			if(Settings.settings.changing_reset_empty)
-				generator.spawner().resetUpgradeLevels();
-		}
-	}
+    private static void spawnXP(Block block, BlockBreakEvent event, boolean ce) {
+        event.setExpToDrop(0);
+        int xp = Settings.settings.breaking_xp_on_failure;
+        if(xp > 0) {
+            if(ce) spawnXP(block, xp);
+            else event.setExpToDrop(xp);
+        }
+    }
 
-	static void explode_entity(EntityExplodeEvent event) {
-		Entity entity = event.getEntity();
-		Iterator<Block> it = event.blockList().iterator();
-		Block block;
-		while(it.hasNext() && (block = it.next()) != null) {
-			if(block.getType() != Material.SPAWNER) continue;
-			
-			if(Utility.isWindCharge(entity)) {
-				it.remove();
-				continue;
-			}
-			
-			IGenerator generator = EventListeners.fetch(block);
-			if(generator == null) continue;
-			
-			ExplosionType explosion;
-			boolean[] xs;
-			if(entity instanceof TNTPrimed) {
-				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.TNT);
-			} else if(entity instanceof Creeper) {
-				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.CREEPERS);
-			} else if(entity instanceof WitherSkull || entity instanceof Wither) {
-				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.WITHER);
-			} else if(entity instanceof Fireball) {
-				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.FIREBALLS);
-			} else if(entity instanceof EnderCrystal) {
-				xs = Settings.settings.explosion_types.get(explosion = ExplosionType.END_CRYSTALS);
-			} else continue;
-			
-			SpawnerExplodeEvent call = call(new SpawnerExplodeEvent(generator, explosion, xs));
-			if(call.cancelled()) {
-				it.remove();
-				continue;
-			}
-			
-			if(xs != null) {
-				if(generator.cache().owned()) {
-					if(xs[0]) destroy(generator, xs[1]);
-				} else {
-					if(xs[2]) destroy(generator, xs[3]);
-				}
-			}
-			block.getWorld().spawnParticle(Utility.particle_angry,
-					block.getLocation().add(0.5, 0.5, 0.5), 10, 0.2, 0.2, 0.2, 0);
-			it.remove();
-		}
-	}
+    public static void spawnXP(Block block, int xp) {
+        ExperienceOrb orb = (ExperienceOrb) block.getWorld()
+                .spawnEntity(block.getLocation().add(0.5, 0.5, 0.5), EntityType.EXPERIENCE_ORB);
+        orb.setExperience(xp);
+    }
 
-	static void place(BlockPlaceEvent event, Block block) {
-		ItemStack item = event.getItemInHand().clone();
-		IVirtual temp = IVirtual.of(item, true), data;
-		if(temp == null) {
-			EntityType entity = DataManager.getEntity(item);
-			if(entity == null) return;
-			SpawnerType type = SpawnerType.ofAll(entity);
-			if(type == null) return;
-			data = new ActiveVirtual(type, null, 0,
-					Settings.settings.spawnable_amount.get(type), type == SpawnerType.EMPTY);
-		} else data = temp;
-		if(Settings.settings.ignored(data.getType().entity())) return;
-		event.setCancelled(true);
-		
-		Player player = event.getPlayer();
-		Messagable m = new Messagable(player);
-		
-		SpawnerType type = data.getType();
-		if(type.disabled()) return;
-		if(data.isEmpty() && !Settings.settings.empty_enabled) {
-			m.send(Language.list("Spawners.empty.disabled"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		if(!player.hasPermission("spawnermeta.place")) {
-			m.send(Language.list("Spawners.placing.permission"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		x: if(Settings.settings.chunk_enabled) {
-			int sa = spawnersInChunk(block);
-			if(sa <= Settings.settings.chunk_limit) break x;
+    static void explode_block(Iterator<Block> it) {
+        Block block;
+        while(it.hasNext() && (block = it.next()) != null) {
+            if(block.getType() != Material.SPAWNER) continue;
 
-			long b = System.currentTimeMillis() / 50;
-			if(chunk >= b - 20) return;
-			chunk = b;
-			
-			m.send(Language.list("Spawners.chunks.limit-reached"));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		if(!Settings.settings.owned_ignore_limit) {
-			if(!player.hasPermission("spawnermeta.ownership.bypass.limit")) {
-				int p = LocationRegistry.get(player).amount();
-				if(p >= Settings.settings.owning_limit(player)) {
-					m.send(Language.list("Spawners.ownership.limit.reached",
-							"limit", Settings.settings.owned_spawner_limit));
-					player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-					return;
-				}
-			}
-		}
-		Price price = null;
-		if(Settings.settings.placing_price.using())
-			price = Price.of(Group.placing, Settings.settings.placing_price.get(type));
-		
-		SpawnerPlaceEvent call = call(new SpawnerPlaceEvent(player, block, price, data));
-		if(call.cancelled()) return;
+            IGenerator generator = EventListeners.fetch(block);
+            if(generator == null) continue;
 
-		if(!call.withdraw(player)) {
-			price = call.getUnsafePrice();
-			m.send(Language.list("Prices.insufficient", 
-					"insufficient", price.insufficient(), "price", price.requires(player)));
-			player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
-			return;
-		}
-		event.setCancelled(false);
-		SpawnerMeta.scheduler().runAtLocation(block.getLocation(), task -> {
-			if(block.getType() != Material.SPAWNER) return;
-			place(block, player, data);
-		});
-	}
-	
-	public static int spawnersInChunk(Block block) {
-		return spawnersInChunk(block.getChunk());
-	}
-	
-	public static int spawnersInChunk(Chunk chunk) {
-		BlockState[] bs = PaperLib.getTileEntities(chunk, false).getTileEntities();
-		return bs == null ? 0 : (int) Stream.of(bs)
-				.filter(s -> s instanceof CreatureSpawner)
-				.count();
-	}
+            boolean[] xs = Settings.settings.explosion_types.get(ExplosionType.TNT);
 
-	public static boolean place(Block block, Player player, IVirtual virtual) {
-		if(block == null || virtual == null) return false;
-		if(block.getType() != Material.SPAWNER) block.setType(Material.SPAWNER);
-		
-		int[] l = virtual.getUpgradeLevels();
-		SpawnerType type = virtual.isEmpty() && !Settings.settings.empty_store_inside
-				? SpawnerType.EMPTY : virtual.getType();
-		DataManager.setNewSpawner(player, block, type,
-				l, virtual.getCharges(), virtual.getSpawnable(), virtual.isEmpty());
-		if(player != null) {
-			IPlayerData il = LocationRegistry.get(player);
-			il.add(block);
-			if(!Settings.settings.owned_ignore_limit)
-				player.sendMessage(Language.get("Spawners.ownership.limit.place",
-						"placed", il.amount(), "limit", Settings.settings.owning_limit(player)).text());
-		}
-		
-		GeneratorRegistry.put(block);
-		
-		HookRegistry.SUPERIOR_SKYBLOCK_2.placing(block);
-		
-		return true;
-	}
+            SpawnerExplodeEvent call = call(new SpawnerExplodeEvent(generator, ExplosionType.TNT, xs));
+            if(call.cancelled()) {
+                it.remove();
+                continue;
+            }
 
-	static void spawn(SpawnerSpawnEvent event, Entity entity) {
-		if(!Settings.settings.spawning) {
-			event.setCancelled(true);
-			return;
-		}
-		if(Utility.isItem(entity.getType())
-				&& Settings.settings.disable_item_spawners) {
-			event.setCancelled(true);
-			return;
-		}
-		if(Settings.settings.ignored(event.getSpawner().getSpawnedType())) {
-			event.setCancelled(false);
-			return;
-		}
-		event.setCancelled(Settings.settings.cancel_spawning_event);
-		if(!entity.isDead()) entity.remove();
-		
-		// creates new generator if it doesn't exit yet
-		IGenerator generator = GeneratorRegistry.get(event.getSpawner().getBlock());
-		if(generator == null) return;
-		
-		if(generator.cache().type().disabled()) event.setCancelled(true);
-	}
+            if(generator.cache().owned()) {
+                if(xs[0]) destroy(generator, xs[1]);
+            } else {
+                if(xs[2]) destroy(generator, xs[3]);
+            }
+            block.getWorld().spawnParticle(Utility.particle_angry,
+                    block.getLocation().add(0.5, 0.5, 0.5), 10, 0.2, 0.2, 0.2, 0);
+            it.remove();
+        }
+    }
+
+    public static boolean destroy(Block block, boolean drop, boolean particles) {
+        IGenerator generator = EventListeners.fetch(block);
+        if(generator == null) return false;
+        return destroy(generator, drop, particles);
+    }
+
+    public static boolean destroy(IGenerator generator, boolean drop) {
+        return destroy(generator, drop, true);
+    }
+
+    public static boolean destroy(IGenerator generator, boolean drop, boolean particles) {
+        Block block = generator.block();
+        if(block == null || block.getType() != Material.SPAWNER) return false;
+        Location at = block.getLocation().add(0.5, 0.5, 0.5);
+        if(drop) {
+            DataManager.getSpawners(block, false)
+                    .forEach(item ->
+                            at.getWorld().dropItem(at, item)
+                                    .setVelocity(new Vector()));
+            dropAfterChanging(null, generator);
+        }
+
+        generator.remove(true);
+
+        if(particles) at.getWorld().spawnParticle(Particle.CLOUD, at, 25, 0.25, 0.25, 0.25, 0);
+        return true;
+    }
+
+    public static void dropAfterChanging(Player player, IGenerator generator) {
+        Block block = generator.block();
+        if(Settings.settings.empty_destroy_eggs_breaking
+                || Settings.settings.empty_store_inside) {
+            block.getWorld().spawnParticle(Particle.CRIT, Utility.center(block), 10, 0, 0, 0, 0.1);
+            return;
+        }
+        ICache cache = generator.cache();
+        SpawnerType type = cache.type();
+        if(cache.empty() && type != SpawnerType.EMPTY) {
+            if(!type.unique()) {
+                Material mat = type.material();
+                if(mat != null) {
+                    int s = cache.stack();
+                    if(Settings.settings.breaking_drop_on_ground) {
+                        ItemStack item = new ItemStack(mat, s);
+                        block.getWorld().dropItem(block.getLocation().add(0.5, 0.5, 0.5), item)
+                                .setVelocity(new Vector());
+                    } else if(player != null) {
+                        while(s > 0) {
+                            ItemStack item = new ItemStack(mat, Math.min(s, 64));
+                            ItemCollector.add(player, item);
+                            s -= 64;
+                        }
+                    }
+                }
+            }
+            if(Settings.settings.changing_reset_empty)
+                generator.spawner().resetUpgradeLevels();
+        }
+    }
+
+    static void explode_entity(EntityExplodeEvent event) {
+        Entity entity = event.getEntity();
+        Iterator<Block> it = event.blockList().iterator();
+        Block block;
+        while(it.hasNext() && (block = it.next()) != null) {
+            if(block.getType() != Material.SPAWNER) continue;
+
+            if(Utility.isWindCharge(entity)) {
+                it.remove();
+                continue;
+            }
+
+            IGenerator generator = EventListeners.fetch(block);
+            if(generator == null) continue;
+
+            ExplosionType explosion;
+            boolean[] xs;
+            if(entity instanceof TNTPrimed) {
+                xs = Settings.settings.explosion_types.get(explosion = ExplosionType.TNT);
+            } else if(entity instanceof Creeper) {
+                xs = Settings.settings.explosion_types.get(explosion = ExplosionType.CREEPERS);
+            } else if(entity instanceof WitherSkull || entity instanceof Wither) {
+                xs = Settings.settings.explosion_types.get(explosion = ExplosionType.WITHER);
+            } else if(entity instanceof Fireball) {
+                xs = Settings.settings.explosion_types.get(explosion = ExplosionType.FIREBALLS);
+            } else if(entity instanceof EnderCrystal) {
+                xs = Settings.settings.explosion_types.get(explosion = ExplosionType.END_CRYSTALS);
+            } else continue;
+
+            SpawnerExplodeEvent call = call(new SpawnerExplodeEvent(generator, explosion, xs));
+            if(call.cancelled()) {
+                it.remove();
+                continue;
+            }
+
+            if(xs != null) {
+                if(generator.cache().owned()) {
+                    if(xs[0]) destroy(generator, xs[1]);
+                } else {
+                    if(xs[2]) destroy(generator, xs[3]);
+                }
+            }
+            block.getWorld().spawnParticle(Utility.particle_angry,
+                    block.getLocation().add(0.5, 0.5, 0.5), 10, 0.2, 0.2, 0.2, 0);
+            it.remove();
+        }
+    }
+
+    static void place(BlockPlaceEvent event, Block block) {
+        ItemStack item = event.getItemInHand().clone();
+        IVirtual temp = IVirtual.of(item, true), data;
+        if(temp == null) {
+            EntityType entity = DataManager.getEntity(item);
+            if(entity == null) return;
+            SpawnerType type = SpawnerType.ofAll(entity);
+            if(type == null) return;
+            data = new ActiveVirtual(type, null, 0,
+                    Settings.settings.spawnable_amount.get(type), type == SpawnerType.EMPTY);
+        } else data = temp;
+        if(Settings.settings.ignored(data.getType().entity())) return;
+        event.setCancelled(true);
+
+        Player player = event.getPlayer();
+        Receiver receiver = new Receiver(player);
+
+        SpawnerType type = data.getType();
+        if(type.disabled()) return;
+        if(data.isEmpty() && !Settings.settings.empty_enabled) {
+            receiver.send(Language.list("Spawners.empty.disabled"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        if(!player.hasPermission("spawnermeta.place")) {
+            receiver.send(Language.list("Spawners.placing.permission"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        x:
+        if(Settings.settings.chunk_enabled) {
+            int sa = spawnersInChunk(block);
+            if(sa <= Settings.settings.chunk_limit) break x;
+
+            long b = System.currentTimeMillis() / 50;
+            if(chunk >= b - 20) return;
+            chunk = b;
+
+            receiver.send(Language.list("Spawners.chunks.limit-reached"));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        if(!Settings.settings.owned_ignore_limit) {
+            if(!player.hasPermission("spawnermeta.ownership.bypass.limit")) {
+                int p = LocationRegistry.get(player).amount();
+                if(p >= Settings.settings.owning_limit(player)) {
+                    receiver.send(Language.list("Spawners.ownership.limit.reached",
+                            "limit", Settings.settings.owned_spawner_limit));
+                    player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+                    return;
+                }
+            }
+        }
+        Price price = null;
+        if(Settings.settings.placing_price.using())
+            price = Price.of(Group.placing, Settings.settings.placing_price.get(type));
+
+        SpawnerPlaceEvent call = call(new SpawnerPlaceEvent(player, block, price, data));
+        if(call.cancelled()) return;
+
+        if(!call.withdraw(player)) {
+            price = call.getUnsafePrice();
+            receiver.send(Language.list("Prices.insufficient",
+                    "insufficient", price.insufficient(), "price", price.requires(player)));
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2f, 1f);
+            return;
+        }
+        event.setCancelled(false);
+        SpawnerMeta.scheduler().runAtLocation(block.getLocation(), task -> {
+            if(block.getType() != Material.SPAWNER) return;
+            place(block, player, data);
+        });
+    }
+
+    public static int spawnersInChunk(Block block) {
+        return spawnersInChunk(block.getChunk());
+    }
+
+    public static int spawnersInChunk(Chunk chunk) {
+        BlockState[] bs = PaperLib.getTileEntities(chunk, false).getTileEntities();
+        return bs == null ? 0 : (int) Stream.of(bs)
+                .filter(s -> s instanceof CreatureSpawner)
+                .count();
+    }
+
+    public static boolean place(Block block, Player player, IVirtual virtual) {
+        if(block == null || virtual == null) return false;
+        if(block.getType() != Material.SPAWNER) block.setType(Material.SPAWNER);
+
+        int[] l = virtual.getUpgradeLevels();
+        SpawnerType type = virtual.isEmpty() && !Settings.settings.empty_store_inside
+                ? SpawnerType.EMPTY : virtual.getType();
+        DataManager.setNewSpawner(player, block, type,
+                l, virtual.getCharges(), virtual.getSpawnable(), virtual.isEmpty());
+        if(player != null) {
+            IPlayerData data = LocationRegistry.get(player);
+            data.add(block);
+            if(!Settings.settings.owned_ignore_limit)
+                player.sendMessage(Language.get("Spawners.ownership.limit.place",
+                        "placed", data.amount(), "limit", Settings.settings.owning_limit(player)).text());
+        }
+
+        GeneratorRegistry.put(block);
+
+        HookRegistry.SUPERIOR_SKYBLOCK_2.placing(block, type);
+        HookRegistry.SUPERIOR_SKYBLOCK_2.reschedule(block);
+
+        return true;
+    }
+
+    static void spawn(SpawnerSpawnEvent event, Entity entity) {
+        if(!Settings.settings.spawning) {
+            event.setCancelled(true);
+            return;
+        }
+        if(Utility.isItem(entity.getType())
+                && Settings.settings.disable_item_spawners) {
+            event.setCancelled(true);
+            return;
+        }
+        if(Settings.settings.ignored(event.getSpawner().getSpawnedType())) {
+            event.setCancelled(false);
+            return;
+        }
+        event.setCancelled(Settings.settings.cancel_spawning_event);
+        if(!entity.isDead()) entity.remove();
+
+        // creates new generator if it doesn't exit yet
+        IGenerator generator = GeneratorRegistry.get(event.getSpawner().getBlock());
+        if(generator == null) return;
+
+        if(generator.cache().type().disabled()) event.setCancelled(true);
+    }
 
 }

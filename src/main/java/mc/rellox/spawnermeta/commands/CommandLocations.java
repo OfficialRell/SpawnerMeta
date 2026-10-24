@@ -4,7 +4,7 @@ import mc.rellox.spawnermeta.api.configuration.IPlayerData;
 import mc.rellox.spawnermeta.configuration.Language;
 import mc.rellox.spawnermeta.configuration.location.LocationFile.FinalPos;
 import mc.rellox.spawnermeta.configuration.location.LocationRegistry;
-import mc.rellox.spawnermeta.utility.Messagable;
+import mc.rellox.spawnermeta.utility.Receiver;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -27,7 +27,7 @@ public class CommandLocations extends Command {
     public boolean execute(CommandSender sender, String lable, String[] args) {
         if(!(sender instanceof Player player)) return false;
 
-        Messagable messagable = new Messagable(player);
+        Receiver receiver = new Receiver(player);
         IPlayerData data = LocationRegistry.get(player);
 
         List<World> worlds = new LinkedList<>();
@@ -43,18 +43,18 @@ public class CommandLocations extends Command {
         }
 
         if(worlds.isEmpty()) {
-            messagable.send(Language.get("Locations.none-owned"));
+            receiver.send(Language.get("Locations.none-owned"));
             return true;
         }
 
-        messagable.send(Language.get("Locations.header",
+        receiver.send(Language.get("Locations.header",
                 "count", s));
         for(int i = 0, j = 0; i < worlds.size(); i++, j = 0) {
-            messagable.send(Language.get("Locations.world",
+            receiver.send(Language.get("Locations.world",
                     "world", worlds.get(i).getName()));
             for(Location at : locations.get(i)) {
                 FinalPos pos = FinalPos.of(at);
-                messagable.send(Language.get("Locations.position",
+                receiver.send(Language.get("Locations.position",
                         "index", ++j,
                         "x", pos.fx(),
                         "y", pos.fy(),
