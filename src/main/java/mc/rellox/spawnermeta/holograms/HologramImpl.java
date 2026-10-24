@@ -14,8 +14,6 @@ import java.util.Objects;
 import java.util.Set;
 
 public abstract class HologramImpl implements IHologram {
-		this.hologram = modifier
-		modifier.update(players, hologram, title);
 
     protected final IGenerator generator;
     private final Object hologram;
@@ -68,7 +66,6 @@ public abstract class HologramImpl implements IHologram {
     public void hide(Player player) {
     }
 
-		players.forEach(player -> modifier.destroy(player, hologram));
     @Override
     public void clear() {
     }
