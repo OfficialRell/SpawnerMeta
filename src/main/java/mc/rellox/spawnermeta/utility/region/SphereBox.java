@@ -6,7 +6,7 @@ public class SphereBox implements IBox {
 	
 	private final int x, y, z, r, rq;
 	
-	public SphereBox(int x, int z, int y, int r) {
+	public SphereBox(int x, int y, int z, int r) {
 		this.x = x;
 		this.y = y;
 		this.z = z;

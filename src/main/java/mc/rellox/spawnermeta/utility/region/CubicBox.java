@@ -6,7 +6,7 @@ public class CubicBox implements IBox {
 	
 	private final int mx, my, mz, xx, xy, xz, r;
 	
-	public CubicBox(int x, int z, int y, int r) {
+	public CubicBox(int x, int y, int z, int r) {
 		this.mx = x - r;
 		this.my = y - r;
 		this.mz = z - r;
