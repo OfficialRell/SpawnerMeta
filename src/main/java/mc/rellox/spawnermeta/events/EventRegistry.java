@@ -675,6 +675,11 @@ public final class EventRegistry {
 
         ISpawner spawner = generator.spawner();
         if(Utility.op(player)) {
+
+            SpawnerBreakEvent call = EventRegistry
+                    .call(new SpawnerBreakEvent(player, generator, null, 100));
+            if(call.cancelled()) return;
+
             Location bl = spawner.center();
             List<ItemStack> items = DataManager.getSpawners(generator, false);
             if(items.isEmpty()) {
