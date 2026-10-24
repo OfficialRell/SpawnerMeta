@@ -21,9 +21,11 @@ public abstract class HologramImpl implements IHologram {
     private final Set<Player> players;
 
     public HologramImpl(IGenerator generator, boolean above, int radius) {
+        Objects.requireNonNull(HANDLER, "Hologram handler is not available");
         this.generator = generator;
         String title = title().text();
         Block block = generator.block();
+        this.hologram = HANDLER
                 .create(block.getLocation()
                         .add(0.5, 1 + (above ? 0.25 : 0)
                                 + Settings.settings.holograms_height, 0.5), title);
@@ -54,20 +56,22 @@ public abstract class HologramImpl implements IHologram {
     @Override
     public void rewrite() {
         String title = title().text();
+        HANDLER.update(players, hologram, title);
     }
 
-		modifier.spawn(player, hologram);
-		modifier.destroy(player, hologram);
     @Override
     public void show(Player player) {
+        HANDLER.spawn(player, hologram);
     }
 
     @Override
     public void hide(Player player) {
+        HANDLER.destroy(player, hologram);
     }
 
     @Override
     public void clear() {
+        players.forEach(player -> HANDLER.destroy(player, hologram));
     }
 
     public abstract Content title();

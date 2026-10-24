@@ -2,7 +2,7 @@ package mc.rellox.spawnermeta.api.hologram;
 
 import mc.rellox.spawnermeta.api.spawner.IGenerator;
 import mc.rellox.spawnermeta.holograms.HologramIdentity;
-import mc.rellox.spawnermeta.holograms.HologramModifier;
+import mc.rellox.spawnermeta.holograms.HologramNull;
 import mc.rellox.spawnermeta.holograms.HologramWarning;
 import org.bukkit.entity.Player;
 
@@ -10,14 +10,18 @@ import java.util.Set;
 
 public interface IHologram {
 
-    HologramModifier modifier = new HologramModifier();
+    IHologramHandler HANDLER = IHologramHandler.of();
 
     static IHologram hologram(IGenerator generator) {
-        return new HologramIdentity(generator);
+        return HANDLER == null
+                ? new HologramNull(generator)
+                : new HologramIdentity(generator);
     }
 
     static IHologram warning(IGenerator generator, boolean above) {
-        return new HologramWarning(generator, above);
+        return HANDLER == null
+                ? new HologramNull(generator)
+                : new HologramWarning(generator, above);
     }
 
     /**
