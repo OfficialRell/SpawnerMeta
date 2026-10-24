@@ -104,14 +104,20 @@ public final class Utility {
             Class<?> clazz = RF.craft("inventory.CraftItemStack");
             Object nms_item = RF.order(clazz, "asNMSCopy", ItemStack.class).invoke(item);
 
-            String[] names = switch(Version.version) {
-                case v_18_1 -> new String[] {"v", "a"};
-                case v_18_2 -> new String[] {"w", "a"};
-                case v_19_1, v_19_2, v_19_3, v_20_4 -> new String[] {"x", "getString"};
-                case v_21_1 -> new String[] {"w", "getString"};
-                case v_26 -> new String[] {"getHoverName", "getString"};
-                default -> new String[] {"y", "getString"};
-            };
+            var version = Version.TYPE;
+
+            String[] names;
+            if(version.atleast(VersionType.v_26_1))
+                names = new String[] { "getHoverName", "getString" };
+            else {
+                names = switch(version) {
+                    case v_18_1 -> new String[] { "v", "a" };
+                    case v_18_2 -> new String[] { "w", "a" };
+                    case v_19_1, v_19_2, v_19_3, v_20_4 -> new String[] { "x", "getString" };
+                    case v_21_1 -> new String[] { "w", "getString" };
+                    default -> new String[] { "y", "getString" };
+                };
+            }
 
             String a = names[0];
             String b = names[1];
@@ -143,12 +149,12 @@ public final class Utility {
     public static Entity create(Location location, EntityType type) {
         Object entity = RF.order(location.getWorld(), "createEntity", Location.class, Class.class)
                 .invoke(location, type.getEntityClass());
-        if(Version.version.atleast(VersionType.v_20_3)) return (Entity) entity;
+        if(Version.TYPE.atleast(VersionType.v_20_3)) return (Entity) entity;
         return RF.direct(entity, "getBukkitEntity", Entity.class);
     }
 
     public static boolean isWindCharge(Entity entity) {
-        if(!Version.version.atleast(VersionType.v_21_1)) return false;
+        if(!Version.TYPE.atleast(VersionType.v_21_1)) return false;
         return switch(entity.getType().name()) {
             case "WIND_CHARGE", "BREEZE_WIND_CHARGE" -> true;
             default -> false;
@@ -248,14 +254,21 @@ public final class Utility {
 
     // Version check
 
-    public static void check(final int id, final Consumer<String> action) {
+    public static void check() {
         SpawnerMeta.scheduler().runLaterAsync(() -> {
-            try(InputStream is = new URI("https://api.spigotmc.org/legacy/update.php?resource=" + id)
+            try(InputStream stream = new URI("https://api.spigotmc.org/legacy/update.php?resource=74188")
                     .toURL().openStream();
-                Scanner sc = new Scanner(is)) {
-                if(sc.hasNext()) action.accept(sc.next());
-            } catch(Exception ignored) {
-            }
+                Scanner scanner = new Scanner(stream)) {
+                if(!scanner.hasNext()) return;
+
+                var newest = scanner.next();
+                var current = SpawnerMeta.version();
+                if(!Utility.isDouble(newest) || !Utility.isDouble(current)) return;
+
+                double v = Double.parseDouble(newest);
+                double c = Double.parseDouble(current);
+                if(v > c) Text.logOutdated(v);
+            } catch(Exception ignored) {}
         }, 50);
     }
 

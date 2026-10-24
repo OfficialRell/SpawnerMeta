@@ -27,131 +27,117 @@ import java.util.List;
 
 public final class SpawnerMeta extends JavaPlugin {
 
-	private static SpawnerMeta plugin;
-    
-    private static boolean loaded;
-    
+    private static SpawnerMeta plugin;
+
     private static FoliaLib folia;
     private static PlatformScheduler scheduler;
-    
+
     private APIInstance api;
-    
+
     @Override
     public void onLoad() {
-		loaded = Version.version != null;
-		
-		if(loaded) {
-			plugin = this;
-			this.api = new APIRegistry();
-		}
+        plugin = this;
+        this.api = new APIRegistry();
+
+        if(Version.instance() == null) {
+            getLogger().info("SpawnerMeta was unable to detect the server version. " +
+                    "Some features may not work (holograms).");
+        }
     }
 
-	@Override
-	public void onEnable() {
-		if(Bukkit.getPluginManager().getPlugin("SpawnerLegacy") != null) {
-			loaded = false;
-			Bukkit.getPluginManager().disablePlugin(this);
-			return;
-		}
-		
-		folia = new FoliaLib(this);
-		scheduler = folia.getScheduler();
-		
-		if(loaded) {
-			Text.logLoad();
-			Utility.check(74188, s -> {
-				var version = version();
-				if(!Utility.isDouble(s) || !Utility.isDouble(version)) return;
-				double v = Double.parseDouble(s);
-				double c = Double.parseDouble(version);
-				if(v > c) Text.logOutdated(v);
-			});
-			HookRegistry.load();
-			Configuration.initialize();
-			CommandManager.initialize();
-			DataManager.initialize();
-			ShopRegistry.initialize();
-			EventListeners.initialize();
-			GeneratorRegistry.initialize();
-			SpawningManager.initialize();
-			LocationRegistry.initialize();
-			initializeMetrics();
-		} else {
-			Text.logFail("failed to load, invalid server version!");
-			Bukkit.getPluginManager().disablePlugin(this);
-		}
-	}
-	
-	@Override
-	public void onDisable() {
-		if(loaded) {
-			Text.logUnload();
-			GeneratorRegistry.clear();
-			LocationRegistry.clear();
-		}
-	}
-	
-	/**
-	 * @return Instance of this plugin
-	 */
-	
-	public static SpawnerMeta instance() {
-		return plugin;
-	}
+    @Override
+    public void onEnable() {
+        if(Bukkit.getPluginManager().getPlugin("SpawnerLegacy") != null) {
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
 
-	/**
-	 * @return Plugin version
-	 */
+        folia = new FoliaLib(this);
+        scheduler = folia.getScheduler();
 
-	public static String version() {
-		return plugin.getDescription().getVersion();
-	}
-	
-	/**
-	 * @return SpawnerMeta API
-	 */
-	
-	public APIInstance getAPI() {
-		return api;
-	}
-	
-	/**
-	 * @return SpawnerMeta API
-	 */
-	
-	public static APIInstance API() {
-		return plugin.api;
-	}
+        Text.logLoad();
+        Utility.check();
+        HookRegistry.load();
+        Configuration.initialize();
+        CommandManager.initialize();
+        DataManager.initialize();
+        ShopRegistry.initialize();
+        EventListeners.initialize();
+        GeneratorRegistry.initialize();
+        SpawningManager.initialize();
+        LocationRegistry.initialize();
+        initializeMetrics();
+    }
 
-	/**
-	 * @return FoliaLib
-	 */
+    @Override
+    public void onDisable() {
+        Text.logUnload();
+        GeneratorRegistry.clear();
+        LocationRegistry.clear();
+        plugin = null;
+    }
 
-	public static FoliaLib foliaLib() {
-		return folia;
-	}
+    /**
+     * @return Instance of this plugin
+     */
 
-	/**
-	 * @return Task scheduler
-	 */
+    public static SpawnerMeta instance() {
+        return plugin;
+    }
 
-	public static PlatformScheduler scheduler() {
-		return scheduler;
-	}
-	
-	@Override
-	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
-							 @NotNull String label, String[] args) {
-		return CommandManager.onCommand(sender, command, args);
-	}
+    /**
+     * @return Plugin version
+     */
 
-	@Override
-	public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
-									  @NotNull String alias, String[] args) {
-		return CommandManager.onTabComplete(command, args);
-	}
-	
-	private void initializeMetrics() {
-		new Metrics(plugin, 8373);
-	}
+    public static String version() {
+        return plugin == null ? "?" : plugin.getDescription().getVersion();
+    }
+
+    /**
+     * @return SpawnerMeta API
+     */
+
+    public APIInstance getAPI() {
+        return api;
+    }
+
+    /**
+     * @return SpawnerMeta API
+     */
+
+    public static APIInstance API() {
+        return plugin.api;
+    }
+
+    /**
+     * @return FoliaLib
+     */
+
+    public static FoliaLib foliaLib() {
+        return folia;
+    }
+
+    /**
+     * @return Task scheduler
+     */
+
+    public static PlatformScheduler scheduler() {
+        return scheduler;
+    }
+
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
+                             @NotNull String label, String[] args) {
+        return CommandManager.onCommand(sender, command, args);
+    }
+
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+                                      @NotNull String alias, String[] args) {
+        return CommandManager.onTabComplete(command, args);
+    }
+
+    private void initializeMetrics() {
+        new Metrics(plugin, 8373);
+    }
 }
